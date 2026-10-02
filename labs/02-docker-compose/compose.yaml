@@ -1,0 +1,59 @@
+# Laboratorium 2/6 — trzy silniki naraz + Adminer (klient w przeglądarce).
+# Uruchomienie:  docker compose up -d      Zatrzymanie:  docker compose down
+# Dane są w wolumenach; kasuje je dopiero:  docker compose down -v
+name: lab02-wiele-silnikow
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: student
+      POSTGRES_DB: student
+    ports: ["5432:5432"]
+    volumes: ["pg-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U student -d student"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: student
+      MYSQL_USER: student
+      MYSQL_PASSWORD: student
+      MYSQL_DATABASE: student
+    ports: ["3306:3306"]
+    volumes: ["mysql-data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -pstudent --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  oracle:
+    image: gvenzl/oracle-free:23
+    environment:
+      ORACLE_PASSWORD: student
+      APP_USER: student
+      APP_USER_PASSWORD: student
+    ports: ["1521:1521"]
+    volumes: ["oracle-data:/opt/oracle/oradata"]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  adminer:
+    image: adminer
+    ports: ["8080:8080"]
+    depends_on: [postgres, mysql]
+
+volumes:
+  pg-data:
+  mysql-data:
+  oracle-data:

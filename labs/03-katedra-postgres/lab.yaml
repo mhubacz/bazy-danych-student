@@ -1,0 +1,27 @@
+id: "03"
+numer: "3/6"
+skrot: "Katedra"
+tytul: "Zapytania proste — baza „Katedra”"
+cel: "Proste zapytania SELECT: warunki, sortowanie, obliczenia i filtrowanie tekstu."
+silnik: postgres
+baza: Katedra
+polaczenie: "host: localhost · port: 5432 · baza: katedra · użytkownik: student · hasło: student"
+wstep:
+  - "Docker działa, a bazy z poprzednich instrukcji są zatrzymane (`docker ps` nie pokazuje kontenerów z portem 5432)."
+  - "Przejdź do katalogu laboratorium: `cd labs/03-katedra-postgres`."
+przygotowanie:
+  - opis: "Uruchom bazę. Dane (tabele `zespol`, `etat`, `pracownik`) wczytują się same ze skryptu `init/01_katedra.sql`:"
+    kod: |
+      docker compose up -d --wait
+  - uwaga: "Połącz się w DBeaver (dane powyżej). Reset bazy do stanu początkowego: `docker compose down -v`, a potem ponownie `docker compose up -d --wait`. Po zakończeniu pracy: `docker compose down` (dane zostają)."
+zadania:
+  - "Przypuśćmy, że adiunktom zabiera się 20% pensji na podatek dochodowy. Zaproponuj obliczenie takiego podatku w oparciu o tabelę `pracownik`."
+  - "Wyświetl nazwisko, etat oraz płacę podstawową pracowników zespołów 10 i 20 zgodnie z alfabetycznym porządkiem nazwisk."
+  - "Wyświetl nazwiska i etaty wszystkich asystentów zespołu 20."
+  - "Wyświetl nazwiska i pensje oraz identyfikatory zespołów pracowników, których miesięczna pensja przekracza 2000."
+  - "Oblicz całkowite dochody roczne wszystkich profesorów."
+  - "Wybierz wszystkich pracowników, których pensja podstawowa jest mniejsza od dwukrotnej pensji dodatkowej."
+  - "Wyznacz wszystkich adiunktów i profesorów, których płaca podstawowa jest wyższa od 1750."
+  - "Sporządź spis wszystkich asystentów w kolejności ustalonej datą ich zatrudnienia."
+  - "Wyświetl nazwiska pracowników rozpoczynające się od litery „M”."
+uwaga_silnik: "W zadaniu 9 `LIKE 'M%'` w PostgreSQL rozróżnia wielkość liter — użyj `ILIKE`, jeśli chcesz ją pominąć. W zadaniu 6 żaden pracownik nie spełnia warunku, więc pusty wynik jest poprawny; zwróć uwagę, jak SQL traktuje wartości NULL w pensji dodatkowej."

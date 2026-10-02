@@ -1,0 +1,33 @@
+id: "01"
+numer: "1/6"
+skrot: "Docker — start"
+tytul: "Uruchamianie bazy danych w kontenerze Docker"
+cel: "Uruchomić własny serwer bazy w kontenerze i połączyć się z nim klientem graficznym. Ten sam schemat działania dla trzech silników."
+silnik: all
+polaczenie: "host: localhost · użytkownik: student · hasło: student · porty: PostgreSQL 5432, MySQL 3306, Oracle 1521"
+wstep:
+  - "Zainstaluj Docker (Windows/macOS: Docker Desktop, Linux: Docker Engine) — patrz `docs/INSTALACJA.md`."
+  - "Sprawdź instalację: `docker --version` oraz `docker compose version`."
+  - "Zainstaluj klienta DBeaver Community."
+przygotowanie:
+  - opis: "Pobierz obrazy trzech silników (Oracle ma ok. 1,1 GB — pobieranie chwilę trwa):"
+    kod: |
+      docker pull postgres:17
+      docker pull mysql:8.4
+      docker pull gvenzl/oracle-free:23
+  - opis: "Uruchom każdy silnik jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`:"
+    kod: |
+      docker run --name pg-lab -e POSTGRES_USER=student -e POSTGRES_PASSWORD=student -e POSTGRES_DB=student -p 5432:5432 -d postgres:17
+      docker run --name mysql-lab -e MYSQL_ROOT_PASSWORD=student -e MYSQL_USER=student -e MYSQL_PASSWORD=student -e MYSQL_DATABASE=student -p 3306:3306 -d mysql:8.4
+      docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e APP_USER_PASSWORD=student -p 1521:1521 -d gvenzl/oracle-free:23
+  - uwaga: "Oracle przy pierwszym starcie potrzebuje kilku minut. Gotowość widać w logach (`docker logs -f oracle-lab`) po komunikacie `DATABASE IS READY TO USE!`."
+zadania:
+  - "Sprawdź działające kontenery: `docker ps`."
+  - "Połącz się w DBeaver z PostgreSQL (host `localhost`, port `5432`, baza `student`, użytkownik `student`, hasło `student`)."
+  - "Utwórz tabelę `pracownik` (id, nazwisko, etat, placa) i dodaj kilka wierszy poleceniem `INSERT`."
+  - "Wyświetl dane: `SELECT * FROM pracownik;`"
+  - "Połącz się z MySQL (port `3306`, baza `student`) oraz z Oracle (port `1521`, połączenie przez **Service name** `FREEPDB1`, użytkownik `student`). Powtórz dwa poprzednie kroki i zanotuj różnice w składni."
+  - "Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, że dane zostały."
+  - "Usuń kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`. Uruchom `pg-lab` od nowa tym samym poleceniem i sprawdź, co stało się z danymi."
+  - "Dla chętnych: wejdź do kontenera i wykonaj zapytanie z linii poleceń — `docker exec -it pg-lab psql -U student`."
+uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (zadanie 7) — porty muszą być wolne."

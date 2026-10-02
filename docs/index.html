@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bazy danych — laboratorium (Docker + trzy silniki)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+    --paper:#F5F6F8; --surface:#FFFFFF; --ink:#1B2430; --muted:#5A6675;
+    --faint:#8A94A2; --line:#E3E7ED; --code-bg:#141B24; --code-ink:#E7ECF2;
+    --code-faint:#8FA0B2; --graphite:#3A4757;
+    --oracle:#C74634; --postgres:#336791; --mysql:#B06A00;
+    --radius:14px; --radius-sm:8px;
+    --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --display:'Space Grotesk',var(--sans);
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--graphite);text-underline-offset:2px}
+  a:hover{text-decoration:underline}
+
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(245,246,248,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topbar-inner{max-width:1180px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{font-family:var(--display);font-weight:700;letter-spacing:-.01em;font-size:17px}
+  .brand .sub{font-family:var(--sans);font-weight:500;font-size:13px;color:var(--muted);margin-left:10px}
+  .legend{margin-left:auto;display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:236px 1fr;gap:40px;padding:0 24px}
+  .sidebar{position:sticky;top:72px;align-self:start;height:calc(100vh - 92px);overflow:auto;padding:28px 0}
+  .sidebar nav{display:flex;flex-direction:column;gap:2px}
+  .sidebar .navlabel{font-size:11.5px;font-weight:600;color:var(--faint);margin:16px 10px 6px}
+  .sidebar a{color:var(--muted);font-size:14px;padding:7px 12px;border-radius:var(--radius-sm);border-left:2px solid transparent;display:flex;align-items:center;gap:8px}
+  .sidebar a:hover{background:var(--surface);text-decoration:none;color:var(--ink)}
+  .sidebar a.active{color:var(--ink);border-left-color:var(--e,var(--graphite));background:var(--surface);font-weight:600}
+  .sidebar a .num{font-family:var(--mono);font-size:12px;color:var(--faint);min-width:26px}
+  .sidebar a .edot{width:8px;height:8px;border-radius:50%;background:var(--e,var(--graphite));flex-shrink:0}
+
+  main{padding:36px 0 120px;min-width:0}
+  section{scroll-margin-top:80px;margin-bottom:56px}
+
+  .hero{padding:18px 0 6px}
+  .hero .kicker{font-size:14px;color:var(--muted);margin:0 0 10px}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,46px);line-height:1.08;letter-spacing:-.02em;margin:0 0 16px}
+  .hero p.lead{font-size:17.5px;color:var(--muted);max-width:64ch;margin:0 0 22px}
+  .assign{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;max-width:760px}
+  .assign .a{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--e);border-radius:var(--radius-sm);padding:12px 14px}
+  .assign .a b{font-family:var(--display);font-size:15px;display:block}
+  .assign .a small{color:var(--muted);font-size:12.5px}
+  .assign .a .eng{color:var(--e);font-weight:600;font-size:12.5px}
+
+  h2.eyebrow{font-family:var(--display);font-weight:600;font-size:14px;color:var(--faint);margin:0 0 6px}
+  .sec-title{font-family:var(--display);font-weight:700;font-size:27px;letter-spacing:-.015em;margin:0 0 16px}
+  p{max-width:72ch}
+
+  .tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .tool{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .tool h3{font-family:var(--display);font-size:16.5px;margin:0 0 6px}
+  .tool p{font-size:14px;color:var(--muted);margin:0}
+  code{font-family:var(--mono);font-size:.86em;background:var(--paper);padding:1px 6px;border-radius:5px;color:var(--ink)}
+
+  .schemas{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .schema{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--e);border-radius:var(--radius);padding:18px 20px}
+  .schema .shead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .schema h3{font-family:var(--display);font-size:18px;margin:0}
+  .badge{font-family:var(--sans);font-size:12px;font-weight:600;color:#fff;background:var(--e);padding:3px 10px;border-radius:999px;white-space:nowrap}
+  .badge.ghost{color:var(--e);background:color-mix(in srgb,var(--e) 12%,transparent)}
+  .tbl{margin:0 0 12px}
+  .tbl .tname{font-family:var(--mono);font-weight:600;font-size:13.5px;color:var(--ink)}
+  .tbl .cols{font-family:var(--mono);font-size:12.3px;color:var(--muted);line-height:1.7;margin-top:2px}
+  .tbl .pk{color:var(--e);font-weight:600}
+  .tbl .fk{color:var(--graphite);text-decoration:underline dotted}
+
+  figure{margin:0}
+  .er{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:6px}
+  .er img{width:100%;height:auto;display:block;border-radius:8px;background:#fff}
+  figcaption{font-size:13px;color:var(--muted);margin-top:10px}
+
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line)}
+  thead th{font-family:var(--display);font-weight:600;font-size:14px;background:var(--paper)}
+  tbody tr:last-child td{border-bottom:0}
+  td:first-child,th:first-child{font-weight:500}
+  td code{background:transparent;padding:0}
+  th.h-oracle{color:var(--oracle)} th.h-postgres{color:var(--postgres)} th.h-mysql{color:var(--mysql)}
+
+  .cheat{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .cheat .cbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:6px 4px}
+  .cheat h4{font-family:var(--display);font-size:14px;color:var(--faint);margin:12px 16px 8px}
+  .cheat .row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:7px 16px;border-top:1px solid var(--line);align-items:center}
+  .cheat .row:first-of-type{border-top:0}
+  .cheat .row code{font-size:12.6px;background:var(--paper)}
+  .cheat .row span{font-size:13px;color:var(--muted);text-align:right}
+
+  .lab{--e:var(--graphite);background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--e);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+  .lab[data-engine=oracle]{--e:var(--oracle)}
+  .lab[data-engine=postgres]{--e:var(--postgres)}
+  .lab[data-engine=mysql]{--e:var(--mysql)}
+  .lab-head{display:flex;align-items:center;gap:14px;padding:18px 22px;cursor:pointer;user-select:none}
+  .lab-head:hover{background:color-mix(in srgb,var(--paper) 55%,transparent)}
+  .lab-no{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--e);background:color-mix(in srgb,var(--e) 12%,transparent);padding:4px 9px;border-radius:6px;white-space:nowrap}
+  .lab-title{font-family:var(--display);font-weight:600;font-size:18px;flex:1;letter-spacing:-.01em}
+  .lab-title small{display:block;font-family:var(--sans);font-weight:400;font-size:13px;color:var(--muted);margin-top:2px}
+  .lab-eng{font-size:12px;font-weight:600;color:#fff;background:var(--e);padding:4px 11px;border-radius:999px;white-space:nowrap}
+  .lab-prog{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;display:none}
+  @media(min-width:620px){.lab-prog{display:inline}}
+  .chev{width:20px;height:20px;flex-shrink:0;color:var(--faint);transition:transform .22s}
+  .lab.open .chev{transform:rotate(90deg)}
+  .lab-body{display:none;padding:0 22px 24px;border-top:1px solid var(--line)}
+  .lab.open .lab-body{display:block}
+  .lab-body h4{font-family:var(--display);font-size:14px;color:var(--faint);font-weight:600;margin:22px 0 10px}
+  .goal{font-size:15px;color:var(--muted);margin:16px 0 4px}
+
+  ol.tasks{list-style:none;margin:6px 0 0;padding:0;counter-reset:t}
+  ol.tasks li{position:relative;padding:9px 8px 9px 42px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:10px}
+  ol.tasks li:last-child{border-bottom:0}
+  ol.tasks li::before{counter-increment:t;content:counter(t);position:absolute;left:8px;top:9px;width:22px;height:22px;font-family:var(--mono);font-size:12px;color:var(--faint);background:var(--paper);border-radius:6px;display:flex;align-items:center;justify-content:center}
+  ol.tasks input[type=checkbox]{margin-top:4px;width:16px;height:16px;accent-color:var(--e);flex-shrink:0;cursor:pointer}
+  ol.tasks label{font-size:15px;cursor:pointer}
+  ol.tasks li.done label{color:var(--faint);text-decoration:line-through}
+  .taskmain{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+  .ans-toggle{align-self:flex-start;background:none;border:0;color:var(--e);font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 0;opacity:.85}
+  .ans-toggle:hover{opacity:1;text-decoration:underline}
+  li.has-ans .ans-toggle{opacity:1}
+  li.has-ans .ans-toggle::before{content:"● ";color:var(--e);font-size:10px}
+  textarea.ans{width:100%;min-height:66px;resize:vertical;font-family:var(--mono);font-size:12.6px;line-height:1.55;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:2px}
+  textarea.ans:focus{outline:2px solid color-mix(in srgb,var(--e) 45%,transparent);outline-offset:1px;border-color:var(--e)}
+
+  .cmd{position:relative;margin:12px 0}
+  .cmd pre{margin:0;background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius-sm);padding:15px 96px 15px 16px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65}
+  .cmd pre .cm{color:var(--code-faint)}
+  .cmd .btns{position:absolute;top:9px;right:9px;display:flex;gap:6px}
+  .cmd .btn{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--code-faint);background:#20293494;border:1px solid #37424f;border-radius:6px;padding:4px 10px;cursor:pointer;transition:.15s}
+  .cmd .btn:hover{color:#fff;border-color:#4a5666}
+  .cmd .btn.done{color:#fff;background:var(--e,#2E7D5B);border-color:transparent}
+
+  .callout{background:var(--paper);border-left:3px solid var(--e);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:13px 16px;font-size:14px;color:var(--muted);margin:14px 0}
+  .callout b{color:var(--ink)}
+  .diff-note{background:color-mix(in srgb,var(--e) 9%,transparent);border-radius:var(--radius-sm);padding:13px 16px;font-size:14px;margin:16px 0 4px}
+  .diff-note strong{color:var(--e)}
+  .conn{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13.5px;color:var(--muted);margin-top:10px}
+  .conn span b{color:var(--ink);font-family:var(--mono);font-weight:500}
+
+  .pin-note{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:22px;font-size:14.5px;color:var(--muted)}
+  .pin-note b{color:var(--ink)}
+
+  .report-form{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+  .report-form .fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  @media(max-width:560px){.report-form .fields{grid-template-columns:1fr}}
+  .report-form .fl{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:600}
+  .report-form input[type=text]{width:100%;font-family:var(--sans);font-size:15px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+  .report-form input[type=text]:focus{outline:2px solid color-mix(in srgb,var(--graphite) 35%,transparent);border-color:var(--graphite)}
+  .report-actions{display:flex;flex-wrap:wrap;gap:10px}
+  .action{font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;padding:10px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+  .action:hover{border-color:var(--graphite)}
+  .action.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .action.primary:hover{background:#0f1620}
+  .action.ghost{color:var(--muted)}
+  .filelabel input{display:none}
+  .rhint{font-size:13px;color:var(--muted);margin-top:12px}
+
+  .fab{position:fixed;right:22px;bottom:22px;z-index:50;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:13px 20px;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(20,27,36,.28)}
+  .fab:hover{background:#0f1620}
+
+  .foot{max-width:1180px;margin:0 auto;padding:30px 24px 60px;color:var(--faint);font-size:13.5px;border-top:1px solid var(--line)}
+
+  /* ---- report (print) ---- */
+  #report{display:none}
+  #report .r-h1{font-family:var(--display);font-size:24px;font-weight:700;margin:0 0 4px}
+  #report .r-meta{color:#333;font-size:14px;margin-bottom:18px;border-bottom:2px solid #111;padding-bottom:10px}
+  #report .r-lab{margin:16px 0;page-break-inside:avoid}
+  #report .r-lab h3{font-family:var(--display);font-size:17px;margin:0 0 8px;border-left:4px solid #999;padding-left:10px}
+  #report .r-task{margin:9px 0 13px;page-break-inside:avoid}
+  #report .r-q{font-size:14px;margin:0 0 5px}
+  #report .r-q b{font-family:var(--mono)}
+  #report pre.r-a{margin:0;background:#f3f4f6;border:1px solid #dcdfe4;border-radius:6px;padding:9px 12px;font-family:var(--mono);font-size:12.4px;white-space:pre-wrap;word-break:break-word}
+  #report .r-empty{color:#999;font-style:italic;font-size:14px}
+  @media print{
+    .topbar,.layout,.foot,.fab{display:none!important}
+    #report{display:block!important;color:#111;font-family:var(--sans);max-width:820px;margin:0 auto;padding:6px}
+    body{background:#fff}
+    @page{margin:16mm}
+  }
+
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr;gap:0;padding:0 16px}
+    .sidebar{display:none}
+    .topbar-inner{padding:11px 16px}
+    .legend{width:100%;margin-left:0}
+    main{padding:26px 0 80px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+
+  /* ---- dodatki wersji z generatora ---- */
+  details.script{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--e,var(--graphite));border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+  details.script>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;padding:14px 18px;font-family:var(--display);font-weight:600}
+  details.script>summary::-webkit-details-marker{display:none}
+  details.script>summary .fname{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--muted);margin-left:auto}
+  details.script .cmd{margin:0 14px 14px}
+  details.script .sdesc{margin:0 18px 10px;font-size:14px;color:var(--muted)}
+  .cmd pre.tall{max-height:420px;overflow:auto}
+  .conn-card{background:color-mix(in srgb,var(--e) 8%,transparent);border:1px solid color-mix(in srgb,var(--e) 25%,transparent);border-radius:var(--radius-sm);padding:10px 14px;margin:14px 0 4px;display:flex;flex-wrap:wrap;gap:6px 22px;font-size:13.5px;color:var(--muted)}
+  .conn-card b{color:var(--ink);font-family:var(--mono);font-weight:500}
+  .filecap{font-family:var(--mono);font-size:12px;color:var(--faint);margin:14px 0 -4px}
+  .gen-note{font-size:12.5px;color:var(--faint)}
+
+</style>
+</head>
+<body>
+<!-- PLIK GENEROWANY przez tools/build_site.py z labs/*/lab.yaml i content/*.yaml — nie edytuj ręcznie. -->
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Bazy danych <span class="sub">laboratorium · Docker + trzy silniki</span></div>
+    <div class="legend">
+      <span><i style="background:var(--oracle)"></i>Oracle</span>
+      <span><i style="background:var(--postgres)"></i>PostgreSQL</span>
+      <span><i style="background:var(--mysql)"></i>MySQL</span>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <nav id="nav">
+      <a href="#start"><span class="edot" style="--e:var(--graphite)"></span>Wprowadzenie</a>
+      <div class="navlabel">Materiały</div>
+      <a href="#narzedzia"><span class="edot" style="--e:var(--graphite)"></span>Narzędzia</a>
+      <a href="#bazy"><span class="edot" style="--e:var(--graphite)"></span>Bazy danych</a>
+      <a href="#skrypty"><span class="edot" style="--e:var(--graphite)"></span>Skrypty SQL</a>
+      <a href="#roznice"><span class="edot" style="--e:var(--graphite)"></span>Różnice dialektów</a>
+      <a href="#docker"><span class="edot" style="--e:var(--graphite)"></span>Ściąga poleceń</a>
+      <div class="navlabel">Instrukcje</div>
+      <a href="#l01" style="--e:var(--graphite)"><span class="num">1/6</span><span class="edot"></span>Docker — start</a>
+      <a href="#l02" style="--e:var(--graphite)"><span class="num">2/6</span><span class="edot"></span>Docker Compose</a>
+      <a href="#l03" style="--e:var(--postgres)"><span class="num">3/6</span><span class="edot"></span>Katedra</a>
+      <a href="#l04" style="--e:var(--mysql)"><span class="num">4/6</span><span class="edot"></span>Fabryka</a>
+      <a href="#l05" style="--e:var(--oracle)"><span class="num">5/6</span><span class="edot"></span>Firma handlowa I</a>
+      <a href="#l06" style="--e:var(--oracle)"><span class="num">6/6</span><span class="edot"></span>Firma handlowa II</a>
+      <a href="#l07" style="--e:var(--oracle)"><span class="num">dod.</span><span class="edot"></span>OT (dodatkowe)</a>
+      <div class="navlabel">Praca studenta</div>
+      <a href="#sprawozdanie"><span class="edot" style="--e:var(--ink)"></span>Sprawozdanie (PDF)</a>
+    </nav>
+  </aside>
+
+  <main>
+    <section id="start" class="hero">
+      <p class="kicker">Kurs SQL · konteneryzacja, trzy silniki, własne rozwiązania i sprawozdanie</p>
+      <h1>Każda baza mieszka<br>na swoim silniku.</h1>
+      <p class="lead">Bazy uruchamiasz w Dockerze jednym poleceniem, rozwiązujesz zadania na przypisanym silniku, wpisujesz swoje polecenia SQL pod każdym zadaniem, a na koniec generujesz sprawozdanie w PDF.</p>
+      <div class="assign">
+        <div class="a" style="--e:var(--postgres)"><b>Katedra</b><span class="eng">PostgreSQL</span><br><small>Instrukcja 3/6</small></div>
+        <div class="a" style="--e:var(--mysql)"><b>Fabryka</b><span class="eng">MySQL</span><br><small>Instrukcja 4/6</small></div>
+        <div class="a" style="--e:var(--oracle)"><b>Firma handlowa</b><span class="eng">Oracle</span><br><small>Instrukcja 5/6 i 6/6</small></div>
+        <div class="a" style="--e:var(--oracle)"><b>OT</b><span class="eng">Oracle</span><br><small>Instrukcja dod.</small></div>
+      </div>
+    </section>
+
+    <section id="narzedzia">
+      <h2 class="eyebrow">Materiały</h2>
+      <div class="sec-title">Narzędzia i platformy</div>
+      <p>Zestaw jest darmowy i działa na Windows, macOS i Linuxie. Jeden klient graficzny obsługuje wszystkie trzy silniki.</p>
+      <div class="tools">
+        <div class="tool"><h3>Docker</h3><p>Uruchamia serwery baz w kontenerach. Docker Desktop (Windows/macOS) lub Docker Engine (Linux), z wbudowanym <code>docker compose</code>.</p></div>
+        <div class="tool"><h3>DBeaver Community</h3><p>Uniwersalny klient graficzny do Oracle, PostgreSQL i MySQL. Główny klient kursu.</p></div>
+        <div class="tool"><h3>Skrypt <code>lab</code></h3><p>Pomocnik: <code>./lab up 3</code> uruchamia bazę laboratorium 3, <code>./lab reset 3</code> przywraca stan początkowy, <code>./lab shell 3</code> otwiera konsolę SQL.</p></div>
+        <div class="tool"><h3>Adminer</h3><p>Lekki klient w przeglądarce, uruchamiany jako kontener (laboratorium 2). Obsługuje PostgreSQL i MySQL.</p></div>
+        <div class="tool"><h3>Git</h3><p>Materiały (instrukcje, skrypty, pliki compose) pobierasz i aktualizujesz z repozytorium: <code>./lab update</code>.</p></div>
+      </div>
+    </section>
+
+    <section id="bazy">
+      <h2 class="eyebrow">Materiały</h2>
+      <div class="sec-title">Bazy danych — schematy</div>
+      <p>Bazy używane w laboratoriach. Klucz główny zaznaczono kolorem, klucz obcy podkreśleniem.</p>
+      <div class="schemas">
+        <div class="schema" style="--e:var(--postgres)"><div class="shead"><h3>Katedra</h3><span class="badge">PostgreSQL</span></div><div class="tbl"><div class="tname">zespol</div><div class="cols"><span class="pk">id_zesp</span>, nazwa, adres</div></div><div class="tbl"><div class="tname">etat</div><div class="cols"><span class="pk">nazwa</span>, placa_min, placa_max</div></div><div class="tbl"><div class="tname">pracownik</div><div class="cols"><span class="pk">numer</span>, nazwisko, imie, <span class="fk">etat</span>, <span class="fk">szef</span>, pracuje_od, placa_pod, placa_dod, <span class="fk">id_zesp</span></div></div></div>
+        <div class="schema" style="--e:var(--mysql)"><div class="shead"><h3>Fabryka</h3><span class="badge">MySQL</span></div><div class="tbl"><div class="tname">hale</div><div class="cols"><span class="pk">id_hali</span>, nazwa, adres</div></div><div class="tbl"><div class="tname">maszyny</div><div class="cols"><span class="pk">id_maszyny</span>, nazwa, data_uruchomienia, <span class="fk">id_hali</span></div></div><div class="tbl"><div class="tname">operatorzy</div><div class="cols"><span class="pk">id_operatora</span>, nazwisko, imie, data_zatrudnienia, placa, <span class="fk">przelozony</span></div></div><div class="tbl"><div class="tname">operator_maszyna</div><div class="cols"><span class="pk fk">id_operatora</span>, <span class="pk fk">id_maszyny</span></div></div><div class="tbl"><div class="tname">awarie</div><div class="cols">czas, usunieta, opis, <span class="fk">id_maszyny</span></div></div><div class="tbl"><div class="tname">maszyny_uszkodzone</div><div class="cols">(widok) id_maszyny, nazwa</div></div></div>
+        <div class="schema" style="--e:var(--oracle)"><div class="shead"><h3>Firma handlowa</h3><span class="badge">Oracle</span></div><div class="tbl"><div class="tname">CUSTOMER</div><div class="cols"><span class="pk">customer_id</span>, name, address, city, state, zip_code, area_code, phone_number, <span class="fk">salesperson_id</span>, credit_limit, comments</div></div><div class="tbl"><div class="tname">EMPLOYEE</div><div class="cols"><span class="pk">employee_id</span>, last_name, first_name, middle_initial, <span class="fk">job_id</span>, <span class="fk">manager_id</span>, hire_date, salary, commission, <span class="fk">department_id</span></div></div><div class="tbl"><div class="tname">DEPARTMENT</div><div class="cols"><span class="pk">department_id</span>, name, <span class="fk">location_id</span></div></div><div class="tbl"><div class="tname">JOBS</div><div class="cols"><span class="pk">job_id</span>, function</div></div><div class="tbl"><div class="tname">LOCATION</div><div class="cols"><span class="pk">location_id</span>, regional_group</div></div><div class="tbl"><div class="tname">SALARY_GRADE</div><div class="cols"><span class="pk">grade_id</span>, lower_bound, upper_bound</div></div><div class="tbl"><div class="tname">PRODUCT</div><div class="cols"><span class="pk">product_id</span>, description</div></div><div class="tbl"><div class="tname">PRICE</div><div class="cols"><span class="pk fk">product_id</span>, list_price, min_price, start_date, end_date</div></div><div class="tbl"><div class="tname">SALES_ORDER</div><div class="cols"><span class="pk">order_id</span>, order_date, <span class="fk">customer_id</span>, ship_date, total</div></div><div class="tbl"><div class="tname">ITEM</div><div class="cols"><span class="pk fk">order_id</span>, <span class="pk">item_id</span>, <span class="fk">product_id</span>, actual_price, quantity, total</div></div></div>
+      </div>
+      <h4 style="font-family:var(--display);color:var(--faint);font-size:14px;margin:26px 0 10px">Materiał dodatkowy — schemat OT (Oracle Sample Database)</h4>
+      <p>Rozbudowana baza handlowa (regiony, kraje, magazyny, kontakty) do laboratorium dodatkowego ze złączeniami wielotabelowymi.</p>
+      <figure class="er">
+        <img alt="Diagram ER schematu OT" src="data:image/png;base64,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">
+        <figcaption>Schemat OT: CUSTOMERS, CONTACTS, ORDERS, ORDER_ITEMS, EMPLOYEES, PRODUCTS, PRODUCT_CATEGORIES, INVENTORIES, WAREHOUSES, LOCATIONS, COUNTRIES, REGIONS. Źródło: oracletutorial.com (do celów edukacyjnych).</figcaption>
+      </figure>
+    </section>
+
+    <section id="skrypty">
+      <h2 class="eyebrow">Materiały</h2>
+      <div class="sec-title">Skrypty SQL</div>
+      <p>Skrypty ładują się <strong>automatycznie</strong> przy pierwszym uruchomieniu bazy (<code>docker compose up</code>) — nie musisz ich ręcznie wczytywać. Podgląd służy do nauki i porównań; możesz je też skopiować lub pobrać.</p>
+      <details class="script" style="--e:var(--postgres)"><summary>Katedra → PostgreSQL<span class="fname">labs/03-katedra-postgres/init/01_katedra.sql</span></summary><p class="sdesc">Tabele zespol, etat, pracownik wraz z danymi (kolumna imie dodana względem oryginału).</p><div class="cmd"><pre class="tall"><code>-- Baza "Katedra" — wersja dla PostgreSQL (z kolumna imie)
+-- Ładowany AUTOMATYCZNIE przy pierwszym starcie kontenera (docker compose up).
+
+DROP TABLE IF EXISTS pracownik;
+DROP TABLE IF EXISTS zespol;
+DROP TABLE IF EXISTS etat;
+
+CREATE TABLE zespol (
+    id_zesp  smallint PRIMARY KEY,
+    nazwa    varchar(20) NOT NULL,
+    adres    varchar(20)
+);
+
+CREATE TABLE etat (
+    nazwa      varchar(10) PRIMARY KEY,
+    placa_min  numeric(6,2) NOT NULL CHECK (placa_min &gt; 0),
+    placa_max  numeric(6,2) NOT NULL CHECK (placa_max &lt; 5000)
+);
+
+CREATE TABLE pracownik (
+    numer      smallint PRIMARY KEY,
+    nazwisko   varchar(25) NOT NULL,
+    imie       varchar(25),
+    etat       varchar(10) REFERENCES etat(nazwa),
+    szef       smallint REFERENCES pracownik(numer),
+    pracuje_od date DEFAULT CURRENT_DATE,
+    placa_pod  numeric(6,2) NOT NULL CHECK (placa_pod &gt; 0),
+    placa_dod  numeric(6,2),
+    id_zesp    smallint REFERENCES zespol(id_zesp)
+);
+
+INSERT INTO zespol (id_zesp, nazwa, adres) VALUES
+    (10, 'ADMINISTRACJA',      'PIOTROWO 3A'),
+    (20, 'BAZY DANYCH',        'WIEŻOWA 75'),
+    (30, 'SIECI KOMPUTEROWE',  'GARBARY 3'),
+    (40, 'SYSTEMY OPERACYJNE', 'PIOTROWO 3A'),
+    (50, 'TRANSLATORY',        'MANSFELDA 4');
+
+INSERT INTO etat (nazwa, placa_min, placa_max) VALUES
+    ('STAŻYSTA',   800, 1000),
+    ('SEKRETARKA', 900, 1200),
+    ('ASYSTENT',  1000, 1600),
+    ('ADIUNKT',   1600, 2000),
+    ('PROFESOR',  2000, 2500),
+    ('DYREKTOR',  2500, 3200);
+
+INSERT INTO pracownik (numer, nazwisko, imie, etat, szef, pracuje_od, placa_pod, placa_dod, id_zesp) VALUES
+    (1000, 'Lech',      'Adam',       'DYREKTOR',   NULL, DATE '1971-01-01', 3160,  570, 10),
+    (1080, 'Koliberek', 'Anna',       'SEKRETARKA', 1000, DATE '1983-02-20', 1150, NULL, 10),
+    (1010, 'Podgajny',  'Piotr',      'PROFESOR',   1000, DATE '1975-05-01', 2180,  420, 20),
+    (1040, 'Rus',       'Marek',      'ADIUNKT',    1010, DATE '1979-09-15', 1750, NULL, 20),
+    (1070, 'Muszyński', 'Tomasz',     'ADIUNKT',    1010, DATE '1985-05-01', 1600, NULL, 20),
+    (1060, 'Misiecki',  'Paweł',      'ASYSTENT',   1010, DATE '1985-03-01', 1400, NULL, 20),
+    (1090, 'Palusz',    'Ewa',        'ASYSTENT',   1040, DATE '1989-09-15', 1200, NULL, 20),
+    (1020, 'Delcki',    'Krzysztof',  'PROFESOR',   1000, DATE '1977-09-01', 2050,  270, 30),
+    (1030, 'Maleja',    'Barbara',    'ADIUNKT',    1020, DATE '1968-07-01', 1750, NULL, 30),
+    (1100, 'Warski',    'Michał',     'ASYSTENT',   1030, DATE '1987-07-14', 1350, NULL, 30),
+    (1110, 'Rajski',    'Aleksandra', 'STAŻYSTA',   1030, DATE '1990-07-01',  900, NULL, 30),
+    (1050, 'Lubicz',    'Jerzy',      'ADIUNKT',    1000, DATE '1983-09-01', 1780, NULL, 40),
+    (1120, 'Orka',      'Katarzyna',  'ASYSTENT',   1050, DATE '1988-04-01', 1350, NULL, 40),
+    (1130, 'Kolski',    'Grzegorz',   'STAŻYSTA',   1050, DATE '1991-09-01',  900, NULL, 40);</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button><button class="btn dl" type="button" data-name="01_katedra.sql">Pobierz</button></div></div></details>
+      <details class="script" style="--e:var(--mysql)"><summary>Fabryka → MySQL<span class="fname">labs/04-fabryka-mysql/init/01_fabryka.sql</span></summary><p class="sdesc">Tabele hale, maszyny, operatorzy, operator_maszyna, awarie oraz widok maszyny_uszkodzone.</p><div class="cmd"><pre class="tall"><code>-- Baza "Fabryka" — wersja dla MySQL
+-- Ładowany AUTOMATYCZNIE przy pierwszym starcie kontenera (docker compose up).
+-- Nazwy kolumn bez polskich znaków (przelozony, usunieta) dla uproszczenia;
+-- dane zawierają polskie znaki (utf8mb4).
+
+-- Wymuszamy UTF-8 po stronie klienta, niezależnie od ustawień domyślnych (polskie znaki w danych).
+SET NAMES utf8mb4;
+
+DROP TABLE IF EXISTS operator_maszyna;
+DROP TABLE IF EXISTS awarie;
+DROP TABLE IF EXISTS maszyny;
+DROP TABLE IF EXISTS operatorzy;
+DROP TABLE IF EXISTS hale;
+
+CREATE TABLE hale (
+    id_hali  TINYINT PRIMARY KEY,
+    nazwa    VARCHAR(30),
+    adres    TEXT
+);
+
+CREATE TABLE maszyny (
+    id_maszyny        SMALLINT PRIMARY KEY AUTO_INCREMENT,
+    nazwa             VARCHAR(30),
+    data_uruchomienia DATE,
+    id_hali           TINYINT,
+    FOREIGN KEY (id_hali) REFERENCES hale(id_hali)
+);
+
+CREATE TABLE operatorzy (
+    id_operatora      SMALLINT PRIMARY KEY AUTO_INCREMENT,
+    nazwisko          VARCHAR(25),
+    imie              VARCHAR(25),
+    data_zatrudnienia DATE,
+    placa             DECIMAL(6,2),
+    przelozony        SMALLINT,
+    FOREIGN KEY (przelozony) REFERENCES operatorzy(id_operatora)
+);
+
+CREATE TABLE operator_maszyna (
+    id_operatora  SMALLINT,
+    id_maszyny    SMALLINT,
+    PRIMARY KEY (id_operatora, id_maszyny),
+    FOREIGN KEY (id_operatora) REFERENCES operatorzy(id_operatora),
+    FOREIGN KEY (id_maszyny)   REFERENCES maszyny(id_maszyny)
+);
+
+CREATE TABLE awarie (
+    czas        DATE,
+    usunieta    CHAR(1),
+    opis        TEXT,
+    id_maszyny  SMALLINT,
+    FOREIGN KEY (id_maszyny) REFERENCES maszyny(id_maszyny)
+);
+
+INSERT INTO hale (id_hali, nazwa) VALUES
+    (1, 'Hala produkcyjna 1'),
+    (2, 'Magazyn A'),
+    (3, 'Budynek administracyjny');
+
+INSERT INTO maszyny (id_maszyny, nazwa, data_uruchomienia, id_hali) VALUES
+    (10, 'Obrabiarka numeryczna',       '2001-10-23', 1),
+    (20, 'Wózek widłowy "Lemur"',       '2011-03-27', 2),
+    (30, 'Suwnica',                     '2001-03-11', 1),
+    (40, 'Ploter tnący A-32',           '2014-02-10', 3),
+    (50, 'Tokarka',                     '2006-07-05', 1),
+    (60, 'Prasa hydrauliczna',          '2003-11-09', 1),
+    (70, 'Wózek widłowy "Lemur lux"',   '2014-03-13', 2);
+
+INSERT INTO operatorzy (id_operatora, nazwisko, imie, data_zatrudnienia, placa, przelozony) VALUES
+    (10, 'SCHWARZENEGGER', 'ARNOLD',    '2003-03-30', 1050, NULL),
+    (20, 'MACGYVER',       'ANGUS',     '2006-11-12',  900,   10),
+    (30, 'BOND',           'JAMES',     '2002-03-13', 1100, NULL),
+    (40, 'NORRIS',         'CHUCK',     '2009-10-21',  870,   10),
+    (50, 'STALLONE',       'SYLVESTER', '2010-01-01',  999,   30),
+    (60, 'WILLIS',         'BRUCE',     '2008-05-21',  800,   10);
+
+INSERT INTO operator_maszyna (id_operatora, id_maszyny) VALUES
+    (10, 30), (10, 60), (20, 10), (30, 20), (30, 70), (40, 50), (60, 40);
+
+INSERT INTO awarie (czas, usunieta, id_maszyny, opis) VALUES
+    ('2013-07-07', 'T', 50, 'Nie kręci się'),
+    ('2023-12-10', 'T', 20, 'Podnośnik nie działa'),
+    ('2007-01-11', 'T', 40, 'Nie włącza się'),
+    ('2012-03-11', NULL, 20, 'Zbyt wolno jedzie'),
+    ('2017-11-12', NULL, 60, 'Niedokładnie prasuje');
+
+CREATE OR REPLACE VIEW maszyny_uszkodzone AS
+    SELECT m.id_maszyny, m.nazwa
+    FROM maszyny m JOIN awarie a ON m.id_maszyny = a.id_maszyny
+    WHERE COALESCE(a.usunieta, 'N') = 'N';</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button><button class="btn dl" type="button" data-name="01_fabryka.sql">Pobierz</button></div></div></details>
+      <details class="script" style="--e:var(--oracle)"><summary>Firma handlowa → Oracle (skrypt startowy)<span class="fname">labs/05-firma-oracle-1/init/01_firma.sql</span></summary><p class="sdesc">Obraz Oracle uruchamia skrypty startowe jako SYS, więc ten skrypt łączy się z kontem student i wczytuje bdemobld.sql.</p><div class="cmd"><pre class="tall"><code>-- Skrypty .sql z initdb.d obraz gvenzl/oracle-free wykonuje jako SYS (w CDB).
+-- Dlatego najpierw łączymy się z kontem student w bazie FREEPDB1, a dopiero potem ładujemy dane.
+CONNECT student/student@//localhost/FREEPDB1
+SET DEFINE OFF
+-- Pierwsze DROP-y w bdemobld.sql zakończą się błędem ORA-00942 (tabel jeszcze nie ma) — to normalne.
+@/lab-sql/bdemobld.sql
+COMMIT;</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button><button class="btn dl" type="button" data-name="01_firma.sql">Pobierz</button></div></div></details>
+      <details class="script" style="--e:var(--oracle)"><summary>Firma handlowa → Oracle (bdemobld.sql)<span class="fname">shared/oracle/bdemobld.sql</span></summary><p class="sdesc">Oryginalny skrypt tworzący tabele bazy handlowej (wersja angielska).</p><div class="cmd"><pre class="tall"><code>REM
+REM $Header: bdemobld.sql 1.1 94/10/19 09:22:46 gdudey Osd&lt;desktop/netware&gt; $ Copyr (c) 1994 Oracle
+REM
+REM   NAME
+REM     bdemobld.sql - Build Oracle Data Browser Demonstration Tables
+REM   DESCRIPTION
+REM     This SQL script builds the Oracle Data Browser demonstration tables
+REM     used in the Oracle Data Browser documentation.
+REM   NOTES
+REM     Do not run this script in the same account where you have run 
+REM     demobld.sql.  Creating a separate account called BROWSER is 
+REM     recommended.
+REM     Constraints created with this script are not named so that the
+REM     script will run under both ORACLE Version 6 and ORACLE7 untouched.
+REM   MODIFIED   (MM/DD/YY)
+REM    gpancha    02/23/94 -  Changed CHAR to VARCHAR2. 
+REM    spao       09/02/93 -  Recreated missing INSERT statements for
+REM                           SALARY_GRADE table.
+REM    spao       08/10/93 -  Changed nonunique indexes to unique indexes and
+REM                           corrected PRICE table to meet check constraints.
+REM    spao       02/24/93 -  Changed date inputs to be language/territory
+REM                           independent; changed number inputs to be
+REM                           territory independent; separated constraint
+REM                           definitions from table definitions; added
+REM                           indexes for LOCATION, DEPARTMENT, JOBS,
+REM                           EMPLOYEE, and SALARY_GRADE tables.
+REM    spao       05/02/91 -  Creation
+
+REM Drop old datasources
+
+DROP VIEW SALES;
+DROP TABLE ITEM;
+DROP TABLE SALES_ORDER;
+DROP TABLE CUSTOMER;
+DROP TABLE PRICE;
+DROP TABLE PRODUCT;
+DROP TABLE SALARY_GRADE;
+DROP TABLE EMPLOYEE;
+DROP TABLE JOBS;
+DROP TABLE DEPARTMENT;
+DROP TABLE LOCATION;
+
+REM Create new datasources
+
+CREATE TABLE LOCATION (
+        LOCATION_ID             NUMBER(3),
+        REGIONAL_GROUP          VARCHAR2(20));
+
+CREATE TABLE DEPARTMENT (
+        DEPARTMENT_ID           NUMBER(2),
+        NAME                    VARCHAR2(14),
+        LOCATION_ID             NUMBER(3));
+
+CREATE TABLE JOBS (
+        JOB_ID                  NUMBER(3),
+        FUNCTION                VARCHAR2(30));
+
+CREATE TABLE EMPLOYEE (
+        EMPLOYEE_ID             NUMBER(4),
+        LAST_NAME               VARCHAR2(15),
+        FIRST_NAME              VARCHAR2(15),
+        MIDDLE_INITIAL          VARCHAR2(1),
+        JOB_ID                  NUMBER(3),
+        MANAGER_ID              NUMBER(4),
+        HIRE_DATE               DATE,
+        SALARY                  NUMBER(7,2),
+        COMMISSION              NUMBER(7,2),
+        DEPARTMENT_ID           NUMBER(2));
+
+CREATE TABLE SALARY_GRADE (
+        GRADE_ID                NUMBER(3),
+        LOWER_BOUND             NUMBER(7,2),
+        UPPER_BOUND             NUMBER(7,2));
+
+CREATE TABLE PRODUCT (
+        PRODUCT_ID              NUMBER (6),
+        DESCRIPTION             VARCHAR2 (30));
+ 
+CREATE TABLE PRICE (
+        PRODUCT_ID              NUMBER (6),
+        LIST_PRICE              NUMBER (8,2),
+        MIN_PRICE               NUMBER (8,2),
+        START_DATE              DATE,
+        END_DATE                DATE);
+
+CREATE TABLE CUSTOMER (
+        CUSTOMER_ID             NUMBER (6),
+        NAME                    VARCHAR2 (45),
+        ADDRESS                 VARCHAR2 (40),
+        CITY                    VARCHAR2 (30),
+        STATE                   VARCHAR2 (2),
+        ZIP_CODE                VARCHAR2 (9),
+        AREA_CODE               NUMBER (3),
+        PHONE_NUMBER            NUMBER (7),
+        SALESPERSON_ID          NUMBER (4),
+        CREDIT_LIMIT            NUMBER (9,2),
+        COMMENTS                LONG);
+
+CREATE TABLE SALES_ORDER  (
+        ORDER_ID                NUMBER (4),
+        ORDER_DATE              DATE,
+        CUSTOMER_ID             NUMBER (6),
+        SHIP_DATE               DATE,
+        TOTAL                   NUMBER (8,2));
+
+CREATE TABLE ITEM  (
+        ORDER_ID                NUMBER (4),
+        ITEM_ID                 NUMBER (4),
+        PRODUCT_ID              NUMBER (6),
+        ACTUAL_PRICE            NUMBER (8,2),
+        QUANTITY                NUMBER (8),
+        TOTAL                   NUMBER (8,2));
+
+CREATE VIEW SALES AS
+SELECT SALESPERSON_ID, SALES_ORDER.CUSTOMER_ID, CUSTOMER.NAME CUSTOMER,
+       PRODUCT.PRODUCT_ID, DESCRIPTION PRODUCT, SUM(ITEM.TOTAL) AMOUNT
+FROM SALES_ORDER, ITEM, CUSTOMER, PRODUCT
+WHERE SALES_ORDER.ORDER_ID = ITEM.ORDER_ID
+AND SALES_ORDER.CUSTOMER_ID = CUSTOMER.CUSTOMER_ID
+AND ITEM.PRODUCT_ID = PRODUCT.PRODUCT_ID
+GROUP BY SALESPERSON_ID, SALES_ORDER.CUSTOMER_ID, CUSTOMER.NAME,
+         PRODUCT.PRODUCT_ID, DESCRIPTION;
+
+REM Grant SELECT privileges to PUBLIC on the datasources
+
+GRANT SELECT ON LOCATION TO PUBLIC;
+GRANT SELECT ON DEPARTMENT TO PUBLIC;
+GRANT SELECT ON JOBS TO PUBLIC;
+GRANT SELECT ON EMPLOYEE TO PUBLIC;
+GRANT SELECT ON SALARY_GRADE TO PUBLIC;
+GRANT SELECT ON PRODUCT TO PUBLIC;
+GRANT SELECT ON PRICE TO PUBLIC;
+GRANT SELECT ON CUSTOMER TO PUBLIC;
+GRANT SELECT ON SALES_ORDER TO PUBLIC;
+GRANT SELECT ON ITEM TO PUBLIC;
+GRANT SELECT ON SALES TO PUBLIC;
+ 
+REM Comment the datasources and their columns
+
+COMMENT ON TABLE EMPLOYEE IS 'General information on all corporate employees.';
+COMMENT ON COLUMN EMPLOYEE.EMPLOYEE_ID IS 'Employee Number: Unique 4-digit identification number assigned to every employee.';
+COMMENT ON COLUMN EMPLOYEE.LAST_NAME IS 'Last name of employee.  Stored in all caps.';
+COMMENT ON COLUMN EMPLOYEE.FIRST_NAME IS 'First name of employee.  Stored in all caps.';
+COMMENT ON COLUMN EMPLOYEE.MIDDLE_INITIAL IS 'Middle initial (one character only).  Stored in all caps.';
+COMMENT ON COLUMN EMPLOYEE.JOB_ID IS 'Job identification number.  See JOB for descriptions.';
+COMMENT ON COLUMN EMPLOYEE.MANAGER_ID IS 'Manager: The employee number of this employee''s manager.  If employee has no manager, value should be NULL.';
+COMMENT ON COLUMN EMPLOYEE.HIRE_DATE IS 'Date the employee was HIRED, not necessarily the day the employee STARTED.';
+COMMENT ON COLUMN EMPLOYEE.SALARY IS 'Monthly salary for the employee in U.S. dollars.  Salary grade information can be found in the table SALARY_GRADE.';
+COMMENT ON COLUMN EMPLOYEE.COMMISSION IS 'Commission (in U.S. dollars) earned last month.  This field should be NULL for non-commissioned employees.';
+COMMENT ON COLUMN EMPLOYEE.DEPARTMENT_ID IS 'Employee''s department number.  Further department information is available in the table DEPT.';
+
+COMMENT ON TABLE JOBS IS 'All valid job categories for personnel information.';
+COMMENT ON COLUMN JOBS.JOB_ID IS 'Unique 3-digit code for JOBS function and title.';
+COMMENT ON COLUMN JOBS.FUNCTION IS 'Generic function class of job.';
+
+COMMENT ON TABLE DEPARTMENT IS 'Department information for all U.S. operations.';
+COMMENT ON COLUMN DEPARTMENT.DEPARTMENT_ID IS 'Department number: Unique 2-digit department number assigned to each department.';
+COMMENT ON COLUMN DEPARTMENT.NAME IS 'Department name: Only the first 14 characters of a department name can be stored in the database.  Storing names in all caps is recommended but not required.';
+COMMENT ON COLUMN DEPARTMENT.LOCATION_ID IS 'Department location: The code for where the department''s central office is located.  (LOCATION)';
+
+COMMENT ON TABLE LOCATION IS 'Location information for all U.S. departments and warehouses.';
+COMMENT ON COLUMN LOCATION.LOCATION_ID IS 'Central location corporate location code.';
+COMMENT ON COLUMN LOCATION.REGIONAL_GROUP IS 'Metropolitan center closest to location.';
+
+COMMENT ON TABLE SALARY_GRADE IS 'Salary grade levels.  Used to classify monthly salary information in U.S. dollars, as found in EMP.SAL.';
+COMMENT ON COLUMN SALARY_GRADE.GRADE_ID IS 'Number used to grade salaries.  Higher salary grade numbers denote higher salaries.';
+COMMENT ON COLUMN SALARY_GRADE.LOWER_BOUND IS 'The lowest monthly salary (rounded to the nearest U.S. dollar) that applies to a particular salary grade. (i.e. the condition ROUND(EMP.SAL) &gt;= LOWER_BOUND must be met.)';
+COMMENT ON COLUMN SALARY_GRADE.UPPER_BOUND IS 'The highest monthly salary (rounded to the nearest U.S. dollar) that applies to a particular salary grade. (i.e. the condition ROUND(EMP.SAL) &lt;= UPPER_BOUND must be met.)';
+
+COMMENT ON TABLE PRODUCT IS 'Products in catalog.  Pricing information can be found in table PRICE.';
+COMMENT ON COLUMN PRODUCT.PRODUCT_ID IS 'Unique 6 digit number assigned to all products.  Number generated by sequence PRODUCT_ID.';
+COMMENT ON COLUMN PRODUCT.DESCRIPTION IS 'Full product name (up to 30 characters).  Storing product names in all caps is recommended but not required.';
+
+COMMENT ON TABLE PRICE IS 'Prices (both standard and minimum) of products.  Database tracks both effective dates and expiration dates for prices.';
+COMMENT ON COLUMN PRICE.PRODUCT_ID IS 'Product number to which price applies.  Product name found in table PRICE.';
+COMMENT ON COLUMN PRICE.LIST_PRICE IS 'Undiscounted price (in U.S. dollars).';
+COMMENT ON COLUMN PRICE.MIN_PRICE IS 'Lowest price (in U.S. dollars) that can be offered.';
+COMMENT ON COLUMN PRICE.START_DATE IS 'Date which standard and minimum prices go into effect.';
+COMMENT ON COLUMN PRICE.END_DATE IS 'Date which standard and minimum price expire.  This value can be left NULL.';
+
+COMMENT ON TABLE CUSTOMER IS 'Information on all U.S. customers and prospective customers.';
+COMMENT ON COLUMN CUSTOMER.CUSTOMER_ID IS 'Unique 6 digit number assigned to all customers.  Number generated by the sequence CUSTOMER_ID.';
+COMMENT ON COLUMN CUSTOMER.NAME IS 'Full store name of every customer (up to 45 characters).  Storing names in all caps is recommended but not required.';
+COMMENT ON COLUMN CUSTOMER.ADDRESS IS 'Street address of customer.  CITY, STATE, and ZIP_CODE make up the rest of the address.';
+COMMENT ON COLUMN CUSTOMER.CITY IS 'City name for address of customer.  Storing city names in all caps is recommended, but not required.';
+COMMENT ON COLUMN CUSTOMER.STATE IS 'Two letter abbreviation for state name for address of customer.  Must be entered in all caps.';
+COMMENT ON COLUMN CUSTOMER.ZIP_CODE IS 'Zip code of customer.  Supports both 5 and 9 digit zip codes.  Dashes should be omitted from 9 digit zips.';
+COMMENT ON COLUMN CUSTOMER.AREA_CODE IS 'Area code of phone number for customer.';
+COMMENT ON COLUMN CUSTOMER.PHONE_NUMBER IS 'Phone number of customer.  This field does not supports letters and spaces for mnemonics (7 numeric digits only).';
+COMMENT ON COLUMN CUSTOMER.SALESPERSON_ID IS 'Employee number of sales representative handling customer''s account.  Employee information can be found in the EMPLOYEE table.';
+COMMENT ON COLUMN CUSTOMER.CREDIT_LIMIT IS 'Credit limit of customer or prospective customer in U.S. dollars.';
+COMMENT ON COLUMN CUSTOMER.COMMENTS IS 'Field can be used flexibly.  Suggestions for use include lists of action items or special considerations when dealing with the particular customer.';
+
+COMMENT ON TABLE SALES_ORDER IS 'Sales order for a customer.  Items in the order can be found in the table ITEM.';
+COMMENT ON COLUMN SALES_ORDER.ORDER_ID IS 'Unique 4 digit number assigned to all orders.  Number generated by sequence ORDER_ID.';
+COMMENT ON COLUMN SALES_ORDER.ORDER_DATE IS 'Date sales order logged (not necessarily when order was fulfilled.)';
+COMMENT ON COLUMN SALES_ORDER.CUSTOMER_ID IS 'Customer ordering the goods.  Further information can be found in the table CUSTOMER.';
+COMMENT ON COLUMN SALES_ORDER.SHIP_DATE IS 'Date order fulfilled and invoice sent (not necessarily date payment received).';
+COMMENT ON COLUMN SALES_ORDER.TOTAL IS 'Total of all items totals in the order.  (i.e. the value of TOTAL for order N should contain: SELECT SUM(TOTAL) FROM ITEM WHERE ORDER_ID=N)';
+
+COMMENT ON TABLE ITEM IS 'Items listed in sales orders.  Product information can be found in table PRODUCT.  Sales order information can be found in table SALES_ORDER.';
+COMMENT ON COLUMN ITEM.ORDER_ID IS 'Sales order in which this item appears.  Sales order information can be found in table SALES_ORDER.';
+COMMENT ON COLUMN ITEM.ITEM_ID IS 'Number of item within the sales order.';
+COMMENT ON COLUMN ITEM.PRODUCT_ID IS 'Number of product (described in PRODUCT) that pertains to the line item.';
+COMMENT ON COLUMN ITEM.ACTUAL_PRICE IS 'Price to be paid by the customer in U.S. dollars.  The standard price is PRICE.STANDARD_PRICE, but in some instances, discounts are given to as low as PRICE.MINIMUM_PRICE.';
+COMMENT ON COLUMN ITEM.QUANTITY IS 'The amount of product to be ordered in this line item.';
+COMMENT ON COLUMN ITEM.TOTAL IS 'The total price (in U.S. dollars) of this line item.  TOTAL = ACTUAL_PRICE * QUANTITY.';
+
+COMMENT ON TABLE SALES IS 'Summary view joining tables SALES_ORDER, ITEM, CUSTOMER, and PRODUCT.  Summarizes the item total grouped by sales representative, customer, and product.  Used by the SALES ORDERS application.';
+COMMENT ON COLUMN SALES.SALESPERSON_ID IS 'Employee number of sales representative handling customer''s account.  Employee information can be found in the EMPLOYEE table. (Same as CUSTOMER.SALESPERSON_ID)';
+COMMENT ON COLUMN SALES.CUSTOMER_ID IS 'Unique 6 digit number assigned to all customers.  Number generated by the sequence CUSTOMER_ID. (Same as CUSTOMER.CUSTOMER_ID)';
+COMMENT ON COLUMN SALES.CUSTOMER IS 'Full store name of every customer (up to 45 characters).  Storing names in all caps is recommended but not required. (Same as CUSTOMER.NAME)';
+COMMENT ON COLUMN SALES.PRODUCT_ID IS 'Unique 6 digit number assigned to all products.  Number generated by sequence PRODUCT_ID. (Same as PRODUCT.PRODUCT_ID)';
+COMMENT ON COLUMN SALES.PRODUCT IS 'Full product name (up to 30 characters).  Storing product names in all caps is recommended but not required. (Same as PRODUCT.PRODUCT_NAME)';
+COMMENT ON COLUMN SALES.AMOUNT IS 'Total sales in (U.S. dollars) of the product sold by the representative to the customer.';
+
+REM Insert Data
+
+INSERT INTO LOCATION VALUES (122, 'NEW YORK');
+INSERT INTO LOCATION VALUES (124, 'DALLAS');
+INSERT INTO LOCATION VALUES (123, 'CHICAGO');
+INSERT INTO LOCATION VALUES (167, 'BOSTON');
+
+INSERT INTO DEPARTMENT VALUES (10,'ACCOUNTING','122');
+INSERT INTO DEPARTMENT VALUES (20,'RESEARCH','124');
+INSERT INTO DEPARTMENT VALUES (30,'SALES','123');
+INSERT INTO DEPARTMENT VALUES (40,'OPERATIONS','167');
+
+INSERT INTO DEPARTMENT VALUES
+  ( 12 , 'RESEARCH', '122');
+
+INSERT INTO DEPARTMENT VALUES
+  ( 13 , 'SALES', '122');
+
+INSERT INTO DEPARTMENT VALUES
+  ( 14 , 'OPERATIONS', '122');
+
+INSERT INTO DEPARTMENT VALUES
+  ( 23 , 'SALES', '124');
+
+INSERT INTO DEPARTMENT VALUES
+  ( 24 , 'OPERATIONS', '124');
+
+INSERT INTO DEPARTMENT VALUES
+  ( 34 , 'OPERATIONS', '123');
+
+INSERT INTO DEPARTMENT VALUES
+  ( 43 , 'SALES', '167');
+
+INSERT INTO JOBS VALUES (667, 'CLERK');
+INSERT INTO JOBS VALUES (668, 'STAFF');
+INSERT INTO JOBS VALUES (669, 'ANALYST');
+INSERT INTO JOBS VALUES (670, 'SALESPERSON');
+INSERT INTO JOBS VALUES (671, 'MANAGER');
+INSERT INTO JOBS VALUES (672, 'PRESIDENT');
+
+INSERT INTO SALARY_GRADE VALUES (1,700,1200);
+INSERT INTO SALARY_GRADE VALUES (2,1201,1400);
+INSERT INTO SALARY_GRADE VALUES (3,1401,2000);
+INSERT INTO SALARY_GRADE VALUES (4,2001,3000);
+INSERT INTO SALARY_GRADE VALUES (5,3001,9999);
+
+INSERT INTO EMPLOYEE VALUES
+    (7369,'SMITH','JOHN','Q',667,7902,TO_DATE(2446052,'J'),800,NULL,20);
+INSERT INTO EMPLOYEE VALUES
+    (7499,'ALLEN','KEVIN','J',670,7698,TO_DATE(2446117,'J'),1600,300,30);
+INSERT INTO EMPLOYEE VALUES
+    (7505,'DOYLE','JEAN','K',671,7839,TO_DATE(2446160,'J'),2850,NULL,13);
+INSERT INTO EMPLOYEE VALUES
+    (7506,'DENNIS','LYNN','S',671,7839,TO_DATE(2446201,'J'),2750,NULL,23);
+INSERT INTO EMPLOYEE VALUES
+    (7507,'BAKER','LESLIE','D',671,7839,TO_DATE(2446227,'J'),2200,NULL,14);
+INSERT INTO EMPLOYEE VALUES
+    (7521,'WARD','CYNTHIA','D',670,7698,TO_DATE(2446119,'J'),1250,500,30);
+INSERT INTO EMPLOYEE VALUES
+    (7555,'PETERS','DANIEL','T',670,7505,TO_DATE(2446156,'J'),1250,300,13);
+INSERT INTO EMPLOYEE VALUES
+    (7557,'SHAW','KAREN','P',670,7505,TO_DATE(2446158,'J'),1250,1200,13);
+INSERT INTO EMPLOYEE VALUES
+    (7560,'DUNCAN','SARAH','S',670,7506,TO_DATE(2446217,'J'),1250,NULL,23);
+INSERT INTO EMPLOYEE VALUES
+    (7564,'LANGE','GREGORY','J',670,7506,TO_DATE(2446218,'J'),1250,300,23);
+INSERT INTO EMPLOYEE VALUES
+    (7566,'JONES','TERRY','M',671,7839,TO_DATE(2446158,'J'),2975,NULL,20);
+INSERT INTO EMPLOYEE VALUES
+    (7569,'ALBERTS','CHRIS','L',671,7839,TO_DATE(2446162,'J'),3000,NULL,12);
+INSERT INTO EMPLOYEE VALUES
+    (7600,'PORTER','RAYMOND','Y',670,7505,TO_DATE(2446171,'J'),1250,900,13);
+INSERT INTO EMPLOYEE VALUES
+    (7609,'LEWIS','RICHARD','M',668,7507,TO_DATE(2446172,'J'),1800,NULL,24);
+INSERT INTO EMPLOYEE VALUES
+    (7654,'MARTIN','KENNETH','J',670,7698,TO_DATE(2446337,'J'),1250,1400,30);
+INSERT INTO EMPLOYEE VALUES
+    (7676,'SOMMERS','DENISE','D',668,7507,TO_DATE(2446175,'J'),1850,NULL,34);
+INSERT INTO EMPLOYEE VALUES
+    (7698,'BLAKE','MARION','S',671,7839,TO_DATE(2446187,'J'),2850,NULL,30);
+INSERT INTO EMPLOYEE VALUES
+    (7782,'CLARK','CAROL','F',671,7839,TO_DATE(2446226,'J'),2450,NULL,10);
+INSERT INTO EMPLOYEE VALUES
+    (7788,'SCOTT','DONALD','T',669,7566,TO_DATE(2446774,'J'),3000,NULL,20);
+INSERT INTO EMPLOYEE VALUES
+    (7789,'WEST','LIVIA','N',670,7506,TO_DATE(2446160,'J'),1500,1000,23);
+INSERT INTO EMPLOYEE VALUES
+    (7799,'FISHER','MATTHEW','G',669,7569,TO_DATE(2446777,'J'),3000,NULL,12);
+INSERT INTO EMPLOYEE VALUES
+    (7820,'ROSS','PAUL','S',670,7505,TO_DATE(2446218,'J'),1300,800,43);
+INSERT INTO EMPLOYEE VALUES
+    (7839,'KING','FRANCIS','A',672,NULL,TO_DATE(2446387,'J'),5000,NULL,10);
+INSERT INTO EMPLOYEE VALUES
+    (7844,'TURNER','MARY','A',670,7698,TO_DATE(2446317,'J'),1500,0,30);
+INSERT INTO EMPLOYEE VALUES
+    (7876,'ADAMS','DIANE','G',667,7788,TO_DATE(2446808,'J'),1100,NULL,20);
+INSERT INTO EMPLOYEE VALUES
+    (7900,'JAMES','FRED','S',667,7698,TO_DATE(2446403,'J'),950,NULL,30);
+INSERT INTO EMPLOYEE VALUES
+    (7902,'FORD','JENNIFER','D',669,7566,TO_DATE(2446403,'J'),3000,NULL,20);
+INSERT INTO EMPLOYEE VALUES
+    (7916,'ROBERTS','GRACE','M',669,7569,TO_DATE(2446800,'J'),2875,NULL,12);
+INSERT INTO EMPLOYEE VALUES
+    (7919,'DOUGLAS','MICHAEL','A',667,7799,TO_DATE(2446800,'J'),800,NULL,12);
+INSERT INTO EMPLOYEE VALUES
+    (7934,'MILLER','BARBARA','M',667,7782,TO_DATE(2446454,'J'),1300,NULL,10);
+INSERT INTO EMPLOYEE VALUES
+    (7950,'JENSEN','ALICE','B',667,7505,TO_DATE(2446811,'J'),750,NULL,13);
+INSERT INTO EMPLOYEE VALUES
+    (7954,'MURRAY','JAMES','T',667,7506,TO_DATE(2446812,'J'),750,NULL,23);
+
+INSERT INTO PRICE VALUES
+   (100871,4.8,3.2,TO_DATE(2447528,'J'),TO_DATE(2447862,'J'));
+INSERT INTO PRICE VALUES
+   (100890,58,46.4,TO_DATE(2447528,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (100890,54,40.5,TO_DATE(2447314,'J'),TO_DATE(2447527,'J'));
+INSERT INTO PRICE VALUES
+   (100860,35,28,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (100860,32,25.6,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (100860,30,24,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (100861,45,36,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (100861,42,33.6,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (100861,39,31.2,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (100870,2.8,2.4,TO_DATE(2447893,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (100870,2.4,1.9,TO_DATE(2447528,'J'),TO_DATE(2447862,'J'));
+INSERT INTO PRICE VALUES
+   (100871,5.6,4.8,TO_DATE(2447893,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (101860,24,18,TO_DATE(2447573,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (101863,12.5,9.4,TO_DATE(2447573,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (102130,3.4,2.8,TO_DATE(2447757,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (200376,2.4,1.75,TO_DATE(2448211,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (200380,4,3.2,TO_DATE(2448211,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (103120,23.2,18.6,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (103120,24,19.2,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (103120,25,20,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (103121,27.8,22.3,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (103121,28.8,23,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (103121,30,24,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (103130,4,3.5,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (103130,4.2,3.6,TO_DATE(2447893,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (103131,4.2,3.6,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (103131,4.5,3.9,TO_DATE(2447893,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (103140,20,15,TO_DATE(2447573,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (103141,20,15,TO_DATE(2447573,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (102132,3.4,2.8,TO_DATE(2447757,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (104350,40,32,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (104350,42,33.6,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (104350,44,35.3,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (104351,23.6,18.9,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (104351,24.8,19.8,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (104351,26,20.8,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (104352,50,35,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (104352,54,37.8,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (104352,58.3,40.8,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (104360,36,29.5,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (104360,39,32,TO_DATE(2447893,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (104361,47,33,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (104361,50,35,TO_DATE(2447893,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (104362,5,4,TO_DATE(2447573,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (102134,3.4,2.8,TO_DATE(2447757,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (105123,36.3,29,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (105123,37.7,32,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (105123,40,34,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (105124,10,7.6,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (105124,12,9,TO_DATE(2447893,'J'),TO_DATE(2448043,'J'));
+INSERT INTO PRICE VALUES
+   (105124,15,10,TO_DATE(2448044,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (105125,2,1.7,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (105125,3,2.6,TO_DATE(2447893,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (105126,5,4.3,TO_DATE(2447528,'J'),TO_DATE(2447892,'J'));
+INSERT INTO PRICE VALUES
+   (105126,6,5,TO_DATE(2447893,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (105127,6,5,TO_DATE(2448211,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (105128,10,8,TO_DATE(2448211,'J'),NULL);
+INSERT INTO PRICE VALUES
+   (102136,3.4,2.8,TO_DATE(2447757,'J'),NULL);
+
+INSERT INTO PRODUCT VALUES ('100860', 'ACE TENNIS RACKET I');
+INSERT INTO PRODUCT VALUES ('100861', 'ACE TENNIS RACKET II');
+INSERT INTO PRODUCT VALUES ('100870', 'ACE TENNIS BALLS-3 PACK');
+INSERT INTO PRODUCT VALUES ('100871', 'ACE TENNIS BALLS-6 PACK');
+INSERT INTO PRODUCT VALUES ('100890', 'ACE TENNIS NET');
+INSERT INTO PRODUCT VALUES ('101860', 'SP TENNIS RACKET');
+INSERT INTO PRODUCT VALUES ('101863', 'SP JUNIOR RACKET');
+INSERT INTO PRODUCT VALUES ('102130', 'RH: "GUIDE TO TENNIS"');
+INSERT INTO PRODUCT VALUES ('200376', 'SB ENERGY BAR-6 PACK');
+INSERT INTO PRODUCT VALUES ('200380', 'SB VITA SNACK-6 PACK');
+INSERT INTO PRODUCT VALUES ( 103120 , 'WIFF SOFTBALL BAT I');
+INSERT INTO PRODUCT VALUES ( 103121 , 'WIFF SOFTBALL BAT II');
+INSERT INTO PRODUCT VALUES ( 103130 , 'WIFF SOFTBALL, SMALL');
+INSERT INTO PRODUCT VALUES ( 103131 , 'WIFF SOFTBALL, LARGE');
+INSERT INTO PRODUCT VALUES ( 103140 , 'WIFF SOFTBALL MITT (LH)');
+INSERT INTO PRODUCT VALUES ( 103141 , 'WIFF SOFTBALL MITT (RH)');
+INSERT INTO PRODUCT VALUES ( 102132 , 'RH: "GUIDE TO SOFTBALL"');
+INSERT INTO PRODUCT VALUES ( 104350 , 'DUNK BASKETBALL INDOOR');
+INSERT INTO PRODUCT VALUES ( 104351 , 'DUNK BASKETBALL OUTDOOR');
+INSERT INTO PRODUCT VALUES ( 104352 , 'DUNK BASKETBALL PROFESSIONAL');
+INSERT INTO PRODUCT VALUES ( 104360 , 'DUNK HOOP');
+INSERT INTO PRODUCT VALUES ( 104361 , 'DUNK HOOP W/FIBERGLASS BOARD');
+INSERT INTO PRODUCT VALUES ( 104362 , 'DUNK NETS - RAINBOW');
+INSERT INTO PRODUCT VALUES ( 102134 , 'RH: "GUIDE TO BASKETBALL"');
+INSERT INTO PRODUCT VALUES ( 105123 , 'YELLOW JERSEY BICYCLE HELMET');
+INSERT INTO PRODUCT VALUES ( 105124 , 'YELLOW JERSEY BICYCLE GLOVES');
+INSERT INTO PRODUCT VALUES ( 105125 , 'YELLOW JERSEY WATER BOTTLE');
+INSERT INTO PRODUCT VALUES ( 105126 , 'YELLOW JERSEY BOTTLE CAGE');
+INSERT INTO PRODUCT VALUES ( 105127 , 'YELLOW JERSEY FRAME PUMP');
+INSERT INTO PRODUCT VALUES ( 105128 , 'YELLOW JERSEY SADDLE PACK');
+INSERT INTO PRODUCT VALUES ( 102136 , 'RH: "GUIDE TO CYCLING"');
+
+INSERT INTO SALES_ORDER VALUES
+   (610,TO_DATE(2448264,'J'),101,TO_DATE(2448265,'J'),101.4);
+INSERT INTO SALES_ORDER VALUES
+   (611,TO_DATE(2448268,'J'),102,TO_DATE(2448268,'J'),45);
+INSERT INTO SALES_ORDER VALUES
+   (612,TO_DATE(2448272,'J'),104,TO_DATE(2448277,'J'),5860);
+INSERT INTO SALES_ORDER VALUES
+   (601,TO_DATE(2448013,'J'),106,TO_DATE(2448042,'J'),60.8);
+INSERT INTO SALES_ORDER VALUES
+   (602,TO_DATE(2448048,'J'),102,TO_DATE(2448063,'J'),56);
+INSERT INTO SALES_ORDER VALUES
+   (600,TO_DATE(2448013,'J'),103,TO_DATE(2448041,'J'),42);
+INSERT INTO SALES_ORDER VALUES
+   (604,TO_DATE(2448058,'J'),106,TO_DATE(2448073,'J'),642);
+INSERT INTO SALES_ORDER VALUES
+   (605,TO_DATE(2448087,'J'),106,TO_DATE(2448103,'J'),8374);
+INSERT INTO SALES_ORDER VALUES
+   (606,TO_DATE(2448087,'J'),100,TO_DATE(2448103,'J'),3.4);
+INSERT INTO SALES_ORDER VALUES
+   (609,TO_DATE(2448105,'J'),100,TO_DATE(2448119,'J'),102.5);
+INSERT INTO SALES_ORDER VALUES
+   (607,TO_DATE(2448091,'J'),104,TO_DATE(2448091,'J'),5.6);
+INSERT INTO SALES_ORDER VALUES
+   (608,TO_DATE(2448098,'J'),104,TO_DATE(2448098,'J'),35.2);
+INSERT INTO SALES_ORDER VALUES
+   (603,TO_DATE(2448048,'J'),102,TO_DATE(2448048,'J'),224);
+INSERT INTO SALES_ORDER VALUES
+   (620,TO_DATE(2448328,'J'),100,TO_DATE(2448328,'J'),4450);
+INSERT INTO SALES_ORDER VALUES
+   (613,TO_DATE(2448289,'J'),108,TO_DATE(2448289,'J'),6400);
+INSERT INTO SALES_ORDER VALUES
+   (614,TO_DATE(2448289,'J'),102,TO_DATE(2448293,'J'),23940);
+INSERT INTO SALES_ORDER VALUES
+   (616,TO_DATE(2448291,'J'),103,TO_DATE(2448298,'J'),764);
+INSERT INTO SALES_ORDER VALUES
+   (619,TO_DATE(2448310,'J'),104,TO_DATE(2448320,'J'),1260);
+INSERT INTO SALES_ORDER VALUES
+   (617,TO_DATE(2448293,'J'),105,TO_DATE(2448319,'J'),46370);
+INSERT INTO SALES_ORDER VALUES
+   (615,TO_DATE(2448289,'J'),107,TO_DATE(2448294,'J'),710);
+INSERT INTO SALES_ORDER VALUES
+   (618,TO_DATE(2448303,'J'),102,TO_DATE(2448322,'J'),3083);
+INSERT INTO SALES_ORDER VALUES
+   (621,TO_DATE(2448331,'J'),100,TO_DATE(2448348,'J'),730);
+INSERT INTO SALES_ORDER VALUES
+   (509,TO_DATE(2447682,'J'),226,TO_DATE(2447688,'J'),1174);
+INSERT INTO SALES_ORDER VALUES
+   (523,TO_DATE(2447936,'J'),226,TO_DATE(2447936,'J'),1165);
+INSERT INTO SALES_ORDER VALUES
+   (549,TO_DATE(2448253,'J'),226,TO_DATE(2448271,'J'),1620);
+INSERT INTO SALES_ORDER VALUES
+   (507,TO_DATE(2447673,'J'),228,TO_DATE(2447674,'J'),886);
+INSERT INTO SALES_ORDER VALUES
+   (516,TO_DATE(2447800,'J'),228,TO_DATE(2447803,'J'),1815);
+INSERT INTO SALES_ORDER VALUES
+   (553,TO_DATE(2448290,'J'),228,TO_DATE(2448301,'J'),4400);
+INSERT INTO SALES_ORDER VALUES
+   (526,TO_DATE(2447955,'J'),221,TO_DATE(2447958,'J'),7700);
+INSERT INTO SALES_ORDER VALUES
+   (543,TO_DATE(2448139,'J'),221,TO_DATE(2448142,'J'),8400);
+INSERT INTO SALES_ORDER VALUES
+   (555,TO_DATE(2448320,'J'),221,TO_DATE(2448323,'J'),8540);
+INSERT INTO SALES_ORDER VALUES
+   (559,TO_DATE(2448212,'J'),222,TO_DATE(2448370,'J'),387.2);
+INSERT INTO SALES_ORDER VALUES
+   (528,TO_DATE(2447975,'J'),224,TO_DATE(2447975,'J'),3770);
+INSERT INTO SALES_ORDER VALUES
+   (531,TO_DATE(2447982,'J'),224,TO_DATE(2447984,'J'),1400);
+INSERT INTO SALES_ORDER VALUES
+   (558,TO_DATE(2448347,'J'),224,TO_DATE(2448349,'J'),1700);
+INSERT INTO SALES_ORDER VALUES
+   (525,TO_DATE(2447951,'J'),225,TO_DATE(2447954,'J'),377);
+INSERT INTO SALES_ORDER VALUES
+   (552,TO_DATE(2448290,'J'),223,TO_DATE(2448295,'J'),555.8);
+INSERT INTO SALES_ORDER VALUES
+   (556,TO_DATE(2448326,'J'),223,TO_DATE(2448328,'J'),85);
+INSERT INTO SALES_ORDER VALUES
+   (560,TO_DATE(2448372,'J'),223,TO_DATE(2448372,'J'),72);
+INSERT INTO SALES_ORDER VALUES
+   (565,TO_DATE(2448409,'J'),227,TO_DATE(2448411,'J'),4900);
+INSERT INTO SALES_ORDER VALUES
+   (574,TO_DATE(2448540,'J'),201,TO_DATE(2448542,'J'),1685);
+INSERT INTO SALES_ORDER VALUES
+   (576,TO_DATE(2448543,'J'),201,TO_DATE(2448548,'J'),2058.9);
+INSERT INTO SALES_ORDER VALUES
+   (503,TO_DATE(2447611,'J'),201,TO_DATE(2447623,'J'),1876);
+INSERT INTO SALES_ORDER VALUES
+   (518,TO_DATE(2447820,'J'),201,TO_DATE(2447836,'J'),2932.5);
+INSERT INTO SALES_ORDER VALUES
+   (517,TO_DATE(2447823,'J'),201,TO_DATE(2447838,'J'),784);
+INSERT INTO SALES_ORDER VALUES
+   (544,TO_DATE(2448146,'J'),202,TO_DATE(2448150,'J'),2358);
+INSERT INTO SALES_ORDER VALUES
+   (524,TO_DATE(2447945,'J'),202,TO_DATE(2447955,'J'),1979);
+INSERT INTO SALES_ORDER VALUES
+   (502,TO_DATE(2447568,'J'),202,TO_DATE(2447581,'J'),500);
+INSERT INTO SALES_ORDER VALUES
+   (539,TO_DATE(2448069,'J'),202,TO_DATE(2448076,'J'),1300);
+INSERT INTO SALES_ORDER VALUES
+   (511,TO_DATE(2447756,'J'),202,TO_DATE(2447760,'J'),647);
+INSERT INTO SALES_ORDER VALUES
+   (512,TO_DATE(2447767,'J'),203,TO_DATE(2447783,'J'),428);
+INSERT INTO SALES_ORDER VALUES
+   (562,TO_DATE(2448381,'J'),203,TO_DATE(2448396,'J'),2044.5);
+INSERT INTO SALES_ORDER VALUES
+   (529,TO_DATE(2447984,'J'),203,TO_DATE(2447987,'J'),1264.7);
+INSERT INTO SALES_ORDER VALUES
+   (563,TO_DATE(2448402,'J'),204,TO_DATE(2448403,'J'),889);
+INSERT INTO SALES_ORDER VALUES
+   (568,TO_DATE(2448451,'J'),204,TO_DATE(2448459,'J'),1217.4);
+INSERT INTO SALES_ORDER VALUES
+   (504,TO_DATE(2447628,'J'),204,TO_DATE(2447629,'J'),1434.7);
+INSERT INTO SALES_ORDER VALUES
+   (538,TO_DATE(2448066,'J'),204,TO_DATE(2448069,'J'),741);
+INSERT INTO SALES_ORDER VALUES
+   (535,TO_DATE(2448040,'J'),204,TO_DATE(2448052,'J'),810);
+INSERT INTO SALES_ORDER VALUES
+   (578,TO_DATE(2448580,'J'),204,TO_DATE(2448595,'J'),2275.6);
+INSERT INTO SALES_ORDER VALUES
+   (534,TO_DATE(2448023,'J'),206,TO_DATE(2448027,'J'),420);
+INSERT INTO SALES_ORDER VALUES
+   (536,TO_DATE(2448033,'J'),206,TO_DATE(2448049,'J'),2135.6);
+INSERT INTO SALES_ORDER VALUES
+   (572,TO_DATE(2448488,'J'),206,TO_DATE(2448493,'J'),1200.5);
+INSERT INTO SALES_ORDER VALUES
+   (514,TO_DATE(2447775,'J'),207,TO_DATE(2447786,'J'),1140);
+INSERT INTO SALES_ORDER VALUES
+   (521,TO_DATE(2447851,'J'),207,TO_DATE(2447854,'J'),896.9);
+INSERT INTO SALES_ORDER VALUES
+   (551,TO_DATE(2448279,'J'),208,TO_DATE(2448294,'J'),1142);
+INSERT INTO SALES_ORDER VALUES
+   (513,TO_DATE(2447776,'J'),208,TO_DATE(2447784,'J'),1497);
+INSERT INTO SALES_ORDER VALUES
+   (508,TO_DATE(2447673,'J'),208,TO_DATE(2447686,'J'),1080);
+INSERT INTO SALES_ORDER VALUES
+   (515,TO_DATE(2447789,'J'),208,TO_DATE(2447796,'J'),1428.5);
+INSERT INTO SALES_ORDER VALUES
+   (542,TO_DATE(2448115,'J'),208,TO_DATE(2448127,'J'),2409);
+INSERT INTO SALES_ORDER VALUES
+   (573,TO_DATE(2448540,'J'),201,TO_DATE(2448542,'J'),1627);
+INSERT INTO SALES_ORDER VALUES
+   (566,TO_DATE(2448417,'J'),201,TO_DATE(2448420,'J'),3389.2);
+INSERT INTO SALES_ORDER VALUES
+   (520,TO_DATE(2447847,'J'),201,TO_DATE(2447850,'J'),341.6);
+INSERT INTO SALES_ORDER VALUES
+   (519,TO_DATE(2447820,'J'),201,TO_DATE(2447836,'J'),955);
+INSERT INTO SALES_ORDER VALUES
+   (575,TO_DATE(2448534,'J'),201,TO_DATE(2448547,'J'),684);
+INSERT INTO SALES_ORDER VALUES
+   (547,TO_DATE(2448181,'J'),202,TO_DATE(2448192,'J'),984.4);
+INSERT INTO SALES_ORDER VALUES
+   (540,TO_DATE(2448088,'J'),202,TO_DATE(2448090,'J'),861.2);
+INSERT INTO SALES_ORDER VALUES
+   (567,TO_DATE(2448443,'J'),202,TO_DATE(2448445,'J'),200);
+INSERT INTO SALES_ORDER VALUES
+   (570,TO_DATE(2448455,'J'),202,TO_DATE(2448462,'J'),663.6);
+INSERT INTO SALES_ORDER VALUES
+   (571,TO_DATE(2448471,'J'),202,TO_DATE(2448481,'J'),1095.6);
+INSERT INTO SALES_ORDER VALUES
+   (541,TO_DATE(2448112,'J'),203,TO_DATE(2448122,'J'),400);
+INSERT INTO SALES_ORDER VALUES
+   (532,TO_DATE(2447990,'J'),203,TO_DATE(2448003,'J'),1295.4);
+INSERT INTO SALES_ORDER VALUES
+   (527,TO_DATE(2447950,'J'),204,TO_DATE(2447965,'J'),3054.4);
+INSERT INTO SALES_ORDER VALUES
+   (501,TO_DATE(2447533,'J'),204,TO_DATE(2447538,'J'),216);
+INSERT INTO SALES_ORDER VALUES
+   (564,TO_DATE(2448402,'J'),204,TO_DATE(2448403,'J'),898.8);
+INSERT INTO SALES_ORDER VALUES
+   (537,TO_DATE(2448057,'J'),204,TO_DATE(2448069,'J'),672.9);
+INSERT INTO SALES_ORDER VALUES
+   (522,TO_DATE(2447899,'J'),204,TO_DATE(2447902,'J'),2578.8);
+INSERT INTO SALES_ORDER VALUES
+   (554,TO_DATE(2448306,'J'),204,TO_DATE(2448310,'J'),282.8);
+INSERT INTO SALES_ORDER VALUES
+   (569,TO_DATE(2448454,'J'),205,TO_DATE(2448461,'J'),2073);
+INSERT INTO SALES_ORDER VALUES
+   (550,TO_DATE(2448284,'J'),205,TO_DATE(2448295,'J'),2356);
+INSERT INTO SALES_ORDER VALUES
+   (548,TO_DATE(2448222,'J'),205,TO_DATE(2448238,'J'),666.9);
+INSERT INTO SALES_ORDER VALUES
+   (505,TO_DATE(2447624,'J'),206,TO_DATE(2447639,'J'),650);
+INSERT INTO SALES_ORDER VALUES
+   (577,TO_DATE(2448536,'J'),206,TO_DATE(2448550,'J'),1265.75);
+INSERT INTO SALES_ORDER VALUES
+   (533,TO_DATE(2448010,'J'),206,TO_DATE(2448014,'J'),1122.1);
+INSERT INTO SALES_ORDER VALUES
+   (561,TO_DATE(2448367,'J'),207,TO_DATE(2448384,'J'),2558.3);
+INSERT INTO SALES_ORDER VALUES
+   (506,TO_DATE(2447644,'J'),208,TO_DATE(2447657,'J'),2600.4);
+INSERT INTO SALES_ORDER VALUES
+   (530,TO_DATE(2447985,'J'),208,TO_DATE(2447989,'J'),3026.5);
+INSERT INTO SALES_ORDER VALUES
+   (545,TO_DATE(2448171,'J'),208,TO_DATE(2448178,'J'),475);
+INSERT INTO SALES_ORDER VALUES
+   (557,TO_DATE(2448324,'J'),208,TO_DATE(2448328,'J'),2461.8);
+INSERT INTO SALES_ORDER VALUES
+   (546,TO_DATE(2448182,'J'),208,TO_DATE(2448188,'J'),3663);
+INSERT INTO SALES_ORDER VALUES
+   (510,TO_DATE(2447726,'J'),208,TO_DATE(2447729,'J'),1336.6);
+
+INSERT INTO ITEM VALUES (600,1,100861,42,1,42);
+INSERT INTO ITEM VALUES (610,3,100890,58,1,58);
+INSERT INTO ITEM VALUES (611,1,100861,45,1,45);
+INSERT INTO ITEM VALUES (612,1,100860,30,100,3000);
+INSERT INTO ITEM VALUES (601,1,200376,2.4,12,28.8);
+INSERT INTO ITEM VALUES (601,2,100860,32,1,32);
+INSERT INTO ITEM VALUES (602,1,100870,2.8,20,56);
+INSERT INTO ITEM VALUES (604,1,100890,58,3,174);
+INSERT INTO ITEM VALUES (604,2,100861,42,2,84);
+INSERT INTO ITEM VALUES (604,3,100860,32,12,384);
+INSERT INTO ITEM VALUES (603,1,100860,32,7,224);
+INSERT INTO ITEM VALUES (610,1,100860,35,1,35);
+INSERT INTO ITEM VALUES (610,2,100870,2.8,3,8.4);
+INSERT INTO ITEM VALUES (613,4,200376,2.2,200,440);
+INSERT INTO ITEM VALUES (614,1,100860,35,444,15540);
+INSERT INTO ITEM VALUES (614,2,100870,2.8,1000,2800);
+INSERT INTO ITEM VALUES (612,2,100861,40.5,20,810);
+INSERT INTO ITEM VALUES (612,3,101863,10,150,1500);
+INSERT INTO ITEM VALUES (620,1,100860,35,10,350);
+INSERT INTO ITEM VALUES (620,2,200376,2.4,1000,2400);
+INSERT INTO ITEM VALUES (620,3,102130,3.4,500,1700);
+INSERT INTO ITEM VALUES (613,1,100871,5.6,100,560);
+INSERT INTO ITEM VALUES (613,2,101860,24,200,4800);
+INSERT INTO ITEM VALUES (613,3,200380,4,150,600);
+INSERT INTO ITEM VALUES (619,3,102130,3.4,100,340);
+INSERT INTO ITEM VALUES (617,1,100860,35,50,1750);
+INSERT INTO ITEM VALUES (617,2,100861,45,100,4500);
+INSERT INTO ITEM VALUES (614,3,100871,5.6,1000,5600);
+INSERT INTO ITEM VALUES (616,1,100861,45,10,450);
+INSERT INTO ITEM VALUES (616,2,100870,2.8,50,140);
+INSERT INTO ITEM VALUES (616,3,100890,58,2,116);
+INSERT INTO ITEM VALUES (616,4,102130,3.4,10,34);
+INSERT INTO ITEM VALUES (616,5,200376,2.4,10,24);
+INSERT INTO ITEM VALUES (619,1,200380,4,100,400);
+INSERT INTO ITEM VALUES (619,2,200376,2.4,100,240);
+INSERT INTO ITEM VALUES (615,1,100861,45,4,180);
+INSERT INTO ITEM VALUES (607,1,100871,5.6,1,5.6);
+INSERT INTO ITEM VALUES (615,2,100870,2.8,100,280);
+INSERT INTO ITEM VALUES (617,3,100870,2.8,500,1400);
+INSERT INTO ITEM VALUES (617,4,100871,5.6,500,2800);
+INSERT INTO ITEM VALUES (617,5,100890,58,500,29000);
+INSERT INTO ITEM VALUES (617,6,101860,24,100,2400);
+INSERT INTO ITEM VALUES (617,7,101863,12.5,200,2500);
+INSERT INTO ITEM VALUES (617,8,102130,3.4,100,340);
+INSERT INTO ITEM VALUES (617,9,200376,2.4,200,480);
+INSERT INTO ITEM VALUES (617,10,200380,4,300,1200);
+INSERT INTO ITEM VALUES (609,2,100870,2.5,5,12.5);
+INSERT INTO ITEM VALUES (609,3,100890,50,1,50);
+INSERT INTO ITEM VALUES (618,1,100860,35,23,805);
+INSERT INTO ITEM VALUES (618,2,100861,45,50,2250);
+INSERT INTO ITEM VALUES (618,3,100870,2.8,10,28);
+INSERT INTO ITEM VALUES (621,1,100861,45,10,450);
+INSERT INTO ITEM VALUES (621,2,100870,2.8,100,280);
+INSERT INTO ITEM VALUES (615,3,100871,5,50,250);
+INSERT INTO ITEM VALUES (608,1,101860,24,1,24);
+INSERT INTO ITEM VALUES (608,2,100871,5.6,2,11.2);
+INSERT INTO ITEM VALUES (609,1,100861,40,1,40);
+INSERT INTO ITEM VALUES (606,1,102130,3.4,1,3.4);
+INSERT INTO ITEM VALUES (605,1,100861,45,100,4500);
+INSERT INTO ITEM VALUES (605,2,100870,2.8,500,1400);
+INSERT INTO ITEM VALUES (605,3,100890,58,5,290);
+INSERT INTO ITEM VALUES (605,4,101860,24,50,1200);
+INSERT INTO ITEM VALUES (605,5,101863,9.5,100,950);
+INSERT INTO ITEM VALUES (605,6,102130,3.4,10,34);
+INSERT INTO ITEM VALUES (612,4,100871,5.5,100,550);
+INSERT INTO ITEM VALUES (619,4,100871,5.6,50,280);
+INSERT INTO ITEM VALUES (509,1,105123,35,30,1050);
+INSERT INTO ITEM VALUES (509,2,105124,9,10,90);
+INSERT INTO ITEM VALUES (509,3,102136,3.4,10,34);
+INSERT INTO ITEM VALUES (523,1,102136,3.4,10,34);
+INSERT INTO ITEM VALUES (523,2,105123,37.7,30,1131);
+INSERT INTO ITEM VALUES (549,1,105123,38,5,190);
+INSERT INTO ITEM VALUES (549,2,105127,6,30,180);
+INSERT INTO ITEM VALUES (549,3,105125,3,200,600);
+INSERT INTO ITEM VALUES (549,4,105124,13,50,650);
+INSERT INTO ITEM VALUES (507,1,105123,35.3,20,706);
+INSERT INTO ITEM VALUES (507,2,105124,9,20,180);
+INSERT INTO ITEM VALUES (516,1,105124,9,60,540);
+INSERT INTO ITEM VALUES (516,2,102136,3.2,250,800);
+INSERT INTO ITEM VALUES (516,3,105125,1.9,250,475);
+INSERT INTO ITEM VALUES (553,1,105127,6,500,3000);
+INSERT INTO ITEM VALUES (553,2,200376,1.75,800,1400);
+INSERT INTO ITEM VALUES (526,1,105123,32,100,3200);
+INSERT INTO ITEM VALUES (526,2,105124,9,500,4500);
+INSERT INTO ITEM VALUES (543,1,105123,34,100,3400);
+INSERT INTO ITEM VALUES (543,2,105124,10,500,5000);
+INSERT INTO ITEM VALUES (555,1,105123,34,100,3400);
+INSERT INTO ITEM VALUES (555,2,105124,10,500,5000);
+INSERT INTO ITEM VALUES (555,3,102136,2.8,50,140);
+INSERT INTO ITEM VALUES (559,1,105123,40,5,200);
+INSERT INTO ITEM VALUES (559,2,105124,15,5,75);
+INSERT INTO ITEM VALUES (559,3,105127,6,5,30);
+INSERT INTO ITEM VALUES (559,4,102136,3.4,3,10.2);
+INSERT INTO ITEM VALUES (559,5,200376,2.4,30,72);
+INSERT INTO ITEM VALUES (528,1,105123,37.7,100,3770);
+INSERT INTO ITEM VALUES (531,1,105124,11,100,1100);
+INSERT INTO ITEM VALUES (531,2,102136,3,100,300);
+INSERT INTO ITEM VALUES (558,1,105124,14,100,1400);
+INSERT INTO ITEM VALUES (558,2,102136,3,100,300);
+INSERT INTO ITEM VALUES (525,1,105123,37.7,10,377);
+INSERT INTO ITEM VALUES (552,1,105123,40,10,400);
+INSERT INTO ITEM VALUES (552,2,105124,15,10,150);
+INSERT INTO ITEM VALUES (552,3,102136,3.4,1,3.4);
+INSERT INTO ITEM VALUES (552,4,200376,2.4,1,2.4);
+INSERT INTO ITEM VALUES (556,1,102136,3.4,25,85);
+INSERT INTO ITEM VALUES (560,1,200376,2.4,30,72);
+INSERT INTO ITEM VALUES (565,1,105123,37,100,3700);
+INSERT INTO ITEM VALUES (565,2,105124,12,100,1200);
+INSERT INTO ITEM VALUES (574,1,104350,41.8,25,1045);
+INSERT INTO ITEM VALUES (574,2,200380,3.2,200,640);
+INSERT INTO ITEM VALUES (576,1,104350,44,10,440);
+INSERT INTO ITEM VALUES (576,2,104351,26,10,260);
+INSERT INTO ITEM VALUES (576,3,104362,4.25,170,722.5);
+INSERT INTO ITEM VALUES (576,4,200376,2.16,90,194.4);
+INSERT INTO ITEM VALUES (576,5,200380,3.4,130,442);
+INSERT INTO ITEM VALUES (503,1,104350,38,30,1140);
+INSERT INTO ITEM VALUES (503,2,104351,23.6,10,236);
+INSERT INTO ITEM VALUES (503,3,104352,50,10,500);
+INSERT INTO ITEM VALUES (518,1,104350,38,25,950);
+INSERT INTO ITEM VALUES (518,2,104351,23.6,20,472);
+INSERT INTO ITEM VALUES (518,3,104360,36,20,720);
+INSERT INTO ITEM VALUES (518,4,104362,4.25,170,722.5);
+INSERT INTO ITEM VALUES (518,5,102134,3.4,20,68);
+INSERT INTO ITEM VALUES (517,1,104352,50,15,750);
+INSERT INTO ITEM VALUES (517,2,102134,3.4,10,34);
+INSERT INTO ITEM VALUES (544,1,104350,44,15,660);
+INSERT INTO ITEM VALUES (544,2,104351,26,15,390);
+INSERT INTO ITEM VALUES (544,3,104352,58.3,10,583);
+INSERT INTO ITEM VALUES (544,4,104361,50,10,500);
+INSERT INTO ITEM VALUES (544,5,104362,4.5,50,225);
+INSERT INTO ITEM VALUES (524,1,104350,42,10,420);
+INSERT INTO ITEM VALUES (524,2,104351,23.56,35,824.6);
+INSERT INTO ITEM VALUES (524,3,104362,4.25,150,637.5);
+INSERT INTO ITEM VALUES (524,4,102134,3.23,30,96.9);
+INSERT INTO ITEM VALUES (502,1,104352,50,10,500);
+INSERT INTO ITEM VALUES (539,1,104351,26,20,520);
+INSERT INTO ITEM VALUES (539,2,104360,39,20,780);
+INSERT INTO ITEM VALUES (511,1,104351,23.6,15,354);
+INSERT INTO ITEM VALUES (511,2,104362,4.5,50,225);
+INSERT INTO ITEM VALUES (511,3,102134,3.4,20,68);
+INSERT INTO ITEM VALUES (512,1,104360,36,10,360);
+INSERT INTO ITEM VALUES (512,2,102134,3.4,20,68);
+INSERT INTO ITEM VALUES (562,1,104351,24.7,25,617.5);
+INSERT INTO ITEM VALUES (562,2,104352,58.3,15,874.5);
+INSERT INTO ITEM VALUES (562,3,104362,4.25,130,552.5);
+INSERT INTO ITEM VALUES (529,1,104350,39.89,30,1196.7);
+INSERT INTO ITEM VALUES (529,2,102134,3.4,20,68);
+INSERT INTO ITEM VALUES (563,1,104352,58.3,10,583);
+INSERT INTO ITEM VALUES (563,2,200376,2.04,150,306);
+INSERT INTO ITEM VALUES (568,1,104351,24.7,30,741);
+INSERT INTO ITEM VALUES (568,2,200376,2.04,110,224.4);
+INSERT INTO ITEM VALUES (568,3,200380,3.6,70,252);
+INSERT INTO ITEM VALUES (504,1,104350,40,10,400);
+INSERT INTO ITEM VALUES (504,2,104351,22.42,35,784.7);
+INSERT INTO ITEM VALUES (504,3,104352,50,5,250);
+INSERT INTO ITEM VALUES (538,1,104351,24.7,30,741);
+INSERT INTO ITEM VALUES (535,1,104352,54,15,810);
+INSERT INTO ITEM VALUES (578,1,104350,41.8,40,1672);
+INSERT INTO ITEM VALUES (578,2,200376,2.04,190,387.6);
+INSERT INTO ITEM VALUES (578,3,200380,3.6,60,216);
+INSERT INTO ITEM VALUES (534,1,104350,42,10,420);
+INSERT INTO ITEM VALUES (536,1,104350,39.89,40,1595.6);
+INSERT INTO ITEM VALUES (536,2,104352,54,10,540);
+INSERT INTO ITEM VALUES (572,1,104351,24.7,25,617.5);
+INSERT INTO ITEM VALUES (572,2,104352,58.3,10,583);
+INSERT INTO ITEM VALUES (514,1,104350,38,30,1140);
+INSERT INTO ITEM VALUES (521,1,104350,40,20,800);
+INSERT INTO ITEM VALUES (521,2,102134,3.23,30,96.9);
+INSERT INTO ITEM VALUES (551,1,104350,44,10,440);
+INSERT INTO ITEM VALUES (551,2,104361,50,5,250);
+INSERT INTO ITEM VALUES (551,3,102134,3.4,20,68);
+INSERT INTO ITEM VALUES (551,4,200376,1.92,200,384);
+INSERT INTO ITEM VALUES (513,1,104350,40,15,600);
+INSERT INTO ITEM VALUES (513,2,104351,23.6,20,472);
+INSERT INTO ITEM VALUES (513,3,104362,4.25,100,425);
+INSERT INTO ITEM VALUES (508,1,104360,36,20,720);
+INSERT INTO ITEM VALUES (508,2,104362,4.5,80,360);
+INSERT INTO ITEM VALUES (515,1,104350,40,20,800);
+INSERT INTO ITEM VALUES (515,2,104351,22.42,25,560.5);
+INSERT INTO ITEM VALUES (515,3,102134,3.4,20,68);
+INSERT INTO ITEM VALUES (542,1,104350,41.8,25,1045);
+INSERT INTO ITEM VALUES (542,2,104360,39,20,780);
+INSERT INTO ITEM VALUES (542,3,104361,50,11,550);
+INSERT INTO ITEM VALUES (542,4,102134,3.4,10,34);
+INSERT INTO ITEM VALUES (573,1,103120,22.5,50,1125);
+INSERT INTO ITEM VALUES (573,2,103131,4.04,50,202);
+INSERT INTO ITEM VALUES (573,3,103141,20,15,300);
+INSERT INTO ITEM VALUES (566,1,103120,23.75,40,950);
+INSERT INTO ITEM VALUES (566,2,103121,27,50,1350);
+INSERT INTO ITEM VALUES (566,3,103130,3.77,60,226.2);
+INSERT INTO ITEM VALUES (566,4,103131,3.9,170,663);
+INSERT INTO ITEM VALUES (566,5,103141,20,10,200);
+INSERT INTO ITEM VALUES (520,1,103130,4,10,40);
+INSERT INTO ITEM VALUES (520,2,103131,3.77,80,301.6);
+INSERT INTO ITEM VALUES (519,1,103130,3.5,110,385);
+INSERT INTO ITEM VALUES (519,2,103140,19,30,570);
+INSERT INTO ITEM VALUES (575,1,103140,19,30,570);
+INSERT INTO ITEM VALUES (575,2,200380,3.8,30,114);
+INSERT INTO ITEM VALUES (547,1,103130,3.77,80,301.6);
+INSERT INTO ITEM VALUES (547,2,103131,4.04,70,282.8);
+INSERT INTO ITEM VALUES (547,3,103140,20,15,300);
+INSERT INTO ITEM VALUES (547,4,103141,20,5,100);
+INSERT INTO ITEM VALUES (540,1,103130,3.98,40,159.2);
+INSERT INTO ITEM VALUES (540,2,103131,3.9,180,702);
+INSERT INTO ITEM VALUES (567,1,103140,20,10,200);
+INSERT INTO ITEM VALUES (570,1,103131,4.04,90,363.6);
+INSERT INTO ITEM VALUES (570,2,103140,20,15,300);
+INSERT INTO ITEM VALUES (571,1,103131,4.04,70,282.8);
+INSERT INTO ITEM VALUES (571,2,103140,19,25,475);
+INSERT INTO ITEM VALUES (571,3,102132,3.4,15,51);
+INSERT INTO ITEM VALUES (571,4,200376,2.16,80,172.8);
+INSERT INTO ITEM VALUES (571,5,200380,3.8,30,114);
+INSERT INTO ITEM VALUES (541,1,103140,20,10,200);
+INSERT INTO ITEM VALUES (541,2,103141,20,10,200);
+INSERT INTO ITEM VALUES (532,1,103120,21.59,60,1295.4);
+INSERT INTO ITEM VALUES (527,1,103120,21.59,60,1295.4);
+INSERT INTO ITEM VALUES (527,2,103121,27.35,40,1094);
+INSERT INTO ITEM VALUES (527,3,103140,19,35,665);
+INSERT INTO ITEM VALUES (501,1,103130,3.6,60,216);
+INSERT INTO ITEM VALUES (564,1,103130,3.77,80,301.6);
+INSERT INTO ITEM VALUES (564,2,103131,3.9,120,468);
+INSERT INTO ITEM VALUES (564,3,102132,3.23,40,129.2);
+INSERT INTO ITEM VALUES (537,1,103130,3.6,160,576);
+INSERT INTO ITEM VALUES (537,2,102132,3.23,30,96.9);
+INSERT INTO ITEM VALUES (522,1,103120,21.59,80,1727.2);
+INSERT INTO ITEM VALUES (522,2,103121,28.8,10,288);
+INSERT INTO ITEM VALUES (522,3,103131,4.04,90,363.6);
+INSERT INTO ITEM VALUES (522,4,103141,20,10,200);
+INSERT INTO ITEM VALUES (554,1,103131,4.04,70,282.8);
+INSERT INTO ITEM VALUES (569,1,103120,22.5,50,1125);
+INSERT INTO ITEM VALUES (569,2,103130,3.6,180,648);
+INSERT INTO ITEM VALUES (569,3,103141,20,15,300);
+INSERT INTO ITEM VALUES (550,1,103120,22.5,60,1350);
+INSERT INTO ITEM VALUES (550,2,103140,19,45,855);
+INSERT INTO ITEM VALUES (550,3,103141,20,5,100);
+INSERT INTO ITEM VALUES (550,4,102132,3.4,15,51);
+INSERT INTO ITEM VALUES (548,1,103140,19,30,570);
+INSERT INTO ITEM VALUES (548,2,102132,3.23,30,96.9);
+INSERT INTO ITEM VALUES (505,1,103130,3.5,100,350);
+INSERT INTO ITEM VALUES (505,2,103140,20,15,300);
+INSERT INTO ITEM VALUES (577,1,103121,30,20,600);
+INSERT INTO ITEM VALUES (577,2,103131,3.9,150,585);
+INSERT INTO ITEM VALUES (577,3,102132,3.23,25,80.75);
+INSERT INTO ITEM VALUES (533,1,103121,27.35,30,820.5);
+INSERT INTO ITEM VALUES (533,2,103130,3.77,80,301.6);
+INSERT INTO ITEM VALUES (561,1,103120,22.5,80,1800);
+INSERT INTO ITEM VALUES (561,2,103130,3.77,70,263.9);
+INSERT INTO ITEM VALUES (561,3,103141,20,15,300);
+INSERT INTO ITEM VALUES (561,4,200376,2.16,90,194.4);
+INSERT INTO ITEM VALUES (506,1,103120,20.88,80,1670.4);
+INSERT INTO ITEM VALUES (506,2,103130,3.5,180,630);
+INSERT INTO ITEM VALUES (506,3,103141,20,15,300);
+INSERT INTO ITEM VALUES (530,1,103121,25.91,50,1295.5);
+INSERT INTO ITEM VALUES (530,2,103130,3.6,200,720);
+INSERT INTO ITEM VALUES (530,3,103140,19,40,760);
+INSERT INTO ITEM VALUES (530,4,103141,20,10,200);
+INSERT INTO ITEM VALUES (530,5,102132,3.4,15,51);
+INSERT INTO ITEM VALUES (545,1,103140,19,25,475);
+INSERT INTO ITEM VALUES (557,1,103120,23.75,40,950);
+INSERT INTO ITEM VALUES (557,2,103121,30,10,300);
+INSERT INTO ITEM VALUES (557,3,103140,19,35,665);
+INSERT INTO ITEM VALUES (557,4,200376,2.16,80,172.8);
+INSERT INTO ITEM VALUES (557,5,200380,3.4,110,374);
+INSERT INTO ITEM VALUES (546,1,103120,22.5,50,1125);
+INSERT INTO ITEM VALUES (546,2,103121,30,20,600);
+INSERT INTO ITEM VALUES (546,3,103130,3.6,120,432);
+INSERT INTO ITEM VALUES (546,4,103131,3.9,140,546);
+INSERT INTO ITEM VALUES (546,5,103140,19,40,760);
+INSERT INTO ITEM VALUES (546,6,103141,20,10,200);
+INSERT INTO ITEM VALUES (510,1,103120,20.88,60,1252.8);
+INSERT INTO ITEM VALUES (510,2,103131,4.19,20,83.8);
+
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('96711', 'CA', '7844', '5986609', 
+  'JOCKSPORTS',
+  '100', '5000', 'BELMONT', '415', '345 VIEWRIDGE', 
+  'Very friendly people to work with -- sales rep likes to be called Mike.');
+ 
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('94061', 'CA', '7521', '3681223',
+  'TKB SPORT SHOP',
+  '101', '10000', 'REDWOOD CITY', '415', '490 BOLI RD.', 
+  'Rep called 5/8 about change in order - contact shipping.');
+                                                              
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('95133', 'CA', '7654', '6443341', 
+  'VOLLYRITE',
+  '102', '7000', 'BURLINGAME', '415', '9722 HAMILTON', 
+  'Company doing heavy promotion beginning 10/89. Prepare for large orders during winter.');
+ 
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('97544', 'CA', '7521', '6779312',
+  'JUST TENNIS',
+  '103', '3000', 'BURLINGAME', '415', 'HILLVIEW MALL', 
+  'Contact rep about new line of tennis rackets.');
+                                                             
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('93301', 'CA', '7499', '9962323',
+  'EVERY MOUNTAIN',
+  '104', '10000', 'CUPERTINO', '408', '574 SURRY RD.', 
+  'Customer with high market share (23%) due to aggressive advertising.');
+                                                      
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('91003', 'CA', '7844', '3769966',
+  'K + T SPORTS',
+  '105', '5000', 'SANTA CLARA', '408', '3476 EL PASEO', 
+  'Tends to order large amounts of merchandise at once. Accounting is considering raising their credit limit. Usually pays on time.');
+                                                      
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('94301', 'CA', '7521', '3649777',
+  'SHAPE UP',
+  '106', '6000', 'PALO ALTO', '415', '908 SEQUOIA', 
+  'Support intensive. Orders small amounts (&lt; 800) of merchandise at a time.');
+ 
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('93301', 'CA', '7499', '9674398',
+  'WOMENS SPORTS',
+  '107', '10000', 'SUNNYVALE', '408', 'VALCO VILLAGE', 
+  'First sporting goods store geared exclusively towards women. Unusual promotional style and very willing to take chances towards new products!');
+            
+INSERT INTO CUSTOMER
+  (ZIP_CODE, STATE, SALESPERSON_ID, PHONE_NUMBER, 
+  NAME, 
+  CUSTOMER_ID, CREDIT_LIMIT, CITY, AREA_CODE, ADDRESS, 
+  COMMENTS)
+  VALUES ('55649', 'MN', '7844', '5669123',
+  'NORTH WOODS HEALTH AND FITNESS SUPPLY CENTER',
+  '108', '8000', 'HIBBING', '612', '98 LONE PINE WAY', '');
+
+INSERT INTO CUSTOMER VALUES
+  ( 201 , 'STADIUM SPORTS', '47 IRVING PL.',
+  'NEW YORK', 'NY', '10003',
+  '212', '5555335',  7557 ,  10000 ,
+  'Large general-purpose sports store with an affluent customer base.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 202 , 'HOOPS', '2345 ADAMS AVE.',
+  'LEICESTER', 'MA', '01524',
+  '508', '5557542',  7820 ,  5000 ,
+  'Specializes in basketball equipment.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 203 , 'REBOUND SPORTS', '2 E. 14TH ST.',
+  'NEW YORK', 'NY', '10009',
+  '212', '5555989',  7557 ,  10000 ,
+  'Follow up on the promotion proposal.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 204 , 'THE POWER FORWARD', '1 KNOTS LANDING',
+  'DALLAS', 'TX', '75248',
+  '214', '5550505',  7560 ,  12000 ,
+  'Large floorspace.  Prefers maintaining large amounts of inventory on hand.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 205 , 'POINT GUARD', '20 THURSTON ST.',
+  'YONKERS', 'NY', '10956',
+  '914', '5554766',  7557 ,  3000 ,
+  'Tremendous potential for an exclusive agreement.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 206 , 'THE COLISEUM', '5678 WILBUR PL.',
+  'SCARSDALE', 'NY', '10583',
+  '914', '5550217',  7557 ,  6000 ,
+  'Contact rep. about new product lines.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 207 , 'FAST BREAK', '1000 HERBERT LN.',
+  'CONCORD', 'MA', '01742',
+  '508', '5551298',  7820 ,  7000 ,
+  'Customer requires written price quotes before making purchase requisitions.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 208 , 'AL AND BOB''S SPORTS', '260 YORKTOWN CT.',
+  'AUSTIN', 'TX', '78731',
+  '512', '5557631',  7560 ,  4000 ,
+  'Very personal purchasing agents -- Sharon and Scott.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 211 , 'AT BAT', '234 BEACHEM ST.',
+  'BROOKLINE', 'MA', '02146',
+  '617', '5557385',  7820 ,  8000 ,
+  'Have an open purchase order for $3000.  Ship immediately on request.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 212 , 'ALL SPORT', '1000 38TH ST.',
+  'BROOKLYN', 'NY', '11210',
+  '718', '5551739',  7600 ,  6000 ,
+  'Pursue a contract -- possible candidate for volume purchasing agreements.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 213 , 'GOOD SPORT', '400 46TH ST.',
+  'SUNNYSIDE', 'NY', '11104',
+  '718', '5553771',  7600 ,  5000 ,
+  'May be moving to a larger location.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 214 , 'AL''S PRO SHOP', '45 SPRUCE ST.',
+  'SPRING', 'TX', '77388',
+  '713', '5555172',  7564 ,  8000 ,
+  'Target market is serious athletes.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 215 , 'BOB''S FAMILY SPORTS', '400 E. 23RD',
+  'HOUSTON', 'TX', '77026',
+  '713', '5558015',  7654 ,  8000 ,
+  'Target market is casual and weekend athletes.  Offers a large selection.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 216 , 'THE ALL AMERICAN', '547 PRENTICE RD.',
+  'CHELSEA', 'MA', '02150',
+  '617', '5553047',  7820 ,  5000 ,
+  'Customer prefers to be called between 10 and 12.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 217 , 'HIT, THROW, AND RUN', '333 WOOD COURT',
+  'GRAPEVINE', 'TX', '76051',
+  '817', '5552352',  7564 ,  6000 ,
+  'General purpose sports store.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 218 , 'THE OUTFIELD', '346 GARDEN BLVD.',
+  'FLUSHING', 'NY', '11355',
+  '718', '5552131',  7820 ,  4000 ,
+  'Store does not open until 11am and does not have an answering service.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 221 , 'WHEELS AND DEALS', '2 MEMORIAL DRIVE',
+  'HOUSTON', 'TX', '77007',
+  '713', '5554139',  7789 ,  10000 ,
+  'Discount bicycle and sporting good store.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 222 , 'JUST BIKES', '4000 PARKRIDGE BLVD.',
+  'DALLAS', 'TX', '75205',
+  '214', '5558735',  7789 ,  4000 ,
+  'Exclusive bicycle dealer.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 223 , 'VELO SPORTS', '23 WHITE ST.',
+  'MALDEN', 'MA', '02148',
+  '617', '5554983',  7820 ,  5000 ,
+  'Clerk answers all phone lines.  Ask for Mike.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 224 , 'JOE''S BIKE SHOP', '4500 FOX COURT',
+  'GRAND PRARIE', 'TX', '75051',
+  '214', '5559834',  7789 ,  6000 ,
+  'Call Joe to make sure last shipment was complete.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 225 , 'BOB''S SWIM, CYCLE, AND RUN', '300 HORSECREEK CIRCLE',
+  'IRVING', 'TX', '75039',
+  '214', '5558388',  7789 ,  7000 ,
+  'Store catering to triathletes.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 226 , 'CENTURY SHOP', '8 DAGMAR DR.',
+  'HUNTINGTON', 'NY', '11743',
+  '516', '5553006',  7555 ,  4000 ,
+  'Customer in the midst of a cost-cutting program.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 227 , 'THE TOUR', '2500 GARDNER RD.',
+  'SOMERVILLE', 'MA', '02144',
+  '617', '5556673',  7820 ,  5000 ,
+  'Customer referred to us by The All American.');
+
+INSERT INTO CUSTOMER VALUES
+  ( 228 , 'FITNESS FIRST', '5000 85TH ST.',
+  'JACKSON HEIGHTS', 'NY', '11372',
+  '718', '5558710',  7555 ,  4000 ,
+  'Recently acquired another sporting goods store.  Expect higher volume in the future.');
+
+COMMIT;
+
+REM Create indexes
+
+CREATE UNIQUE INDEX I_LOCATION$LOCATION_ID ON LOCATION (LOCATION_ID);
+CREATE UNIQUE INDEX I_DEPARTMENT$DEPARTMENT_ID ON DEPARTMENT (DEPARTMENT_ID);
+CREATE UNIQUE INDEX I_JOB$JOB_ID ON JOBS (JOB_ID);
+CREATE UNIQUE INDEX I_EMPLOYEE$EMPLOYEE_ID ON EMPLOYEE (EMPLOYEE_ID);
+CREATE UNIQUE INDEX I_SALARY_GRADE$GRADE_ID ON SALARY_GRADE (GRADE_ID);
+CREATE UNIQUE INDEX I_PRODUCT$PRODUCT_ID ON PRODUCT (PRODUCT_ID);
+CREATE UNIQUE INDEX I_PRICE ON PRICE (PRODUCT_ID, START_DATE);
+CREATE UNIQUE INDEX I_CUSTOMER$CUSTOMER_ID ON CUSTOMER (CUSTOMER_ID);
+CREATE UNIQUE INDEX I_SALES_ORDER$ORDER_ID ON SALES_ORDER (ORDER_ID);
+CREATE UNIQUE INDEX I_ITEM ON ITEM (ORDER_ID, ITEM_ID);
+
+REM Add constraints
+
+ALTER TABLE CUSTOMER ADD /* CONSTRAINT CUSTOMER_ID_NN */
+   CHECK (CUSTOMER_ID IS NOT NULL);
+ALTER TABLE CUSTOMER ADD /* CONSTRAINT SALESPERSON_ID_NN */
+   CHECK (SALESPERSON_ID IS NOT NULL);
+ALTER TABLE CUSTOMER ADD /* CONSTRAINT CUSTOMER_ID_ZERO */
+   CHECK (CUSTOMER_ID &gt; 0);
+ALTER TABLE CUSTOMER ADD /* CONSTRAINT STATE_ALL_CAPS */
+   CHECK (STATE = UPPER(STATE));
+ALTER TABLE CUSTOMER ADD /* CONSTRAINT ZIP_CODE_FULL */
+   CHECK (LENGTH(NVL(ZIP_CODE, '99999')) IN (5, 9));
+ALTER TABLE DEPARTMENT ADD /* CONSTRAINT DEPTNO_NN */
+   CHECK (DEPARTMENT_ID IS NOT NULL);
+ALTER TABLE EMPLOYEE ADD /* CONSTRAINT EMPNO_NN */
+   CHECK (EMPLOYEE_ID IS NOT NULL);
+ALTER TABLE EMPLOYEE ADD /* CONSTRAINT EMPLOYEE$DEPTNO_NN */
+   CHECK (DEPARTMENT_ID IS NOT NULL);
+ALTER TABLE ITEM ADD /* CONSTRAINT ITEM$ORDER_ID_NN */
+   CHECK (ORDER_ID IS NOT NULL);
+ALTER TABLE ITEM ADD /* CONSTRAINT ITEM_ID_NN */
+   CHECK (ITEM_ID IS NOT NULL);
+ALTER TABLE JOBS ADD /* CONSTRAINT JOBID_NN */
+   CHECK (JOB_ID IS NOT NULL);
+ALTER TABLE JOBS ADD /* CONSTRAINT JOBFN_NN */
+   CHECK (FUNCTION IS NOT NULL);
+ALTER TABLE LOCATION ADD /* CONSTRAINT LOC_NN */
+   CHECK (LOCATION_ID IS NOT NULL);
+ALTER TABLE PRICE ADD /* CONSTRAINT PRICE$PRODUCT_ID_NN */
+   CHECK (PRODUCT_ID IS NOT NULL);
+ALTER TABLE PRICE ADD /* CONSTRAINT START_DATE_NN */
+   CHECK (START_DATE IS NOT NULL);
+ALTER TABLE PRICE ADD /* CONSTRAINT MIN_PRICE_LESS */
+   CHECK (LIST_PRICE IS NULL OR MIN_PRICE IS NULL OR MIN_PRICE &lt;= LIST_PRICE);
+ALTER TABLE PRICE ADD /* CONSTRAINT START_DATE_LESS */
+   CHECK (END_DATE IS NULL OR START_DATE &lt;= END_DATE);
+ALTER TABLE PRODUCT ADD /* CONSTRAINT PRODUCT_ID_NN */
+   CHECK (PRODUCT_ID IS NOT NULL);
+ALTER TABLE SALARY_GRADE ADD /* CONSTRAINT GRADE_ID_NN */
+   CHECK (GRADE_ID IS NOT NULL);
+ALTER TABLE SALARY_GRADE ADD /* CONSTRAINT LOWER_BOUND_LESS */
+   CHECK ((LOWER_BOUND IS NULL AND UPPER_BOUND IS NOT NULL) OR (LOWER_BOUND IS NOT NULL AND UPPER_BOUND IS NULL) OR (LOWER_BOUND &lt;= UPPER_BOUND));
+ALTER TABLE SALES_ORDER ADD /* CONSTRAINT ORDER_ID_NN */
+   CHECK (ORDER_ID IS NOT NULL);
+ALTER TABLE SALES_ORDER ADD /* CONSTRAINT ORDER$CUSTOMER_ID_NN */
+   CHECK (CUSTOMER_ID IS NOT NULL);
+ALTER TABLE SALES_ORDER ADD /* CONSTRAINT SALES_TOTAL_ZERO */
+   CHECK (TOTAL &gt;= 0);
+
+ALTER TABLE CUSTOMER ADD /* CONSTRAINT CUSTOMER_PRIMARY_KEY */
+   PRIMARY KEY (CUSTOMER_ID);
+ALTER TABLE DEPARTMENT ADD /* CONSTRAINT DEPT_PRIMARY_KEY */
+   PRIMARY KEY (DEPARTMENT_ID);
+ALTER TABLE EMPLOYEE ADD /* CONSTRAINT EMP_PRIMARY_KEY */
+   PRIMARY KEY (EMPLOYEE_ID);
+ALTER TABLE ITEM ADD /* CONSTRAINT ITEM_PRIMARY_KEY */
+   PRIMARY KEY (ORDER_ID, ITEM_ID);
+ALTER TABLE JOBS ADD /* CONSTRAINT JOB_PRIMARY_KEY */
+   PRIMARY KEY (JOB_ID);
+ALTER TABLE LOCATION ADD /* CONSTRAINT LOC_PRIMARY_KEY */
+   PRIMARY KEY (LOCATION_ID);
+ALTER TABLE PRICE ADD /* CONSTRAINT PRICE_PRIMARY_KEY */
+   PRIMARY KEY (PRODUCT_ID, START_DATE);
+ALTER TABLE PRODUCT ADD /* CONSTRAINT PRODUCT_PRIMARY_KEY */
+   PRIMARY KEY (PRODUCT_ID);
+ALTER TABLE SALARY_GRADE ADD /* CONSTRAINT SALARY_GRADE_PRIMARY_KEY */
+   PRIMARY KEY (GRADE_ID);
+ALTER TABLE SALES_ORDER ADD /* CONSTRAINT SALES_ORDER_PRIMARY_KEY */
+   PRIMARY KEY (ORDER_ID);
+
+ALTER TABLE CUSTOMER ADD /* CONSTRAINT CUSTOMER_FOREIGN_KEY  */
+   FOREIGN KEY (SALESPERSON_ID) REFERENCES EMPLOYEE;
+ALTER TABLE DEPARTMENT ADD /* CONSTRAINT DEPT_FOREIGN_KEY  */
+   FOREIGN KEY (LOCATION_ID) REFERENCES LOCATION;
+ALTER TABLE EMPLOYEE ADD /* CONSTRAINT EMP_FOREIGN_KEY_2  */
+   FOREIGN KEY (JOB_ID) REFERENCES JOBS;
+ALTER TABLE EMPLOYEE ADD /* CONSTRAINT EMP_SELF_KEY  */
+   FOREIGN KEY (MANAGER_ID) REFERENCES EMPLOYEE;
+ALTER TABLE EMPLOYEE ADD /* CONSTRAINT EMP_FOREIGN_KEY_1  */
+   FOREIGN KEY (DEPARTMENT_ID) REFERENCES DEPARTMENT;
+ALTER TABLE ITEM ADD /* CONSTRAINT ITEM_ORDER_FOREIGN_KEY  */
+   FOREIGN KEY (ORDER_ID) REFERENCES SALES_ORDER;
+ALTER TABLE ITEM ADD /* CONSTRAINT ITEM_PRODUCT_FOREIGN_KEY  */
+   FOREIGN KEY (PRODUCT_ID) REFERENCES PRODUCT;
+ALTER TABLE PRICE ADD /* CONSTRAINT PRICE_FOREIGN_KEY  */
+   FOREIGN KEY (PRODUCT_ID) REFERENCES PRODUCT;
+ALTER TABLE SALES_ORDER ADD /* CONSTRAINT SALES_ORDER_FOREIGN_KEY  */
+   FOREIGN KEY (CUSTOMER_ID) REFERENCES CUSTOMER;</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button><button class="btn dl" type="button" data-name="bdemobld.sql">Pobierz</button></div></div></details>
+      <details class="script" style="--e:var(--oracle)"><summary>OT → Oracle (schemat)<span class="fname">shared/ot/ot_schema.sql</span></summary><p class="sdesc">Schemat bazy OT do laboratorium dodatkowego. Dane są w shared/ot/ot_data.sql (ok. 370 KB — nie pokazujemy ich tutaj).</p><div class="cmd"><pre class="tall"><code>--------------------------------------------------------------------------------------
+-- Name	       : OT (Oracle Tutorial) Sample Database
+-- Link	       : http://www.oracletutorial.com/oracle-sample-database/
+-- Version     : 1.0
+-- Last Updated: July-28-2017
+-- Copyright   : Copyright © 2017 by www.oracletutorial.com. All Rights Reserved.
+-- Notice      : Use this sample database for the educational purpose only.
+--               Credit the site oracletutorial.com explitly in your materials that
+--               use this sample database.
+--------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+-- execute the following statements to create tables
+---------------------------------------------------------------------------
+-- regions
+CREATE TABLE regions
+  (
+    region_id NUMBER PRIMARY KEY,
+    region_name VARCHAR2( 50 ) NOT NULL
+  );
+  
+-- countries table
+CREATE TABLE countries
+  (
+    country_id   CHAR( 2 ) PRIMARY KEY  ,
+    country_name VARCHAR2( 40 ) NOT NULL,
+    region_id    NUMBER                 , -- fk
+    CONSTRAINT fk_countries_regions FOREIGN KEY( region_id )
+      REFERENCES regions( region_id ) 
+      ON DELETE CASCADE
+  );
+
+-- location
+CREATE TABLE locations
+  (
+    location_id NUMBER PRIMARY KEY       ,
+    address     VARCHAR2( 255 ) NOT NULL,
+    postal_code VARCHAR2( 20 )          ,
+    city        VARCHAR2( 50 )          ,
+    state       VARCHAR2( 50 )          ,
+    country_id  CHAR( 2 )               , -- fk
+    CONSTRAINT fk_locations_countries 
+      FOREIGN KEY( country_id )
+      REFERENCES countries( country_id ) 
+      ON DELETE CASCADE
+  );
+-- warehouses
+CREATE TABLE warehouses
+  (
+    warehouse_id NUMBER PRIMARY KEY,
+    warehouse_name VARCHAR( 255 ) ,
+    location_id    NUMBER( 12, 0 ), -- fk
+    CONSTRAINT fk_warehouses_locations 
+      FOREIGN KEY( location_id )
+      REFERENCES locations( location_id ) 
+      ON DELETE CASCADE
+  );
+-- employees
+CREATE TABLE employees
+  (
+    employee_id NUMBER PRIMARY KEY,
+    first_name VARCHAR( 255 ) NOT NULL,
+    last_name  VARCHAR( 255 ) NOT NULL,
+    email      VARCHAR( 255 ) NOT NULL,
+    phone      VARCHAR( 50 ) NOT NULL ,
+    hire_date  DATE NOT NULL          ,
+    manager_id NUMBER( 12, 0 )        , -- fk
+    job_title  VARCHAR( 255 ) NOT NULL,
+    CONSTRAINT fk_employees_manager 
+        FOREIGN KEY( manager_id )
+        REFERENCES employees( employee_id )
+        ON DELETE CASCADE
+  );
+-- product category
+CREATE TABLE product_categories
+  (
+    category_id NUMBER PRIMARY KEY,
+    category_name VARCHAR2( 255 ) NOT NULL
+  );
+
+-- products table
+CREATE TABLE products
+  (
+    product_id NUMBER PRIMARY KEY,
+    product_name  VARCHAR2( 255 ) NOT NULL,
+    description   VARCHAR2( 2000 )        ,
+    standard_cost NUMBER( 9, 2 )          ,
+    list_price    NUMBER( 9, 2 )          ,
+    category_id   NUMBER NOT NULL         ,
+    CONSTRAINT fk_products_categories 
+      FOREIGN KEY( category_id )
+      REFERENCES product_categories( category_id ) 
+      ON DELETE CASCADE
+  );
+-- customers
+CREATE TABLE customers
+  (
+    customer_id NUMBER PRIMARY KEY,
+    name         VARCHAR2( 255 ) NOT NULL,
+    address      VARCHAR2( 255 )         ,
+    website      VARCHAR2( 255 )         ,
+    credit_limit NUMBER( 8, 2 )
+  );
+-- contacts
+CREATE TABLE contacts
+  (
+    contact_id NUMBER PRIMARY KEY,
+    first_name  VARCHAR2( 255 ) NOT NULL,
+    last_name   VARCHAR2( 255 ) NOT NULL,
+    email       VARCHAR2( 255 ) NOT NULL,
+    phone       VARCHAR2( 20 )          ,
+    customer_id NUMBER                  ,
+    CONSTRAINT fk_contacts_customers 
+      FOREIGN KEY( customer_id )
+      REFERENCES customers( customer_id ) 
+      ON DELETE CASCADE
+  );
+-- orders table
+CREATE TABLE orders
+  (
+    order_id NUMBER PRIMARY KEY,
+    customer_id NUMBER( 6, 0 ) NOT NULL, -- fk
+    status      VARCHAR( 20 ) NOT NULL ,
+    salesman_id NUMBER( 6, 0 )         , -- fk
+    order_date  DATE NOT NULL          ,
+    CONSTRAINT fk_orders_customers 
+      FOREIGN KEY( customer_id )
+      REFERENCES customers( customer_id )
+      ON DELETE CASCADE,
+    CONSTRAINT fk_orders_employees 
+      FOREIGN KEY( salesman_id )
+      REFERENCES employees( employee_id ) 
+      ON DELETE SET NULL
+  );
+-- order items
+CREATE TABLE order_items
+  (
+    order_id   NUMBER( 12, 0 )                                , -- fk
+    item_id    NUMBER( 12, 0 )                                ,
+    product_id NUMBER( 12, 0 ) NOT NULL                       , -- fk
+    quantity   NUMBER( 8, 2 ) NOT NULL                        ,
+    unit_price NUMBER( 8, 2 ) NOT NULL                        ,
+    CONSTRAINT pk_order_items 
+      PRIMARY KEY( order_id, item_id ),
+    CONSTRAINT fk_order_items_products 
+      FOREIGN KEY( product_id )
+      REFERENCES products( product_id ) 
+      ON DELETE CASCADE,
+    CONSTRAINT fk_order_items_orders 
+      FOREIGN KEY( order_id )
+      REFERENCES orders( order_id ) 
+      ON DELETE CASCADE
+  );
+-- inventories
+CREATE TABLE inventories
+  (
+    product_id   NUMBER( 12, 0 )        , -- fk
+    warehouse_id NUMBER( 12, 0 )        , -- fk
+    quantity     NUMBER( 8, 0 ) NOT NULL,
+    CONSTRAINT pk_inventories 
+      PRIMARY KEY( product_id, warehouse_id ),
+    CONSTRAINT fk_inventories_products 
+      FOREIGN KEY( product_id )
+      REFERENCES products( product_id ) 
+      ON DELETE CASCADE,
+    CONSTRAINT fk_inventories_warehouses 
+      FOREIGN KEY( warehouse_id )
+      REFERENCES warehouses( warehouse_id ) 
+      ON DELETE CASCADE
+  );  </code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button><button class="btn dl" type="button" data-name="ot_schema.sql">Pobierz</button></div></div></details>
+    </section>
+
+    <section id="roznice">
+      <h2 class="eyebrow">Materiały</h2>
+      <div class="sec-title">Różnice dialektów</div>
+      <p>Rdzeń SQL jest wspólny. Poniżej miejsca, w których silniki się różnią — przydatne, gdy przenosisz zapytanie z jednej bazy na drugą.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Zagadnienie</th><th class="h-oracle">Oracle</th><th class="h-postgres">PostgreSQL</th><th class="h-mysql">MySQL</th></tr></thead>
+        <tbody>
+          <tr><td>Literał daty</td><td><code>DATE '1985-04-01'</code></td><td><code>DATE '1985-04-01'</code></td><td><code>'1985-04-01'</code></td></tr>
+          <tr><td>Łączenie tekstu</td><td><code>a || b</code></td><td><code>a || b</code></td><td><code>CONCAT(a, b)</code> (<code>||</code> to tu OR!)</td></tr>
+          <tr><td>Zapytanie bez tabeli</td><td><code>SELECT 1 FROM dual</code></td><td><code>SELECT 1</code></td><td><code>SELECT 1</code></td></tr>
+          <tr><td>Klucz automatyczny</td><td><code>GENERATED AS IDENTITY</code></td><td><code>SERIAL</code> lub <code>GENERATED AS IDENTITY</code></td><td><code>AUTO_INCREMENT</code></td></tr>
+          <tr><td>Limit wierszy</td><td><code>FETCH FIRST n ROWS ONLY</code></td><td><code>LIMIT n</code></td><td><code>LIMIT n</code></td></tr>
+          <tr><td>Bieżąca data</td><td><code>SYSDATE</code></td><td><code>CURRENT_DATE</code></td><td><code>CURDATE()</code></td></tr>
+          <tr><td>LIKE a wielkość liter</td><td>rozróżnia</td><td>rozróżnia (użyj <code>ILIKE</code>)</td><td>domyślnie nie rozróżnia</td></tr>
+          <tr><td>Zatwierdzanie zmian</td><td><code>COMMIT</code> (DBeaver: auto-commit)</td><td>auto-commit w DBeaver</td><td>auto-commit w DBeaver</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="docker">
+      <h2 class="eyebrow">Materiały</h2>
+      <div class="sec-title">Ściąga poleceń</div>
+      <div class="cheat">
+        <div class="cbox"><h4>Kontenery</h4><div class="row"><code>docker ps</code><span>działające kontenery</span></div><div class="row"><code>docker ps -a</code><span>wszystkie kontenery</span></div><div class="row"><code>docker stop nazwa</code><span>zatrzymaj</span></div><div class="row"><code>docker start nazwa</code><span>uruchom ponownie</span></div><div class="row"><code>docker rm -f nazwa</code><span>usuń kontener</span></div><div class="row"><code>docker logs -f nazwa</code><span>logi na żywo</span></div><div class="row"><code>docker exec -it nazwa bash</code><span>wejdź do środka</span></div></div>
+        <div class="cbox"><h4>Obrazy, wolumeny, Compose</h4><div class="row"><code>docker images</code><span>pobrane obrazy</span></div><div class="row"><code>docker pull obraz</code><span>pobierz obraz</span></div><div class="row"><code>docker volume ls</code><span>lista wolumenów (dane baz)</span></div><div class="row"><code>docker compose up -d --wait</code><span>uruchom i poczekaj na gotowość</span></div><div class="row"><code>docker compose ps</code><span>stan usług</span></div><div class="row"><code>docker compose down</code><span>zatrzymaj (dane zostają)</span></div><div class="row"><code>docker compose down -v</code><span>zatrzymaj i SKASUJ dane</span></div></div>
+        <div class="cbox"><h4>Skrypt lab</h4><div class="row"><code>./lab list</code><span>lista laboratoriów</span></div><div class="row"><code>./lab up N</code><span>uruchom bazę laboratorium N</span></div><div class="row"><code>./lab shell N</code><span>konsola SQL w kontenerze</span></div><div class="row"><code>./lab reset N</code><span>stan początkowy (kasuje dane)</span></div><div class="row"><code>./lab down</code><span>zatrzymaj wszystko</span></div><div class="row"><code>./lab update</code><span>pobierz nowe materiały</span></div></div>
+      </div>
+    </section>
+
+    <div class="pin-note">
+      <b>Zasada kursu:</b> instrukcje 1–2 dotyczą wszystkich silników (nauka uruchamiania baz). Instrukcje od 3 są przypisane na stałe do jednego silnika — widnieje on na belce każdego laboratorium. Pod każdym zadaniem znajdziesz pole „+ rozwiązanie” na własne polecenie SQL.
+    </div>
+
+<section id="l01">
+<div class="lab open" data-engine="all" data-lab="01">
+<div class="lab-head" data-toggle><span class="lab-no">1/6</span><span class="lab-title"><span class="t">Uruchamianie bazy danych w kontenerze Docker</span><small>Uruchomić własny serwer bazy w kontenerze i połączyć się z nim klientem graficznym. Ten sam schemat działania dla trzech silników.</small></span><span class="lab-eng">wszystkie silniki</span><span class="lab-prog" data-prog></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+<div class="lab-body">
+<div class="conn-card"><span>host <b>localhost</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span><span>porty <b>PostgreSQL 5432, MySQL 3306, Oracle 1521</b></span></div>
+<h4>Czynności wstępne</h4><ol class="tasks">
+<li><input type="checkbox" id="w-01-0"><label for="w-01-0">Zainstaluj Docker (Windows/macOS: Docker Desktop, Linux: Docker Engine) — patrz <code>docs/INSTALACJA.md</code>.</label></li>
+<li><input type="checkbox" id="w-01-1"><label for="w-01-1">Sprawdź instalację: <code>docker --version</code> oraz <code>docker compose version</code>.</label></li>
+<li><input type="checkbox" id="w-01-2"><label for="w-01-2">Zainstaluj klienta DBeaver Community.</label></li>
+</ol>
+<h4>Przygotowanie bazy</h4>
+<p class="goal">Pobierz obrazy trzech silników (Oracle ma ok. 1,1 GB — pobieranie chwilę trwa):</p>
+<div class="cmd"><pre><code>docker pull postgres:17
+docker pull mysql:8.4
+docker pull gvenzl/oracle-free:23</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div>
+<p class="goal">Uruchom każdy silnik jednym poleceniem. We wszystkich trzech użytkownik i hasło to <code>student</code>:</p>
+<div class="cmd"><pre><code>docker run --name pg-lab -e POSTGRES_USER=student -e POSTGRES_PASSWORD=student -e POSTGRES_DB=student -p 5432:5432 -d postgres:17
+docker run --name mysql-lab -e MYSQL_ROOT_PASSWORD=student -e MYSQL_USER=student -e MYSQL_PASSWORD=student -e MYSQL_DATABASE=student -p 3306:3306 -d mysql:8.4
+docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e APP_USER_PASSWORD=student -p 1521:1521 -d gvenzl/oracle-free:23</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div>
+<div class="callout">Oracle przy pierwszym starcie potrzebuje kilku minut. Gotowość widać w logach (<code>docker logs -f oracle-lab</code>) po komunikacie <code>DATABASE IS READY TO USE!</code>.</div>
+<h4>Zadania</h4><ol class="tasks zadania">
+<li><input type="checkbox" id="z-01-0"><div class="taskmain"><label for="z-01-0">Sprawdź działające kontenery: <code>docker ps</code>.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="01:0" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-1"><div class="taskmain"><label for="z-01-1">Połącz się w DBeaver z PostgreSQL (host <code>localhost</code>, port <code>5432</code>, baza <code>student</code>, użytkownik <code>student</code>, hasło <code>student</code>).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="01:1" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-2"><div class="taskmain"><label for="z-01-2">Utwórz tabelę <code>pracownik</code> (id, nazwisko, etat, placa) i dodaj kilka wierszy poleceniem <code>INSERT</code>.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="01:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-3"><div class="taskmain"><label for="z-01-3">Wyświetl dane: <code>SELECT * FROM pracownik;</code></label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="01:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-4"><div class="taskmain"><label for="z-01-4">Połącz się z MySQL (port <code>3306</code>, baza <code>student</code>) oraz z Oracle (port <code>1521</code>, połączenie przez <strong>Service name</strong> <code>FREEPDB1</code>, użytkownik <code>student</code>). Powtórz dwa poprzednie kroki i zanotuj różnice w składni.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="01:4" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-5"><div class="taskmain"><label for="z-01-5">Zatrzymaj i uruchom ponownie kontener: <code>docker stop pg-lab</code>, potem <code>docker start pg-lab</code>. Sprawdź, że dane zostały.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="01:5" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-6"><div class="taskmain"><label for="z-01-6">Usuń kontenery: <code>docker rm -f pg-lab mysql-lab oracle-lab</code>. Uruchom <code>pg-lab</code> od nowa tym samym poleceniem i sprawdź, co stało się z danymi.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="01:6" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-7"><div class="taskmain"><label for="z-01-7">Dla chętnych: wejdź do kontenera i wykonaj zapytanie z linii poleceń — <code>docker exec -it pg-lab psql -U student</code>.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="01:7" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+</ol>
+<div class="diff-note"><strong>Uwagi:</strong> Ta instrukcja nie używa jeszcze wolumenów, dlatego po <code>docker rm</code> dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (zadanie 7) — porty muszą być wolne.</div>
+</div></div></section>
+<section id="l02">
+<div class="lab" data-engine="all" data-lab="02">
+<div class="lab-head" data-toggle><span class="lab-no">2/6</span><span class="lab-title"><span class="t">Wiele silników i Docker Compose</span><small>Uruchomić trzy silniki jednym poleceniem, poznać wolumeny i porównać różnice w składni SQL.</small></span><span class="lab-eng">wszystkie silniki</span><span class="lab-prog" data-prog></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+<div class="lab-body">
+<div class="conn-card"><span>host <b>localhost</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span><span>baza <b>student</b></span><span>porty <b>PostgreSQL 5432, MySQL 3306, Oracle 1521 (service FREEPDB1)</b></span><span>Adminer <b>http://localhost:8080</b></span></div>
+<h4>Czynności wstępne</h4><ol class="tasks">
+<li><input type="checkbox" id="w-02-0"><label for="w-02-0">Zakończ instrukcję 1/6 (usuń jej kontenery: <code>docker rm -f pg-lab mysql-lab oracle-lab</code>).</label></li>
+<li><input type="checkbox" id="w-02-1"><label for="w-02-1">Przejdź do katalogu laboratorium: <code>cd labs/02-docker-compose</code>.</label></li>
+</ol>
+<h4>Przygotowanie bazy</h4>
+<p class="goal">Przeczytaj plik <code>compose.yaml</code> z tego katalogu. Opisuje on cztery usługi — trzy bazy i klienta Adminer:</p>
+<div class="filecap">labs/02-docker-compose/compose.yaml</div>
+<div class="cmd"><pre class="tall"><code># Laboratorium 2/6 — trzy silniki naraz + Adminer (klient w przeglądarce).
+# Uruchomienie:  docker compose up -d      Zatrzymanie:  docker compose down
+# Dane są w wolumenach; kasuje je dopiero:  docker compose down -v
+name: lab02-wiele-silnikow
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: student
+      POSTGRES_DB: student
+    ports: ["5432:5432"]
+    volumes: ["pg-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U student -d student"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: student
+      MYSQL_USER: student
+      MYSQL_PASSWORD: student
+      MYSQL_DATABASE: student
+    ports: ["3306:3306"]
+    volumes: ["mysql-data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -pstudent --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  oracle:
+    image: gvenzl/oracle-free:23
+    environment:
+      ORACLE_PASSWORD: student
+      APP_USER: student
+      APP_USER_PASSWORD: student
+    ports: ["1521:1521"]
+    volumes: ["oracle-data:/opt/oracle/oradata"]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  adminer:
+    image: adminer
+    ports: ["8080:8080"]
+    depends_on: [postgres, mysql]
+
+volumes:
+  pg-data:
+  mysql-data:
+  oracle-data:</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button><button class="btn dl" type="button" data-name="compose.yaml">Pobierz</button></div></div>
+<p class="goal">Uruchom cały zestaw i sprawdź stan (opcja <code>--wait</code> czeka, aż bazy będą gotowe):</p>
+<div class="cmd"><pre><code>docker compose up -d --wait
+docker compose ps</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div>
+<h4>Zadania</h4><ol class="tasks zadania">
+<li><input type="checkbox" id="z-02-0"><div class="taskmain"><label for="z-02-0">Wskaż w pliku <code>compose.yaml</code>, gdzie podano obrazy, porty, zmienne środowiskowe i wolumeny.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="02:0" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-02-1"><div class="taskmain"><label for="z-02-1">Otwórz <code>http://localhost:8080</code> (Adminer) i połącz się z PostgreSQL (serwer <code>postgres</code>) oraz MySQL (serwer <code>mysql</code>). Użytkownik i hasło: <code>student</code>. Do Oracle użyj DBeaver.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="02:1" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-02-2"><div class="taskmain"><label for="z-02-2">W każdym z trzech silników utwórz tę samą tabelę z kluczem automatycznym i porównaj składnię (<code>IDENTITY</code> / <code>SERIAL</code> / <code>AUTO_INCREMENT</code>).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="02:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-02-3"><div class="taskmain"><label for="z-02-3">Wykonaj w każdym silniku zapytanie łączące imię i nazwisko w jedną kolumnę i filtrujące po dacie. Zapisz, gdzie składnia się różni (<code>||</code> vs <code>CONCAT</code>, zapis daty).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="02:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-02-4"><div class="taskmain"><label for="z-02-4">Zatrzymaj zestaw poleceniem <code>docker compose down</code>, uruchom go ponownie (<code>docker compose up -d --wait</code>) i sprawdź, że Twoje tabele nadal istnieją. Dlaczego dane przetrwały?</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="02:4" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-02-5"><div class="taskmain"><label for="z-02-5">Usuń zestaw razem z danymi: <code>docker compose down -v</code>. Co się stało z tabelami po ponownym uruchomieniu?</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="02:5" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+</ol>
+<div class="diff-note"><strong>Uwagi:</strong> Jeśli <code>up</code> zgłasza zajęty port 5432/3306/1521, zatrzymaj inne kontenery (<code>docker ps</code>, <code>docker rm -f nazwa</code>). Oracle przy pierwszym starcie potrzebuje kilku minut — <code>--wait</code> poczeka na niego. Pamiętaj, że każde z laboratoriów 3–7 używa tych samych portów, więc przed ich uruchomieniem wykonaj <code>docker compose down</code>.</div>
+</div></div></section>
+<section id="l03">
+<div class="lab" data-engine="postgres" data-lab="03">
+<div class="lab-head" data-toggle><span class="lab-no">3/6</span><span class="lab-title"><span class="t">Zapytania proste — baza „Katedra”</span><small>Proste zapytania SELECT: warunki, sortowanie, obliczenia i filtrowanie tekstu.</small></span><span class="lab-eng">PostgreSQL</span><span class="lab-prog" data-prog></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+<div class="lab-body">
+<div class="conn-card"><span>host <b>localhost</b></span><span>port <b>5432</b></span><span>baza <b>katedra</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
+<h4>Czynności wstępne</h4><ol class="tasks">
+<li><input type="checkbox" id="w-03-0"><label for="w-03-0">Docker działa, a bazy z poprzednich instrukcji są zatrzymane (<code>docker ps</code> nie pokazuje kontenerów z portem 5432).</label></li>
+<li><input type="checkbox" id="w-03-1"><label for="w-03-1">Przejdź do katalogu laboratorium: <code>cd labs/03-katedra-postgres</code>.</label></li>
+</ol>
+<h4>Przygotowanie bazy</h4>
+<p class="goal">Uruchom bazę. Dane (tabele <code>zespol</code>, <code>etat</code>, <code>pracownik</code>) wczytują się same ze skryptu <code>init/01_katedra.sql</code>:</p>
+<div class="cmd"><pre><code>docker compose up -d --wait</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div>
+<div class="callout">Połącz się w DBeaver (dane powyżej). Reset bazy do stanu początkowego: <code>docker compose down -v</code>, a potem ponownie <code>docker compose up -d --wait</code>. Po zakończeniu pracy: <code>docker compose down</code> (dane zostają).</div>
+<h4>Zadania</h4><ol class="tasks zadania">
+<li><input type="checkbox" id="z-03-0"><div class="taskmain"><label for="z-03-0">Przypuśćmy, że adiunktom zabiera się 20% pensji na podatek dochodowy. Zaproponuj obliczenie takiego podatku w oparciu o tabelę <code>pracownik</code>.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:0" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-03-1"><div class="taskmain"><label for="z-03-1">Wyświetl nazwisko, etat oraz płacę podstawową pracowników zespołów 10 i 20 zgodnie z alfabetycznym porządkiem nazwisk.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:1" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-03-2"><div class="taskmain"><label for="z-03-2">Wyświetl nazwiska i etaty wszystkich asystentów zespołu 20.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-03-3"><div class="taskmain"><label for="z-03-3">Wyświetl nazwiska i pensje oraz identyfikatory zespołów pracowników, których miesięczna pensja przekracza 2000.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-03-4"><div class="taskmain"><label for="z-03-4">Oblicz całkowite dochody roczne wszystkich profesorów.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:4" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-03-5"><div class="taskmain"><label for="z-03-5">Wybierz wszystkich pracowników, których pensja podstawowa jest mniejsza od dwukrotnej pensji dodatkowej.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:5" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-03-6"><div class="taskmain"><label for="z-03-6">Wyznacz wszystkich adiunktów i profesorów, których płaca podstawowa jest wyższa od 1750.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:6" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-03-7"><div class="taskmain"><label for="z-03-7">Sporządź spis wszystkich asystentów w kolejności ustalonej datą ich zatrudnienia.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:7" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-03-8"><div class="taskmain"><label for="z-03-8">Wyświetl nazwiska pracowników rozpoczynające się od litery „M”.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="03:8" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+</ol>
+<div class="diff-note"><strong>Uwagi:</strong> W zadaniu 9 <code>LIKE 'M%'</code> w PostgreSQL rozróżnia wielkość liter — użyj <code>ILIKE</code>, jeśli chcesz ją pominąć. W zadaniu 6 żaden pracownik nie spełnia warunku, więc pusty wynik jest poprawny; zwróć uwagę, jak SQL traktuje wartości NULL w pensji dodatkowej.</div>
+</div></div></section>
+<section id="l04">
+<div class="lab" data-engine="mysql" data-lab="04">
+<div class="lab-head" data-toggle><span class="lab-no">4/6</span><span class="lab-title"><span class="t">INSERT, UPDATE, DELETE — baza „Fabryka”</span><small>Modyfikacja danych poleceniami INSERT, UPDATE i DELETE oraz zapytania z warunkami i prostymi złączeniami.</small></span><span class="lab-eng">MySQL</span><span class="lab-prog" data-prog></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+<div class="lab-body">
+<div class="conn-card"><span>host <b>localhost</b></span><span>port <b>3306</b></span><span>baza <b>fabryka</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
+<h4>Czynności wstępne</h4><ol class="tasks">
+<li><input type="checkbox" id="w-04-0"><label for="w-04-0">Docker działa, a poprzednie bazy są zatrzymane (<code>docker compose down</code> w ich katalogach).</label></li>
+<li><input type="checkbox" id="w-04-1"><label for="w-04-1">Przejdź do katalogu laboratorium: <code>cd labs/04-fabryka-mysql</code>.</label></li>
+</ol>
+<h4>Przygotowanie bazy</h4>
+<p class="goal">Uruchom bazę. Tabele (<code>hale</code>, <code>maszyny</code>, <code>operatorzy</code>, <code>operator_maszyna</code>, <code>awarie</code>) wczytują się same ze skryptu <code>init/01_fabryka.sql</code>:</p>
+<div class="cmd"><pre><code>docker compose up -d --wait</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div>
+<div class="callout">Połącz się w DBeaver (dane powyżej). W tym laboratorium modyfikujesz dane, więc reset do stanu początkowego jest przydatny: <code>docker compose down -v</code>, a potem <code>docker compose up -d --wait</code>.</div>
+<h4>Zadania</h4><ol class="tasks zadania">
+<li><input type="checkbox" id="z-04-0"><div class="taskmain"><label for="z-04-0">Dodaj nowego operatora o Twoim imieniu i nazwisku, przy czym przełożonym będzie BOND. Reszta danych wg uznania.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:0" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-1"><div class="taskmain"><label for="z-04-1">Dodaj nową maszynę „Pakowarka próżniowa” do Magazynu A.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:1" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-2"><div class="taskmain"><label for="z-04-2">Tokarka zaczęła zgrzytać. Wprowadź informację o tej awarii.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-3"><div class="taskmain"><label for="z-04-3">Podwyższ o 20% płace operatorów, którzy nie mają przełożonego.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-4"><div class="taskmain"><label for="z-04-4">BRUCE WILLIS dostał uprawnienia obsługi wózka widłowego i obsługuje wózki wraz z BONDem. Wprowadź odpowiednie informacje do bazy.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:4" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-5"><div class="taskmain"><label for="z-04-5">Napisz polecenie SQL zwracające nazwiska i płace operatorów, którzy zarabiają więcej niż 1000, a mniej niż 2000.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:5" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-6"><div class="taskmain"><label for="z-04-6">Napisz polecenie SQL zwracające maszyny, których jeszcze nie uruchomiono.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:6" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-7"><div class="taskmain"><label for="z-04-7">Napisz polecenie SQL zwracające nazwiska i płace operatorów, którzy mają przełożonych.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:7" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-8"><div class="taskmain"><label for="z-04-8">Napisz polecenie SQL zwracające maszyny uruchomione między rokiem 2010 a 2012.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:8" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-9"><div class="taskmain"><label for="z-04-9">Napisz polecenie SQL zwracające maszyny ze wszystkich hal poza 1.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:9" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-10"><div class="taskmain"><label for="z-04-10">Napisz polecenie SQL zwracające daty wszystkich awarii oraz nazwy maszyn, które im uległy.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:10" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-11"><div class="taskmain"><label for="z-04-11">Napisz polecenie zwracające maszyny wraz z nazwami operatorów, które je obsługują.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:11" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-04-12"><div class="taskmain"><label for="z-04-12">Napisz polecenie SQL zwracające nazwy maszyn oraz nazwy hal, w których te maszyny się znajdują.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="04:12" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+</ol>
+<div class="diff-note"><strong>Uwagi:</strong> Klucze <code>id_maszyny</code> i <code>id_operatora</code> mają <code>AUTO_INCREMENT</code> — w zadaniach 1–2 nie podawaj ich ręcznie. Datę zapisujesz jako <code>'2010-01-01'</code>. W zadaniu 3 skorzystaj z <code>CURDATE()</code> jako daty awarii. Uwaga: w MySQL operator <code>||</code> oznacza OR, a nie łączenie tekstu.</div>
+</div></div></section>
+<section id="l05">
+<div class="lab" data-engine="oracle" data-lab="05">
+<div class="lab-head" data-toggle><span class="lab-no">5/6</span><span class="lab-title"><span class="t">Baza „Firma handlowa” — część I</span><small>Warunki złożone, przedziały, daty i pierwsze złączenia.</small></span><span class="lab-eng">Oracle</span><span class="lab-prog" data-prog></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+<div class="lab-body">
+<div class="conn-card"><span>host <b>localhost</b></span><span>port <b>1521</b></span><span>Service name <b>FREEPDB1</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
+<h4>Czynności wstępne</h4><ol class="tasks">
+<li><input type="checkbox" id="w-05-0"><label for="w-05-0">Docker działa, a poprzednie bazy są zatrzymane.</label></li>
+<li><input type="checkbox" id="w-05-1"><label for="w-05-1">Przejdź do katalogu laboratorium: <code>cd labs/05-firma-oracle-1</code>.</label></li>
+</ol>
+<h4>Przygotowanie bazy</h4>
+<p class="goal">Uruchom bazę. Pierwszy start trwa kilka minut — Oracle inicjalizuje się, a skrypt <code>init/01_firma.sql</code> ładuje dane ze skryptu <code>bdemobld.sql</code>:</p>
+<div class="cmd"><pre><code>docker compose up -d
+docker compose logs -f oracle</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div>
+<div class="callout">Gdy w logach pojawi się <code>DATABASE IS READY TO USE!</code>, zakończ podgląd (Ctrl+C) i połącz się w DBeaver — wybierz połączenie przez <strong>Service name</strong> <code>FREEPDB1</code>. Błędy <code>ORA-00942</code> na początku ładowania (instrukcje DROP nieistniejących tabel) są normalne. Laboratorium 6/6 kontynuuje tę samą bazę.</div>
+<h4>Zadania</h4><ol class="tasks zadania">
+<li><input type="checkbox" id="z-05-0"><div class="taskmain"><label for="z-05-0">Wprowadź do tabeli <code>CUSTOMER</code> nowy wpis, podając w kolumnie <code>NAME</code> swoje imię i nazwisko. Pozostałe dane wg własnego uznania.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:0" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-1"><div class="taskmain"><label for="z-05-1">Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników (<code>EMPLOYEE</code>), którzy otrzymują prowizję większą niż 900 lub mniejszą niż 500.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:1" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-2"><div class="taskmain"><label for="z-05-2">Napisz polecenie SQL zwracające wyroby (nazwa) wraz z ceną minimalną i cennikową (<code>PRODUCT</code>, <code>PRICE</code>), w których opisie występuje słowo „TENNIS”, a nie ma słowa „BALL”.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-3"><div class="taskmain"><label for="z-05-3">Napisz polecenie SQL zwracające klientów z miast „DALLAS” i „NEW YORK”, których limit kredytowy przekracza 10000.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-4"><div class="taskmain"><label for="z-05-4">Napisz polecenie SQL zwracające nazwiska i imiona pracowników pracujących na etacie „STAFF” i „SALESPERSON” (tabela <code>JOBS</code>), zatrudnionych po 1 kwietnia 1985.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:4" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-5"><div class="taskmain"><label for="z-05-5">Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników, których podwójna prowizja jest większa od pensji i zostali zatrudnieni po 1 maja 1985.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:5" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-6"><div class="taskmain"><label for="z-05-6">Napisz polecenie SQL zwracające zamówienia (identyfikator, data, wartość) z tabeli <code>SALES_ORDER</code>, których wartość przekracza 1000.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:6" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-7"><div class="taskmain"><label for="z-05-7">Wprowadź do tabeli <code>EMPLOYEE</code> nowy wpis, podając swoje imię i nazwisko. Pozostałe dane wg własnego uznania.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:7" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-8"><div class="taskmain"><label for="z-05-8">Napisz polecenie SQL zwracające identyfikatory zamówień sprzed 2 kwietnia 1990, których wartość przekracza 1000.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:8" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-9"><div class="taskmain"><label for="z-05-9">Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników zatrudnionych po 31 marca 1985, którzy otrzymują prowizję.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:9" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-10"><div class="taskmain"><label for="z-05-10">Napisz polecenie SQL zwracające klientów i ich sprzedawców z limitem kredytowym powyżej 5000 (nazwa, adres, limit, nazwisko i imię pracownika — sprzedawcy).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:10" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-11"><div class="taskmain"><label for="z-05-11">Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników, których pensja mieści się w przedziale 2000–3000.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:11" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-05-12"><div class="taskmain"><label for="z-05-12">Napisz polecenie SQL zwracające zamówienia (identyfikator zamówienia, data jego złożenia, nazwa klienta) dla zamówień o wartości powyżej 200.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="05:12" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+</ol>
+<div class="diff-note"><strong>Uwagi:</strong> Daty zapisuj jako <code>DATE '1985-04-01'</code>. Imię i nazwisko łączysz operatorem <code>||</code>. Zapytanie bez tabeli wymaga <code>FROM dual</code>. W DBeaver domyślnie działa tryb auto-commit, więc <code>INSERT</code> zatwierdza się od razu.</div>
+</div></div></section>
+<section id="l06">
+<div class="lab" data-engine="oracle" data-lab="06">
+<div class="lab-head" data-toggle><span class="lab-no">6/6</span><span class="lab-title"><span class="t">Złączenia, grupowanie i funkcje agregujące</span><small>JOIN, GROUP BY, COUNT, AVG i HAVING na bazie „Firma handlowa”.</small></span><span class="lab-eng">Oracle</span><span class="lab-prog" data-prog></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+<div class="lab-body">
+<div class="conn-card"><span>host <b>localhost</b></span><span>port <b>1521</b></span><span>Service name <b>FREEPDB1</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
+<h4>Czynności wstępne</h4><ol class="tasks">
+<li><input type="checkbox" id="w-06-0"><label for="w-06-0">Docker działa, a poprzednie bazy są zatrzymane.</label></li>
+<li><input type="checkbox" id="w-06-1"><label for="w-06-1">Przejdź do katalogu laboratorium: <code>cd labs/06-firma-oracle-2</code>.</label></li>
+</ol>
+<h4>Przygotowanie bazy</h4>
+<p class="goal">Uruchom bazę. To ta sama baza i ten sam wolumen co w instrukcji 5/6 — jeśli już ją tworzyłeś, dane i Twoje zmiany są na miejscu:</p>
+<div class="cmd"><pre><code>docker compose up -d
+docker compose logs -f oracle</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div>
+<div class="callout">Poczekaj na komunikat <code>DATABASE IS READY TO USE!</code> (Ctrl+C kończy podgląd logów). Reset do stanu początkowego: <code>docker compose down -v</code>, potem <code>docker compose up -d</code>.</div>
+<h4>Zadania</h4><ol class="tasks zadania">
+<li><input type="checkbox" id="z-06-0"><div class="taskmain"><label for="z-06-0">Napisz polecenie SQL zwracające klientów i ich sprzedawców z limitem kredytowym powyżej 5000 (nazwa, adres, limit, nazwisko i imię pracownika — sprzedawcy).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:0" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-1"><div class="taskmain"><label for="z-06-1">Napisz polecenie SQL zwracające ogólną (łączną) ilość wyrobów zamówionych po 1990 roku (id, opis, ilość).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:1" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-2"><div class="taskmain"><label for="z-06-2">Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników, których pensja mieści się w przedziale 2000–3000.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-3"><div class="taskmain"><label for="z-06-3">Napisz polecenie SQL zwracające zamówienia (identyfikator zamówienia, data jego złożenia, nazwa klienta) dla zamówień o wartości powyżej 200.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-4"><div class="taskmain"><label for="z-06-4">Wyświetl nazwę klienta i wartość zamówienia złożonego przez niego, pod warunkiem że wartość zamówienia jest z przedziału &lt;1000, 3000&gt; i zamówienie złożono po dniu 10-05-1991. Posortuj wynik po wartościach zamówień.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:4" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-5"><div class="taskmain"><label for="z-06-5">Wyświetl średnią wartość zamówienia poszczególnych klientów, z zamówień otrzymanych z poprzedniego zadania. Pogrupuj wiersze po nazwie klienta (<code>GROUP BY</code>); wartość średnią liczy funkcja <code>AVG(wartość)</code>, użyj jej zamiast wyświetlania wartości zamówienia.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:5" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-6"><div class="taskmain"><label for="z-06-6">Ilu pracowników zatrudnionych jest na poszczególnych etatach? Pokaż nazwę etatu (tabela <code>JOBS</code>) i ilość pracowników. Wykonaj w dwóch krokach: najpierw nazwa etatu i <code>employee_id</code> posortowane po nazwie etatu, potem grupowanie (<code>GROUP BY</code>) i <code>COUNT</code>.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:6" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-7"><div class="taskmain"><label for="z-06-7">Każdy klient obsługiwany jest przez pewnego pracownika. Wyświetl imię i nazwisko pracownika oraz ilu klientów obsługuje. Pracownicy, którzy nie obsługują klientów, nie powinni wystąpić w wyniku (bez złączeń zewnętrznych).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:7" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-8"><div class="taskmain"><label for="z-06-8">Zmodyfikuj poprzednie zadanie tak, żeby wynik pokazywał ilość klientów w poszczególnych miastach (imię i nazwisko, miasto, ilość klientów).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:8" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-06-9"><div class="taskmain"><label for="z-06-9">Napisz polecenie SQL zwracające wydziały (<code>DEPARTMENT</code>), które mają powyżej 3 pracowników.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="06:9" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+</ol>
+<div class="diff-note"><strong>Uwagi:</strong> <code>JOIN</code>, <code>GROUP BY</code>, <code>HAVING</code>, <code>COUNT</code> i <code>AVG</code> działają standardowo. Imię i nazwisko łączysz operatorem <code>||</code>. Zadania 1–4 powtarzają materiał z 5/6 — to celowa powtórka przed grupowaniem.</div>
+</div></div></section>
+<section id="l07">
+<div class="lab" data-engine="oracle" data-lab="07">
+<div class="lab-head" data-toggle><span class="lab-no">dod.</span><span class="lab-title"><span class="t">Laboratorium dodatkowe — schemat OT (Oracle)</span><small>Złączenia wielotabelowe na rozbudowanym schemacie: klienci, zamówienia, produkty, magazyny i lokalizacje.</small></span><span class="lab-eng">Oracle</span><span class="lab-prog" data-prog></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+<div class="lab-body">
+<div class="conn-card"><span>host <b>localhost</b></span><span>port <b>1521</b></span><span>Service name <b>FREEPDB1</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
+<h4>Czynności wstępne</h4><ol class="tasks">
+<li><input type="checkbox" id="w-07-0"><label for="w-07-0">Docker działa, a poprzednie bazy są zatrzymane.</label></li>
+<li><input type="checkbox" id="w-07-1"><label for="w-07-1">Przejdź do katalogu laboratorium: <code>cd labs/07-ot-rozszerzenie</code>.</label></li>
+<li><input type="checkbox" id="w-07-2"><label for="w-07-2">Przejrzyj diagram ER schematu OT (sekcja „Bazy danych” w tym skoroszycie).</label></li>
+</ol>
+<h4>Przygotowanie bazy</h4>
+<p class="goal">Uruchom bazę (osobny wolumen — nie nadpisuje bazy „Firma handlowa”). Schemat i dane wczytują się ze skryptów <code>ot_schema.sql</code> i <code>ot_data.sql</code>:</p>
+<div class="cmd"><pre><code>docker compose up -d
+docker compose logs -f oracle</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div>
+<div class="callout">Poczekaj na komunikat <code>DATABASE IS READY TO USE!</code>. Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych).</div>
+<div class="callout">Poniższe zadania to propozycje do edycji przez prowadzącego.</div>
+<h4>Zadania</h4><ol class="tasks zadania">
+<li><input type="checkbox" id="z-07-0"><div class="taskmain"><label for="z-07-0">Wyświetl klientów (<code>CUSTOMERS</code>) z limitem kredytowym powyżej 5000, posortowanych malejąco po limicie.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="07:0" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-07-1"><div class="taskmain"><label for="z-07-1">Wyświetl zamówienia (<code>ORDERS</code>) ze statusem „Pending” wraz z nazwą klienta.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="07:1" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-07-2"><div class="taskmain"><label for="z-07-2">Policz zamówienia każdego klienta (nazwa klienta, liczba zamówień), od największej liczby.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="07:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-07-3"><div class="taskmain"><label for="z-07-3">Oblicz wartość zamówienia jako sumę <code>quantity * unit_price</code> z tabeli <code>ORDER_ITEMS</code> dla 10 zamówień o największej wartości.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="07:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-07-4"><div class="taskmain"><label for="z-07-4">Wyświetl produkty (<code>PRODUCTS</code>) z kategorii „CPU” (<code>PRODUCT_CATEGORIES</code>) wraz z ceną cennikową.</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="07:4" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-07-5"><div class="taskmain"><label for="z-07-5">Wyświetl magazyny (<code>WAREHOUSES</code>) wraz z miastem i nazwą kraju (<code>LOCATIONS</code>, <code>COUNTRIES</code>).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="07:5" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-07-6"><div class="taskmain"><label for="z-07-6">Wyświetl pracowników (<code>EMPLOYEES</code>) wraz z nazwiskami ich przełożonych (złączenie tabeli z samą sobą).</label><button type="button" class="ans-toggle">+ rozwiązanie</button><textarea class="ans" data-key="07:6" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+</ol>
+<div class="diff-note"><strong>Uwagi:</strong> Limit liczby wierszy w Oracle zapisujesz jako <code>FETCH FIRST n ROWS ONLY</code>. Skrypt OT ładuje się dłużej niż pozostałe (blisko 3000 poleceń INSERT).</div>
+</div></div></section>
+
+    <section id="sprawozdanie">
+      <h2 class="eyebrow">Praca studenta</h2>
+      <div class="sec-title">Sprawozdanie</div>
+      <p>Wpisz swoje polecenia SQL pod zadaniami (przycisk „+ rozwiązanie”), uzupełnij dane poniżej i wygeneruj sprawozdanie. W oknie drukowania wybierz „Zapisz jako PDF”.</p>
+      <div class="report-form">
+        <div class="fields">
+          <div><label class="fl" for="stud-name">Imię i nazwisko</label><input type="text" id="stud-name" placeholder="np. Jan Kowalski"></div>
+          <div><label class="fl" for="stud-group">Grupa / nr indeksu</label><input type="text" id="stud-group" placeholder="np. INF-2, 123456"></div>
+        </div>
+        <div class="report-actions">
+          <button class="action primary" id="btn-pdf" type="button">Generuj sprawozdanie (PDF)</button>
+          <button class="action" id="btn-save" type="button">Zapisz odpowiedzi (JSON)</button>
+          <label class="action filelabel">Wczytaj odpowiedzi<input type="file" id="file-load" accept="application/json,.json"></label>
+          <button class="action ghost" id="btn-clear" type="button">Wyczyść</button>
+        </div>
+        <p class="rhint">Odpowiedzi zapisują się automatycznie w tej przeglądarce (jeśli to możliwe). Plik JSON pozwala przenieść pracę na inny komputer lub zachować kopię.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="foot">Materiał laboratoryjny · kurs Bazy danych (SQL). Skoroszyt jest generowany z plików <code>lab.yaml</code> (<code>tools/build_site.py</code>). Schemat OT: © oracletutorial.com (do celów edukacyjnych).</div>
+
+<button class="fab" id="fab" type="button">Sprawozdanie (PDF)</button>
+<div id="report"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  function esc(s) {
+    return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; });
+  }
+  function flash(btn, txt) {
+    var o = btn.textContent;
+    btn.textContent = txt;
+    btn.classList.add('done');
+    setTimeout(function () { btn.textContent = o; btn.classList.remove('done'); }, 1400);
+  }
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type || 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ---- rozwijanie laboratoriów ----
+  document.querySelectorAll('[data-toggle]').forEach(function (h) {
+    h.addEventListener('click', function () { h.closest('.lab').classList.toggle('open'); });
+  });
+
+  // ---- kopiowanie / pobieranie ----
+  document.querySelectorAll('.cmd .btn.cp').forEach(function (b) {
+    b.addEventListener('click', async function () {
+      var code = b.closest('.cmd').querySelector('code').textContent;
+      try { await navigator.clipboard.writeText(code); } catch (e) { /* brak uprawnień schowka */ }
+      flash(b, 'Skopiowano');
+    });
+  });
+  document.querySelectorAll('.cmd .btn.dl').forEach(function (b) {
+    b.addEventListener('click', function () {
+      download(b.dataset.name, b.closest('.cmd').querySelector('code').textContent, 'text/plain');
+      flash(b, 'Pobrano');
+    });
+  });
+
+  // ---- zapis stanu (localStorage, z zabezpieczeniem) ----
+  var KEY = 'sql-lab-v2';
+  function store() { try { return window.localStorage; } catch (e) { return null; } }
+  function loadState() {
+    try { var s = store(); return s ? JSON.parse(s.getItem(KEY) || '{}') : {}; } catch (e) { return {}; }
+  }
+  var STATE = loadState();
+  STATE.__meta = STATE.__meta || {};
+  function saveState() { try { var s = store(); if (s) s.setItem(KEY, JSON.stringify(STATE)); } catch (e) { /* ignoruj */ } }
+
+  var nameEl = document.getElementById('stud-name');
+  var groupEl = document.getElementById('stud-group');
+  nameEl.value = STATE.__meta.name || '';
+  groupEl.value = STATE.__meta.group || '';
+  nameEl.addEventListener('input', function () { STATE.__meta.name = nameEl.value; saveState(); });
+  groupEl.addEventListener('input', function () { STATE.__meta.group = groupEl.value; saveState(); });
+
+  // ---- pola na rozwiązania ----
+  function setToggleLabel(li, hidden) {
+    var btn = li.querySelector('.ans-toggle');
+    if (btn) btn.textContent = (hidden ? '+' : '–') + ' rozwiązanie';
+  }
+  document.querySelectorAll('textarea.ans').forEach(function (ta) {
+    var li = ta.closest('li');
+    var key = ta.dataset.key;
+    var btn = li.querySelector('.ans-toggle');
+    if (STATE[key]) { ta.value = STATE[key]; ta.hidden = false; li.classList.add('has-ans'); setToggleLabel(li, false); }
+    btn.addEventListener('click', function () {
+      ta.hidden = !ta.hidden;
+      setToggleLabel(li, ta.hidden);
+      if (!ta.hidden) ta.focus();
+    });
+    ta.addEventListener('input', function () {
+      li.classList.toggle('has-ans', ta.value.trim() !== '');
+      STATE[key] = ta.value;
+      saveState();
+    });
+  });
+
+  function applyState(ns) {
+    STATE = ns || {};
+    STATE.__meta = STATE.__meta || {};
+    saveState();
+    document.querySelectorAll('textarea.ans').forEach(function (ta) {
+      var v = STATE[ta.dataset.key];
+      var has = !!(v && v.trim());
+      ta.value = v || '';
+      ta.hidden = !has;
+      var li = ta.closest('li');
+      li.classList.toggle('has-ans', has);
+      setToggleLabel(li, ta.hidden);
+    });
+    nameEl.value = STATE.__meta.name || '';
+    groupEl.value = STATE.__meta.group || '';
+  }
+
+  // ---- postęp ----
+  function refresh(lab) {
+    var bx = lab.querySelectorAll('ol.tasks input[type=checkbox]');
+    var d = Array.prototype.filter.call(bx, function (x) { return x.checked; }).length;
+    var t = lab.querySelector('[data-prog]');
+    if (t) t.textContent = d + ' / ' + bx.length;
+  }
+  document.querySelectorAll('.lab').forEach(function (lab) {
+    lab.addEventListener('change', function (e) {
+      if (e.target.matches('input[type=checkbox]')) {
+        e.target.closest('li').classList.toggle('done', e.target.checked);
+        refresh(lab);
+      }
+    });
+    refresh(lab);
+  });
+
+  // ---- sprawozdanie (drukowanie do PDF) ----
+  function buildReport() {
+    var name = nameEl.value.trim();
+    var group = groupEl.value.trim();
+    var d = new Date().toLocaleDateString('pl-PL');
+    var h = '<div class="r-h1">Sprawozdanie — Bazy danych (SQL)</div>';
+    h += '<div class="r-meta">' + (name ? '<b>' + esc(name) + '</b>' : '(imię i nazwisko)') +
+         (group ? ' · ' + esc(group) : '') + ' · ' + d + '</div>';
+    var any = false;
+    document.querySelectorAll('.lab').forEach(function (lab) {
+      var no = lab.querySelector('.lab-no').textContent.trim();
+      var title = lab.querySelector('.lab-title .t').textContent.trim();
+      var eng = lab.querySelector('.lab-eng').textContent.trim();
+      var rows = '';
+      lab.querySelectorAll('ol.zadania > li').forEach(function (li, idx) {
+        var ta = li.querySelector('textarea.ans');
+        var val = ta ? ta.value.trim() : '';
+        if (val) {
+          var q = li.querySelector('label').textContent.trim();
+          rows += '<div class="r-task"><div class="r-q"><b>' + (idx + 1) + '.</b> ' + esc(q) +
+                  '</div><pre class="r-a">' + esc(val) + '</pre></div>';
+        }
+      });
+      if (rows) {
+        any = true;
+        h += '<div class="r-lab"><h3>' + esc(no) + ' · ' + esc(title) + ' — ' + esc(eng) + '</h3>' + rows + '</div>';
+      }
+    });
+    if (!any) {
+      h += '<div class="r-empty">Brak wpisanych rozwiązań. Rozwiń zadanie („+ rozwiązanie”), wpisz polecenie SQL i wygeneruj sprawozdanie ponownie.</div>';
+    }
+    document.getElementById('report').innerHTML = h;
+  }
+  document.getElementById('btn-pdf').addEventListener('click', function () { buildReport(); window.print(); });
+  document.getElementById('fab').addEventListener('click', function () {
+    document.getElementById('sprawozdanie').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // ---- zapis / wczytanie JSON, czyszczenie ----
+  document.getElementById('btn-save').addEventListener('click', function () {
+    STATE.__meta.name = nameEl.value;
+    STATE.__meta.group = groupEl.value;
+    saveState();
+    var base = (nameEl.value.trim() || 'sprawozdanie').replace(/\s+/g, '_').toLowerCase();
+    download('odpowiedzi_' + base + '.json', JSON.stringify(STATE, null, 2), 'application/json');
+  });
+  document.getElementById('file-load').addEventListener('change', function (e) {
+    var f = e.target.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      try { applyState(JSON.parse(r.result)); } catch (err) { alert('Nie udało się wczytać pliku JSON.'); }
+    };
+    r.readAsText(f);
+    e.target.value = '';
+  });
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    if (!confirm('Usunąć wszystkie wpisane rozwiązania?')) return;
+    applyState({ __meta: { name: nameEl.value, group: groupEl.value } });
+  });
+
+  // ---- aktywna pozycja w menu bocznym ----
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var map = {};
+  links.forEach(function (a) {
+    var id = a.getAttribute('href').slice(1);
+    if (document.getElementById(id)) map[id] = a;
+  });
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (es) {
+      es.forEach(function (en) {
+        if (en.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          var a = map[en.target.id];
+          if (a) a.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    Object.keys(map).forEach(function (id) { obs.observe(document.getElementById(id)); });
+  }
+})();
+
+</script>
+</body>
+</html>

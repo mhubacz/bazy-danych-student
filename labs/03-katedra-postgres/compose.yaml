@@ -1,0 +1,26 @@
+# Laboratorium 3/6 — baza „Katedra” na PostgreSQL.
+# Skrypty z katalogu init/ wykonują się AUTOMATYCZNIE przy pierwszym starcie (pusty wolumen).
+# Reset do stanu początkowego:  docker compose down -v && docker compose up -d --wait
+name: lab03-katedra
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: student
+      POSTGRES_DB: katedra
+    ports: ["5432:5432"]
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # test przez TCP: tymczasowy serwer z fazy inicjalizacji nasłuchuje tylko na gnieździe unix,
+      # więc „healthy" oznacza, że init/ już się skończył
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U student -d katedra"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pg-data:

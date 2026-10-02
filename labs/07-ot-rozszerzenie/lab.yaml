@@ -1,0 +1,28 @@
+id: "07"
+numer: "dod."
+skrot: "OT (dodatkowe)"
+tytul: "Laboratorium dodatkowe — schemat OT (Oracle)"
+cel: "Złączenia wielotabelowe na rozbudowanym schemacie: klienci, zamówienia, produkty, magazyny i lokalizacje."
+silnik: oracle
+baza: OT
+polaczenie: "host: localhost · port: 1521 · Service name: FREEPDB1 · użytkownik: student · hasło: student"
+wstep:
+  - "Docker działa, a poprzednie bazy są zatrzymane."
+  - "Przejdź do katalogu laboratorium: `cd labs/07-ot-rozszerzenie`."
+  - "Przejrzyj diagram ER schematu OT (sekcja „Bazy danych” w tym skoroszycie)."
+przygotowanie:
+  - opis: "Uruchom bazę (osobny wolumen — nie nadpisuje bazy „Firma handlowa”). Schemat i dane wczytują się ze skryptów `ot_schema.sql` i `ot_data.sql`:"
+    kod: |
+      docker compose up -d
+      docker compose logs -f oracle
+  - uwaga: "Poczekaj na komunikat `DATABASE IS READY TO USE!`. Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych)."
+  - uwaga: "Poniższe zadania to propozycje do edycji przez prowadzącego."
+zadania:
+  - "Wyświetl klientów (`CUSTOMERS`) z limitem kredytowym powyżej 5000, posortowanych malejąco po limicie."
+  - "Wyświetl zamówienia (`ORDERS`) ze statusem „Pending” wraz z nazwą klienta."
+  - "Policz zamówienia każdego klienta (nazwa klienta, liczba zamówień), od największej liczby."
+  - "Oblicz wartość zamówienia jako sumę `quantity * unit_price` z tabeli `ORDER_ITEMS` dla 10 zamówień o największej wartości."
+  - "Wyświetl produkty (`PRODUCTS`) z kategorii „CPU” (`PRODUCT_CATEGORIES`) wraz z ceną cennikową."
+  - "Wyświetl magazyny (`WAREHOUSES`) wraz z miastem i nazwą kraju (`LOCATIONS`, `COUNTRIES`)."
+  - "Wyświetl pracowników (`EMPLOYEES`) wraz z nazwiskami ich przełożonych (złączenie tabeli z samą sobą)."
+uwaga_silnik: "Limit liczby wierszy w Oracle zapisujesz jako `FETCH FIRST n ROWS ONLY`. Skrypt OT ładuje się dłużej niż pozostałe (blisko 3000 poleceń INSERT)."

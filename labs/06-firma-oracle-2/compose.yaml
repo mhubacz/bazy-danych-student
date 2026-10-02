@@ -1,0 +1,28 @@
+# Laboratorium 06/6 — baza „Firma handlowa” na Oracle Database Free.
+# Lab 6 kontynuuje bazę z labu 5: ten sam projekt, ten sam wolumen, ten sam skrypt startowy.
+# Pierwszy start trwa kilka minut (inicjalizacja bazy + ładowanie danych).
+# Gotowość: w logach pojawia się „DATABASE IS READY TO USE!"  (docker compose logs -f)
+# Reset do stanu początkowego:  docker compose down -v && docker compose up -d
+name: lab-firma-oracle
+
+services:
+  oracle:
+    image: gvenzl/oracle-free:23
+    environment:
+      ORACLE_PASSWORD: student
+      APP_USER: student
+      APP_USER_PASSWORD: student
+    ports: ["1521:1521"]
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ../05-firma-oracle-1/init:/container-entrypoint-initdb.d:ro
+      - ../../shared/oracle:/lab-sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+      start_period: 120s
+
+volumes:
+  oracle-data:

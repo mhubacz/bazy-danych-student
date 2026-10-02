@@ -1,0 +1,26 @@
+# Laboratorium dodatkowe — schemat OT (Oracle Tutorial Sample Database) na Oracle Database Free.
+# Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych, z podaniem źródła).
+# Własny wolumen — nie nadpisuje bazy „Firma handlowa”.
+name: lab-ot-oracle
+
+services:
+  oracle:
+    image: gvenzl/oracle-free:23
+    environment:
+      ORACLE_PASSWORD: student
+      APP_USER: student
+      APP_USER_PASSWORD: student
+    ports: ["1521:1521"]
+    volumes:
+      - oracle-ot-data:/opt/oracle/oradata
+      - ./init:/container-entrypoint-initdb.d:ro
+      - ../../shared/ot:/lab-sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+      start_period: 120s
+
+volumes:
+  oracle-ot-data:

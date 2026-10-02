@@ -1,0 +1,32 @@
+id: "05"
+numer: "5/6"
+skrot: "Firma handlowa I"
+tytul: "Baza „Firma handlowa” — część I"
+cel: "Warunki złożone, przedziały, daty i pierwsze złączenia."
+silnik: oracle
+baza: Firma handlowa
+polaczenie: "host: localhost · port: 1521 · Service name: FREEPDB1 · użytkownik: student · hasło: student"
+wstep:
+  - "Docker działa, a poprzednie bazy są zatrzymane."
+  - "Przejdź do katalogu laboratorium: `cd labs/05-firma-oracle-1`."
+przygotowanie:
+  - opis: "Uruchom bazę. Pierwszy start trwa kilka minut — Oracle inicjalizuje się, a skrypt `init/01_firma.sql` ładuje dane ze skryptu `bdemobld.sql`:"
+    kod: |
+      docker compose up -d
+      docker compose logs -f oracle
+  - uwaga: "Gdy w logach pojawi się `DATABASE IS READY TO USE!`, zakończ podgląd (Ctrl+C) i połącz się w DBeaver — wybierz połączenie przez **Service name** `FREEPDB1`. Błędy `ORA-00942` na początku ładowania (instrukcje DROP nieistniejących tabel) są normalne. Laboratorium 6/6 kontynuuje tę samą bazę."
+zadania:
+  - "Wprowadź do tabeli `CUSTOMER` nowy wpis, podając w kolumnie `NAME` swoje imię i nazwisko. Pozostałe dane wg własnego uznania."
+  - "Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników (`EMPLOYEE`), którzy otrzymują prowizję większą niż 900 lub mniejszą niż 500."
+  - "Napisz polecenie SQL zwracające wyroby (nazwa) wraz z ceną minimalną i cennikową (`PRODUCT`, `PRICE`), w których opisie występuje słowo „TENNIS”, a nie ma słowa „BALL”."
+  - "Napisz polecenie SQL zwracające klientów z miast „DALLAS” i „NEW YORK”, których limit kredytowy przekracza 10000."
+  - "Napisz polecenie SQL zwracające nazwiska i imiona pracowników pracujących na etacie „STAFF” i „SALESPERSON” (tabela `JOBS`), zatrudnionych po 1 kwietnia 1985."
+  - "Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników, których podwójna prowizja jest większa od pensji i zostali zatrudnieni po 1 maja 1985."
+  - "Napisz polecenie SQL zwracające zamówienia (identyfikator, data, wartość) z tabeli `SALES_ORDER`, których wartość przekracza 1000."
+  - "Wprowadź do tabeli `EMPLOYEE` nowy wpis, podając swoje imię i nazwisko. Pozostałe dane wg własnego uznania."
+  - "Napisz polecenie SQL zwracające identyfikatory zamówień sprzed 2 kwietnia 1990, których wartość przekracza 1000."
+  - "Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników zatrudnionych po 31 marca 1985, którzy otrzymują prowizję."
+  - "Napisz polecenie SQL zwracające klientów i ich sprzedawców z limitem kredytowym powyżej 5000 (nazwa, adres, limit, nazwisko i imię pracownika — sprzedawcy)."
+  - "Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników, których pensja mieści się w przedziale 2000–3000."
+  - "Napisz polecenie SQL zwracające zamówienia (identyfikator zamówienia, data jego złożenia, nazwa klienta) dla zamówień o wartości powyżej 200."
+uwaga_silnik: "Daty zapisuj jako `DATE '1985-04-01'`. Imię i nazwisko łączysz operatorem `||`. Zapytanie bez tabeli wymaga `FROM dual`. W DBeaver domyślnie działa tryb auto-commit, więc `INSERT` zatwierdza się od razu."

@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+# lab — pomocnik do laboratoriów z baz danych.
+# Użycie:  ./lab <polecenie> [numer] [usługa]      (./lab help — pełna lista)
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LABS="$ROOT/labs"
+
+usage() {
+  cat << 'HELP'
+Użycie: ./lab <polecenie> [numer]
+
+  list            lista laboratoriów (numer, silnik, tytuł)
+  up N            uruchom bazę laboratorium N (inne laboratoria zostaną zatrzymane)
+  down [N]        zatrzymaj laboratorium N (bez N: wszystkie); dane zostają
+  reset N         wróć do stanu początkowego (KASUJE dane tego laboratorium)
+  shell N [usł.]  otwórz konsolę SQL w kontenerze (np. ./lab shell 2 postgres)
+  logs N          pokaż logi (Ctrl+C kończy)
+  status          pokaż działające kontenery
+  clean           usuń wszystkie kontenery i dane laboratoriów (KASUJE dane)
+  site            otwórz skoroszyt z instrukcjami w przeglądarce
+  update          pobierz najnowsze materiały z repozytorium (git pull)
+
+Przykład:  ./lab up 3   →  baza „Katedra” na PostgreSQL gotowa do pracy
+HELP
+}
+
+die() { echo "Błąd: $*" >&2; exit 1; }
+
+need_docker() {
+  command -v docker > /dev/null 2>&1 || die "nie znaleziono Dockera. Zainstaluj go (patrz docs/INSTALACJA.md)."
+  docker compose version > /dev/null 2>&1 || die "brak polecenia 'docker compose' (potrzebny Docker Compose v2)."
+  docker info > /dev/null 2>&1 || die "Docker nie odpowiada lub brak uprawnień. Zobacz docs/ROZWIAZYWANIE-PROBLEMOW.md."
+}
+
+lab_dir() {
+  local n d
+  [[ "${1:-}" =~ ^[0-9]+$ ]] || die "podaj numer laboratorium (./lab list)."
+  n="$(printf '%02d' "$((10#$1))")"
+  d="$(find "$LABS" -maxdepth 1 -type d -name "$n-*" | head -n 1)"
+  [ -n "$d" ] || die "nie ma laboratorium $1 (./lab list)."
+  echo "$d"
+}
+
+# Czyta pole z lab.yaml zapisane w jednej linii:  klucz: "wartość"
+yaml_field() {
+  sed -n "s/^$2: *\"\{0,1\}\(.*[^\"]\)\"\{0,1\} *$/\1/p" "$1" | head -n 1
+}
+
+stop_all() {
+  local f
+  for f in "$LABS"/*/compose.yaml; do
+    [ -f "$f" ] || continue
+    docker compose -f "$f" stop > /dev/null 2>&1 || true
+  done
+}
+
+wait_oracle() {
+  local f="$1" i=0
+  # healthcheck (--wait) wyłapuje ponowne starty; komunikat w logach potwierdza, że skończyły się skrypty init/ (pierwszy start)
+  echo -n "Sprawdzam komunikat gotowości w logach"
+  until docker compose -f "$f" logs oracle 2>&1 | grep -q "DATABASE IS READY TO USE"; do
+    i=$((i + 1))
+    if [ "$i" -gt 180 ]; then
+      echo
+      die "Oracle nie wystartował w 15 min. Sprawdź logi: ./lab logs N"
+    fi
+    echo -n "."
+    sleep 5
+  done
+  echo " gotowe."
+}
+
+confirm() {
+  local ans
+  read -r -p "$1 [t/N] " ans
+  if [[ ! "$ans" =~ ^[tTyY]$ ]]; then
+    echo "Anulowano."
+    exit 0
+  fi
+}
+
+cmd_list() {
+  local d id sil tyt
+  printf '%-4s %-11s %s\n' "NR" "SILNIK" "TYTUŁ"
+  for d in "$LABS"/*/; do
+    [ -f "$d/lab.yaml" ] || continue
+    id="$(yaml_field "$d/lab.yaml" id)"
+    sil="$(yaml_field "$d/lab.yaml" silnik)"
+    tyt="$(yaml_field "$d/lab.yaml" tytul)"
+    printf '%-4s %-11s %s\n' "$id" "$sil" "$tyt"
+  done
+}
+
+cmd_up() {
+  need_docker
+  local d f
+  d="$(lab_dir "${1:-}")"
+  f="$d/compose.yaml"
+  if [ ! -f "$f" ]; then
+    echo "To laboratorium nie ma pliku compose.yaml — wykonujesz je ręcznie wg instrukcji."
+    return 0
+  fi
+  echo "Zatrzymuję inne laboratoria (porty są wspólne)..."
+  stop_all
+  echo "Uruchamiam: $(basename "$d")"
+  if grep -q "gvenzl/oracle" "$f"; then
+    echo "Oracle uruchamia się kilka minut (pierwszy start jeszcze dłużej, bo ładuje dane) — proszę czekać..."
+    docker compose -f "$f" up -d --wait || die "Oracle nie osiągnął stanu gotowości. Sprawdź logi: ./lab logs $1"
+    wait_oracle "$f"
+  else
+    docker compose -f "$f" up -d --wait
+  fi
+  echo
+  echo "Połączenie (DBeaver): $(yaml_field "$d/lab.yaml" polaczenie)"
+}
+
+cmd_down() {
+  need_docker
+  if [ -z "${1:-}" ]; then
+    stop_all
+    echo "Zatrzymano wszystkie laboratoria (dane zostały)."
+    return 0
+  fi
+  local d
+  d="$(lab_dir "$1")"
+  [ -f "$d/compose.yaml" ] || die "to laboratorium nie ma compose.yaml."
+  docker compose -f "$d/compose.yaml" down
+  echo "Zatrzymano (dane zostały). Reset do stanu początkowego: ./lab reset $1"
+}
+
+cmd_reset() {
+  need_docker
+  local d f
+  d="$(lab_dir "${1:-}")"
+  f="$d/compose.yaml"
+  [ -f "$f" ] || die "to laboratorium nie ma compose.yaml."
+  confirm "Skasować dane laboratorium $(basename "$d") i zacząć od nowa?"
+  docker compose -f "$f" down -v
+  cmd_up "$1"
+}
+
+cmd_shell() {
+  need_docker
+  local d f svc
+  d="$(lab_dir "${1:-}")"
+  f="$d/compose.yaml"
+  [ -f "$f" ] || die "to laboratorium nie ma compose.yaml."
+  svc="${2:-$(docker compose -f "$f" config --services | grep -E '^(postgres|mysql|oracle)$' | head -n 1)}"
+  case "$svc" in
+    postgres) docker compose -f "$f" exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' ;;
+    mysql)    docker compose -f "$f" exec mysql sh -c 'mysql --default-character-set=utf8mb4 -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' ;;
+    oracle)   docker compose -f "$f" exec oracle sqlplus student/student@//localhost/FREEPDB1 ;;
+    *)        die "nieznana usługa '$svc' (postgres, mysql lub oracle)." ;;
+  esac
+}
+
+cmd_logs() {
+  need_docker
+  local d
+  d="$(lab_dir "${1:-}")"
+  docker compose -f "$d/compose.yaml" logs -f
+}
+
+cmd_status() {
+  need_docker
+  docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+}
+
+cmd_clean() {
+  need_docker
+  confirm "Usunąć WSZYSTKIE kontenery i dane laboratoriów?"
+  local f
+  for f in "$LABS"/*/compose.yaml; do
+    [ -f "$f" ] || continue
+    docker compose -f "$f" down -v > /dev/null 2>&1 || true
+  done
+  docker rm -f pg-lab mysql-lab oracle-lab > /dev/null 2>&1 || true
+  echo "Posprzątano."
+}
+
+cmd_site() {
+  local f="$ROOT/docs/index.html"
+  [ -f "$f" ] || die "brak pliku $f"
+  if command -v xdg-open > /dev/null 2>&1; then
+    xdg-open "$f" > /dev/null 2>&1 &
+  elif command -v open > /dev/null 2>&1; then
+    open "$f"
+  else
+    echo "Otwórz w przeglądarce: $f"
+  fi
+}
+
+cmd_update() {
+  command -v git > /dev/null 2>&1 || die "brak gita."
+  [ -d "$ROOT/.git" ] || die "to nie jest klon repozytorium (brak .git). Pobierz nową paczkę."
+  if [ "${1:-}" = "--force" ]; then
+    git -C "$ROOT" fetch --quiet origin
+    git -C "$ROOT" reset --hard '@{u}'
+  else
+    git -C "$ROOT" pull --ff-only || die "nie udało się zaktualizować (lokalne zmiany?). Zapisz swoje pliki poza katalogiem repo i użyj: ./lab update --force"
+  fi
+  echo "Materiały zaktualizowane."
+}
+
+case "${1:-help}" in
+  list)   cmd_list ;;
+  up)     cmd_up "${2:-}" ;;
+  down)   cmd_down "${2:-}" ;;
+  reset)  cmd_reset "${2:-}" ;;
+  shell)  cmd_shell "${2:-}" "${3:-}" ;;
+  logs)   cmd_logs "${2:-}" ;;
+  status) cmd_status ;;
+  clean)  cmd_clean ;;
+  site)   cmd_site ;;
+  update) cmd_update "${2:-}" ;;
+  help|-h|--help) usage ;;
+  *) usage; exit 1 ;;
+esac

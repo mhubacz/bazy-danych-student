@@ -15,7 +15,7 @@ cd bazy-danych-student
 
 Możesz też użyć paczki ZIP z e-learningu.
 
-3. **Otwórz instrukcje** — skoroszyt ze wszystkimi laboratoriami otworzy się w przeglądarce:
+3. **Otwórz instrukcje** — strona ze wszystkimi laboratoriami otworzy się w przeglądarce:
 
 ```
 ./lab site
@@ -48,7 +48,7 @@ Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z ins
 
 | Polecenie | Co robi |
 |---|---|
-| `./lab site` | otwiera instrukcje (skoroszyt) w przeglądarce |
+| `./lab site` | otwiera stronę z instrukcjami w przeglądarce |
 | `./lab list` | lista laboratoriów |
 | `./lab up N` | uruchamia bazę laboratorium N (zatrzymuje inne) |
 | `./lab shell N` | konsola SQL w kontenerze |
@@ -73,7 +73,7 @@ Naraz działa jedno laboratorium (porty są wspólne).
 lab, install-linux.sh     pomocnik i instalator dla Linuxa
 labs/                     laboratoria: lab.yaml, compose.yaml, init/ (skrypty SQL)
 shared/                   wspólne skrypty Oracle i schemat OT
-docs/                     skoroszyt index.html, instrukcje i pomoc
+docs/                     strona z instrukcjami (index.html), wydruki i pomoc
 ```
 
 Schemat bazy OT: © oracletutorial.com, do celów edukacyjnych (zob. `shared/ot/NOTICE.md`).

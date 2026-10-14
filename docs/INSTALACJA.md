@@ -4,7 +4,7 @@ Potrzebujesz trzech rzeczy: **Dockera** (uruchamia bazy), **DBeavera** (klient d
 Instrukcja dla własnego komputera (Windows, macOS, Linux).
 
 Wymagania: ok. 20 GB wolnego miejsca (obrazy baz zajmują kilka GB) i co najmniej 8 GB pamięci RAM.
-Najbardziej wymagająca jest baza Oracle — w ustawieniach Dockera przydziel mu minimum 4 GB RAM.
+Najbardziej wymagająca jest baza Oracle — Docker musi mieć do dyspozycji co najmniej 4 GB RAM (macOS: *Settings → Resources*; Windows z WSL 2: limit ustala WSL, domyślnie połowa pamięci komputera).
 
 ## Windows
 
@@ -21,7 +21,7 @@ cd bazy-danych-student
 
 Jeśli prowadzący udostępnił paczkę ZIP — rozpakuj ją i wejdź do katalogu.
 
-5. **Instrukcje:** otwórz skoroszyt w przeglądarce (PowerShell, w katalogu repozytorium):
+5. **Instrukcje:** otwórz stronę z instrukcjami w przeglądarce (PowerShell, w katalogu repozytorium):
 
 ```
 start docs\index.html

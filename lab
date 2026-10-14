@@ -18,7 +18,7 @@ Użycie: ./lab <polecenie> [numer]
   logs N          pokaż logi (Ctrl+C kończy)
   status          pokaż działające kontenery
   clean           usuń wszystkie kontenery i dane laboratoriów (KASUJE dane)
-  site            otwórz skoroszyt z instrukcjami w przeglądarce
+  site            otwórz stronę z instrukcjami w przeglądarce
   update          pobierz najnowsze materiały z repozytorium (git pull)
 
 Przykład:  ./lab up 3   →  baza „Katedra” na PostgreSQL gotowa do pracy

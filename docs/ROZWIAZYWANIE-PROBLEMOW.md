@@ -32,7 +32,7 @@ Kontener o tej nazwie został z wcześniejszego podejścia — jest tylko zatrzy
 
 **Oracle długo startuje albo kończy się błędem**
 Pierwszy start trwa kilka minut. Obserwuj: `./lab logs 5`. Gotowość oznacza komunikat `DATABASE IS READY TO USE!`.
-Jeśli kontener się restartuje lub znika, najczęściej brakuje pamięci: w Docker Desktop zwiększ RAM (*Settings → Resources*) do co najmniej 4 GB.
+Jeśli kontener się restartuje lub znika, najczęściej brakuje pamięci. Docker potrzebuje co najmniej 4 GB RAM: na macOS ustawisz to w Docker Desktop (*Settings → Resources*), na Windows z WSL 2 w pliku `%UserProfile%\.wslconfig` (sekcja `[wsl2]`, np. `memory=6GB`, potem `wsl --shutdown`).
 Komunikaty `ORA-00942` na początku ładowania danych (instrukcje DROP nieistniejących tabel) są normalne.
 
 **Tabele nie istnieją, choć uruchomiłem laboratorium**
@@ -43,7 +43,7 @@ Skrypty z `init/` wykonują się **tylko przy pierwszym starcie z pustym wolumen
 `./lab reset N` (z pytaniem o potwierdzenie). Laboratoria 5 i 6 współdzielą bazę — reset jednego resetuje oba.
 
 **Zniekształcone polskie znaki w MySQL**
-W DBeaver połączenie powinno używać UTF-8 (to domyślne ustawienie). Przy pracy w konsoli kontenera użyj `./lab shell 4`, która ustawia `utf8mb4`.
+W DBeaver połączenie powinno używać UTF-8 (to domyślne ustawienie). Przy pracy w konsoli kontenera użyj polecenia `./lab shell 4`, które ustawia `utf8mb4`.
 Jeśli dane już zostały załadowane błędnie, wykonaj `./lab reset 4`.
 
 ## Połączenie w DBeaver

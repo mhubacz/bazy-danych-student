@@ -28,7 +28,7 @@ docker compose logs -f oracle
 2. Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników (`EMPLOYEE`), którzy otrzymują prowizję większą niż 900 lub mniejszą niż 500.
 3. Napisz polecenie SQL zwracające wyroby (nazwa) wraz z ceną minimalną i cennikową (`PRODUCT`, `PRICE`), w których opisie występuje słowo „TENNIS”, a nie ma słowa „BALL”.
 4. Napisz polecenie SQL zwracające klientów z miast „DALLAS” i „NEW YORK”, których limit kredytowy przekracza 10000.
-5. Napisz polecenie SQL zwracające nazwiska i imiona pracowników pracujących na etacie „STAFF” i „SALESPERSON” (tabela `JOBS`), zatrudnionych po 1 kwietnia 1985.
+5. Napisz polecenie SQL zwracające nazwiska i imiona pracowników pracujących na etatach „STAFF” lub „SALESPERSON” (tabela `JOBS`), zatrudnionych po 1 kwietnia 1985.
 6. Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników, których podwójna prowizja jest większa od pensji i zostali zatrudnieni po 1 maja 1985.
 7. Napisz polecenie SQL zwracające zamówienia (identyfikator, data, wartość) z tabeli `SALES_ORDER`, których wartość przekracza 1000.
 8. Wprowadź do tabeli `EMPLOYEE` nowy wpis, podając swoje imię i nazwisko. Pozostałe dane wg własnego uznania.
@@ -40,5 +40,5 @@ docker compose logs -f oracle
 
 ## Uwagi
 
-Daty zapisuj jako `DATE '1985-04-01'`. Imię i nazwisko łączysz operatorem `||`. Zapytanie bez tabeli wymaga `FROM dual`. W DBeaver domyślnie działa tryb auto-commit, więc `INSERT` zatwierdza się od razu.
+Daty zapisuj jako `DATE '1985-04-01'`. Imię i nazwisko łączysz operatorem `||`. Zapytanie bez tabeli zapisuje się w Oracle tradycyjnie z `FROM dual` (od wersji 23ai `FROM` można pominąć). W DBeaver domyślnie działa tryb auto-commit, więc `INSERT` zatwierdza się od razu.
 

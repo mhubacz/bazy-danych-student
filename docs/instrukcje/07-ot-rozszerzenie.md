@@ -10,7 +10,7 @@
 
 1. Docker działa, a poprzednie bazy są zatrzymane.
 2. Przejdź do katalogu laboratorium: `cd labs/07-ot-rozszerzenie`.
-3. Przejrzyj diagram ER schematu OT (sekcja „Bazy danych” w tym skoroszycie).
+3. Przejrzyj diagram ER schematu OT (sekcja „Bazy danych” na stronie z instrukcjami).
 
 ## Przygotowanie bazy
 
@@ -22,8 +22,6 @@ docker compose logs -f oracle
 ```
 
 > Poczekaj na komunikat `DATABASE IS READY TO USE!`. Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych).
-
-> Poniższe zadania to propozycje do edycji przez prowadzącego.
 
 ## Zadania
 

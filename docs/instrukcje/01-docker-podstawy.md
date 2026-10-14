@@ -14,7 +14,7 @@
 
 ## Przygotowanie bazy
 
-Pobierz obrazy trzech silników (Oracle ma ok. 1,1 GB — pobieranie chwilę trwa):
+Pobierz obrazy trzech silników (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa):
 
 ```bash
 docker pull postgres:17
@@ -47,11 +47,11 @@ docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e A
 3. Utwórz tabelę `pracownik` (id, nazwisko, etat, placa) i dodaj kilka wierszy poleceniem `INSERT`.
 4. Wyświetl dane: `SELECT * FROM pracownik;`
 5. Połącz się z MySQL (port `3306`, baza `student`) oraz z Oracle (port `1521`, połączenie przez **Service name** `FREEPDB1`, użytkownik `student`). Powtórz dwa poprzednie kroki i zanotuj różnice w składni.
-6. Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, że dane zostały.
+6. Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, czy dane zostały zachowane.
 7. Usuń kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`. Uruchom `pg-lab` od nowa tym samym poleceniem i sprawdź, co stało się z danymi.
-8. Dla chętnych: wejdź do kontenera i wykonaj zapytanie z linii poleceń — `docker exec -it pg-lab psql -U student`.
+8. Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`.
 
 ## Uwagi
 
-Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (zadanie 7) — porty muszą być wolne.
+Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (polecenie z zadania 7) — porty muszą być wolne.
 

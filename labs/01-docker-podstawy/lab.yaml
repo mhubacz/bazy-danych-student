@@ -10,7 +10,7 @@ wstep:
   - "Sprawdź instalację: `docker --version` oraz `docker compose version`."
   - "Zainstaluj klienta DBeaver Community."
 przygotowanie:
-  - opis: "Pobierz obrazy trzech silników (Oracle ma ok. 1,1 GB — pobieranie chwilę trwa):"
+  - opis: "Pobierz obrazy trzech silników (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa):"
     kod: |
       docker pull postgres:17
       docker pull mysql:8.4
@@ -31,7 +31,7 @@ zadania:
   - "Utwórz tabelę `pracownik` (id, nazwisko, etat, placa) i dodaj kilka wierszy poleceniem `INSERT`."
   - "Wyświetl dane: `SELECT * FROM pracownik;`"
   - "Połącz się z MySQL (port `3306`, baza `student`) oraz z Oracle (port `1521`, połączenie przez **Service name** `FREEPDB1`, użytkownik `student`). Powtórz dwa poprzednie kroki i zanotuj różnice w składni."
-  - "Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, że dane zostały."
+  - "Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, czy dane zostały zachowane."
   - "Usuń kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`. Uruchom `pg-lab` od nowa tym samym poleceniem i sprawdź, co stało się z danymi."
-  - "Dla chętnych: wejdź do kontenera i wykonaj zapytanie z linii poleceń — `docker exec -it pg-lab psql -U student`."
-uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (zadanie 7) — porty muszą być wolne."
+  - "Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`."
+uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (polecenie z zadania 7) — porty muszą być wolne."

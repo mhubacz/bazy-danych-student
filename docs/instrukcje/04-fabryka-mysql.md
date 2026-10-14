@@ -32,9 +32,9 @@ docker compose up -d --wait
 7. Napisz polecenie SQL zwracające maszyny, których jeszcze nie uruchomiono.
 8. Napisz polecenie SQL zwracające nazwiska i płace operatorów, którzy mają przełożonych.
 9. Napisz polecenie SQL zwracające maszyny uruchomione między rokiem 2010 a 2012.
-10. Napisz polecenie SQL zwracające maszyny ze wszystkich hal poza 1.
+10. Napisz polecenie SQL zwracające maszyny ze wszystkich hal poza halą nr 1.
 11. Napisz polecenie SQL zwracające daty wszystkich awarii oraz nazwy maszyn, które im uległy.
-12. Napisz polecenie zwracające maszyny wraz z nazwami operatorów, które je obsługują.
+12. Napisz polecenie zwracające maszyny wraz z imionami i nazwiskami operatorów, którzy je obsługują.
 13. Napisz polecenie SQL zwracające nazwy maszyn oraz nazwy hal, w których te maszyny się znajdują.
 
 ## Uwagi

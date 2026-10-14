@@ -28,12 +28,12 @@ docker compose up -d --wait
 3. Wyświetl nazwiska i etaty wszystkich asystentów zespołu 20.
 4. Wyświetl nazwiska i pensje oraz identyfikatory zespołów pracowników, których miesięczna pensja przekracza 2000.
 5. Oblicz całkowite dochody roczne wszystkich profesorów.
-6. Wybierz wszystkich pracowników, których pensja podstawowa jest mniejsza od dwukrotnej pensji dodatkowej.
+6. Wybierz wszystkich pracowników, których płaca podstawowa jest mniejsza od dwukrotności płacy dodatkowej.
 7. Wyznacz wszystkich adiunktów i profesorów, których płaca podstawowa jest wyższa od 1750.
-8. Sporządź spis wszystkich asystentów w kolejności ustalonej datą ich zatrudnienia.
-9. Wyświetl nazwiska pracowników rozpoczynające się od litery „M”.
+8. Sporządź listę wszystkich asystentów uporządkowaną według daty zatrudnienia.
+9. Wyświetl nazwiska pracowników zaczynające się na literę „M”.
 
 ## Uwagi
 
-W zadaniu 9 `LIKE 'M%'` w PostgreSQL rozróżnia wielkość liter — użyj `ILIKE`, jeśli chcesz ją pominąć. W zadaniu 6 żaden pracownik nie spełnia warunku, więc pusty wynik jest poprawny; zwróć uwagę, jak SQL traktuje wartości NULL w pensji dodatkowej.
+W zadaniu 9 `LIKE 'M%'` w PostgreSQL rozróżnia wielkość liter — użyj `ILIKE`, jeśli chcesz ją pominąć. W zadaniu 6 żaden pracownik nie spełnia warunku, więc pusty wynik jest poprawny; zwróć uwagę, jak SQL traktuje wartości NULL w kolumnie `placa_dod`.
 

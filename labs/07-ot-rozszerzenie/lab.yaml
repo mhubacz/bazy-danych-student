@@ -9,14 +9,13 @@ polaczenie: "host: localhost · port: 1521 · Service name: FREEPDB1 · użytkow
 wstep:
   - "Docker działa, a poprzednie bazy są zatrzymane."
   - "Przejdź do katalogu laboratorium: `cd labs/07-ot-rozszerzenie`."
-  - "Przejrzyj diagram ER schematu OT (sekcja „Bazy danych” w tym skoroszycie)."
+  - "Przejrzyj diagram ER schematu OT (sekcja „Bazy danych” na stronie z instrukcjami)."
 przygotowanie:
   - opis: "Uruchom bazę (osobny wolumen — nie nadpisuje bazy „Firma handlowa”). Schemat i dane wczytują się ze skryptów `ot_schema.sql` i `ot_data.sql`:"
     kod: |
       docker compose up -d
       docker compose logs -f oracle
   - uwaga: "Poczekaj na komunikat `DATABASE IS READY TO USE!`. Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych)."
-  - uwaga: "Poniższe zadania to propozycje do edycji przez prowadzącego."
 zadania:
   - "Wyświetl klientów (`CUSTOMERS`) z limitem kredytowym powyżej 5000, posortowanych malejąco po limicie."
   - "Wyświetl zamówienia (`ORDERS`) ze statusem „Pending” wraz z nazwą klienta."

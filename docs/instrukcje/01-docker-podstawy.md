@@ -49,15 +49,11 @@ docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e A
 
    W DBeaver: *Database* → *New Database Connection* → **PostgreSQL** → *Next*. Wpisz host, port, bazę, użytkownika i hasło, kliknij *Test Connection* (za pierwszym razem DBeaver zaproponuje pobranie sterownika — zgódź się), potem *Finish*.
 
-   **Ważne:** domyślny, uproszczony widok drzewa nie pozwala tworzyć tabel graficznie. Od razu po utworzeniu połączenia kliknij je prawym przyciskiem → *Edit Connection* → *General* → *Navigator view*: **Advanced** → *OK*. Zrób to samo dla połączeń MySQL i Oracle w zadaniu 5.
-
-3. Utwórz tabelę `pracownik` (id, nazwisko, etat, placa) i dodaj kilka wierszy (np. poleceniem `INSERT`).
+3. Utwórz tabelę `pracownik` (id, nazwisko, etat, placa) i dodaj kilka wierszy poleceniem `INSERT`.
 
    **Podpowiedź:**
 
-   **Sposób 1 — graficznie** (wymaga widoku drzewa *Advanced* — zob. podpowiedź do zadania 2). Rozwiń `student` → `Databases` → `student` → `Schemas` → `public`, kliknij prawym przyciskiem `Tables` → *Create New Table*. Wpisz nazwę tabeli, w zakładce *Columns* dodaj kolumny (prawy przycisk → *Create New Column*) i zapisz (**Ctrl+S**). Przed zapisem DBeaver pokaże polecenie SQL, które wykona za Ciebie — przeczytaj je, przyda się w zadaniu 5. Wiersze dodasz w zakładce *Data* (przycisk dodawania wiersza, potem **Ctrl+S**).
-
-   **Sposób 2 — poleceniem SQL.** Otwórz edytor SQL (prawy przycisk na połączeniu → *SQL Editor* → *Open SQL script*, skrót **Ctrl+]**). Wzór dla PostgreSQL — dopisz własne wiersze; **Ctrl+Enter** wykonuje polecenie pod kursorem, **Alt+X** cały skrypt:
+   Otwórz edytor SQL (prawy przycisk na połączeniu → *SQL Editor* → *Open SQL script*, skrót **Ctrl+]**). Wzór dla PostgreSQL — dopisz własne wiersze; **Ctrl+Enter** wykonuje polecenie pod kursorem, **Alt+X** cały skrypt:
 
    ```sql
    CREATE TABLE pracownik (
@@ -90,9 +86,8 @@ docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e A
    | liczba całkowita | `integer` | `INT` | `NUMBER(10)` |
    | tekst | `varchar(30)` | `VARCHAR(30)` | `VARCHAR2(30)` |
    | kwota | `numeric(8,2)` | `DECIMAL(8,2)` | `NUMBER(8,2)` |
-   | folder `Tables` (widok *Advanced*) | `Databases` → `student` → `Schemas` → `public` → `Tables` | `student` → `Tables` | `Schemas` → `STUDENT` → `Tables` |
 
-   Najprościej porównać składnię, tworząc tabelę graficznie w każdym silniku i czytając polecenie SQL, które DBeaver pokazuje przed zapisem. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`PRACOWNIK`). Jeśli MySQL zgłosi „Public Key Retrieval is not allowed”, zajrzyj do `docs/ROZWIAZYWANIE-PROBLEMOW.md`.
+   Po utworzeniu tabeli możesz podejrzeć, jak dany silnik zapisał jej definicję: prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*. Porównaj te definicje między silnikami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`PRACOWNIK`). Jeśli MySQL zgłosi „Public Key Retrieval is not allowed”, zajrzyj do `docs/ROZWIAZYWANIE-PROBLEMOW.md`.
 
 6. Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, czy dane zostały zachowane.
 7. Usuń kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`. Uruchom `pg-lab` od nowa tym samym poleceniem i sprawdź, co stało się z danymi.

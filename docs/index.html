@@ -135,6 +135,7 @@
 
   .cmd{position:relative;margin:12px 0}
   .cmd pre{margin:0;background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius-sm);padding:15px 96px 15px 16px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65}
+  .cmd pre code{background:none;padding:0;border-radius:0;color:inherit;font-size:inherit}
   .cmd pre .cm{color:var(--code-faint)}
   .cmd .btns{position:absolute;top:9px;right:9px;display:flex;gap:6px}
   .cmd .btn{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--code-faint);background:#20293494;border:1px solid #37424f;border-radius:6px;padding:4px 10px;cursor:pointer;transition:.15s}
@@ -210,6 +211,19 @@
   .conn-card b{color:var(--ink);font-family:var(--mono);font-weight:500}
   .filecap{font-family:var(--mono);font-size:12px;color:var(--faint);margin:14px 0 -4px}
   .gen-note{font-size:12.5px;color:var(--faint)}
+
+  /* podpowiedzi pod zadaniami */
+  details.hint{font-size:13.5px;color:var(--muted)}
+  details.hint>summary{cursor:pointer;color:var(--e);font-weight:600;font-size:12.5px;width:max-content;list-style:none}
+  details.hint>summary::before{content:"? ";font-weight:700}
+  details.hint>summary::-webkit-details-marker{display:none}
+  details.hint[open]>summary{margin-bottom:6px}
+  .hint-body{background:var(--paper);border-left:3px solid var(--e);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:10px 14px}
+  .hint-body p{margin:0 0 8px}
+  .hint-tab{border-collapse:collapse;font-size:13px;margin:4px 0 8px;width:100%}
+  .hint-tab th,.hint-tab td{border:1px solid var(--line, #dcdfe4);padding:4px 8px;text-align:left;vertical-align:top}
+  .hint-tab th{color:var(--ink)}
+  @media print{details.hint{display:none}}
 
 </style>
 </head>
@@ -1972,9 +1986,17 @@ docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e A
 <h4>Zadania</h4><ol class="tasks zadania">
 <li><input type="checkbox" id="z-01-0"><div class="taskmain"><label for="z-01-0">Sprawdź działające kontenery: <code>docker ps</code>.</label></div></li>
 <li><input type="checkbox" id="z-01-1"><div class="taskmain"><label for="z-01-1">Połącz się w DBeaver z PostgreSQL (host <code>localhost</code>, port <code>5432</code>, baza <code>student</code>, użytkownik <code>student</code>, hasło <code>student</code>).</label></div></li>
-<li><input type="checkbox" id="z-01-2"><div class="taskmain"><label for="z-01-2">Utwórz tabelę <code>pracownik</code> (id, nazwisko, etat, placa) i dodaj kilka wierszy poleceniem <code>INSERT</code>.</label><button type="button" class="ans-toggle" data-label="rozwiązanie">+ rozwiązanie</button><textarea class="ans" data-key="01:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
-<li><input type="checkbox" id="z-01-3"><div class="taskmain"><label for="z-01-3">Wyświetl dane: <code>SELECT * FROM pracownik;</code></label><button type="button" class="ans-toggle" data-label="rozwiązanie">+ rozwiązanie</button><textarea class="ans" data-key="01:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
-<li><input type="checkbox" id="z-01-4"><div class="taskmain"><label for="z-01-4">Połącz się z MySQL (port <code>3306</code>, baza <code>student</code>) oraz z Oracle (port <code>1521</code>, połączenie przez <strong>Service name</strong> <code>FREEPDB1</code>, użytkownik <code>student</code>). Powtórz dwa poprzednie kroki i zanotuj różnice w składni.</label><button type="button" class="ans-toggle" data-label="odpowiedź">+ odpowiedź</button><textarea class="ans" data-key="01:4" hidden placeholder="Wpisz wykonane polecenia lub swoje obserwacje…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-2"><div class="taskmain"><label for="z-01-2">Utwórz tabelę <code>pracownik</code> (id, nazwisko, etat, placa) i dodaj kilka wierszy (np. poleceniem <code>INSERT</code>).</label><details class="hint"><summary>Podpowiedź</summary><div class="hint-body"><p><strong>Sposób 1 — graficznie.</strong> W DBeaver w drzewie po lewej rozwiń połączenie: <code>student</code> → <code>Schemas</code> → <code>public</code>, kliknij prawym przyciskiem <code>Tables</code> → <em>Create New Table</em>. Wpisz nazwę tabeli, w zakładce <em>Columns</em> dodaj kolumny (prawy przycisk → <em>Create New Column</em>) i zapisz (<strong>Ctrl+S</strong>). Przed zapisem DBeaver pokaże polecenie SQL, które wykona za Ciebie — przeczytaj je, przyda się w zadaniu 5. Wiersze dodasz w zakładce <em>Data</em> (przycisk dodawania wiersza, potem <strong>Ctrl+S</strong>).</p><p><strong>Sposób 2 — poleceniem SQL.</strong> Otwórz edytor SQL (prawy przycisk na połączeniu → <em>SQL Editor</em> → <em>Open SQL script</em>, skrót <strong>Ctrl+]</strong>). Wzór dla PostgreSQL — dopisz własne wiersze; <strong>Ctrl+Enter</strong> wykonuje polecenie pod kursorem, <strong>Alt+X</strong> cały skrypt:</p><div class="cmd"><pre><code>CREATE TABLE pracownik (
+    id        integer PRIMARY KEY,
+    nazwisko  varchar(30) NOT NULL,
+    etat      varchar(20),
+    placa     numeric(8,2)
+);
+
+INSERT INTO pracownik (id, nazwisko, etat, placa)
+VALUES (1, 'Kowalski', 'ASYSTENT', 4500);</code></pre><div class="btns"><button class="btn cp" type="button">Kopiuj</button></div></div><p><code>PRIMARY KEY</code> oznacza, że <code>id</code> musi być unikalny — drugi wiersz z tym samym <code>id</code> zakończy się błędem. <code>numeric(8,2)</code> to liczba z dwoma miejscami po przecinku (np. płaca).</p></div></details><button type="button" class="ans-toggle" data-label="rozwiązanie">+ rozwiązanie</button><textarea class="ans" data-key="01:2" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-3"><div class="taskmain"><label for="z-01-3">Wyświetl dane: <code>SELECT * FROM pracownik;</code></label><details class="hint"><summary>Podpowiedź</summary><div class="hint-body"><p>Wpisz zapytanie w edytorze SQL i naciśnij <strong>Ctrl+Enter</strong> — wynik pojawi się w panelu pod edytorem. Ten sam widok otrzymasz graficznie: dwuklik na tabeli w drzewie → zakładka <em>Data</em>. Jeśli nowej tabeli nie widać w drzewie, odśwież je (<strong>F5</strong>).</p></div></details><button type="button" class="ans-toggle" data-label="rozwiązanie">+ rozwiązanie</button><textarea class="ans" data-key="01:3" hidden placeholder="Wpisz swoje polecenie SQL…"></textarea></div></li>
+<li><input type="checkbox" id="z-01-4"><div class="taskmain"><label for="z-01-4">Połącz się z MySQL (port <code>3306</code>, baza <code>student</code>) oraz z Oracle (port <code>1521</code>, połączenie przez <strong>Service name</strong> <code>FREEPDB1</code>, użytkownik <code>student</code>). Powtórz dwa poprzednie kroki i zanotuj różnice w składni.</label><details class="hint"><summary>Podpowiedź</summary><div class="hint-body"><p>Nowe połączenia tworzysz tak samo jak dla PostgreSQL (<em>Database</em> → <em>New Database Connection</em>). Polecenia z zadania 3 trzeba lekko dostosować — silniki różnią się nazwami typów:</p><table class="hint-tab"><thead><tr><th></th><th>PostgreSQL</th><th>MySQL</th><th>Oracle</th></tr></thead><tbody><tr><td>liczba całkowita</td><td><code>integer</code></td><td><code>INT</code></td><td><code>NUMBER(10)</code></td></tr><tr><td>tekst</td><td><code>varchar(30)</code></td><td><code>VARCHAR(30)</code></td><td><code>VARCHAR2(30)</code></td></tr><tr><td>kwota</td><td><code>numeric(8,2)</code></td><td><code>DECIMAL(8,2)</code></td><td><code>NUMBER(8,2)</code></td></tr><tr><td>tabele w drzewie DBeaver</td><td><code>student</code> → <code>Schemas</code> → <code>public</code> → <code>Tables</code></td><td><code>student</code> → <code>Tables</code></td><td><code>Schemas</code> → <code>STUDENT</code> → <code>Tables</code></td></tr></tbody></table><p>Najprościej porównać składnię, tworząc tabelę graficznie w każdym silniku i czytając polecenie SQL, które DBeaver pokazuje przed zapisem. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (<code>PRACOWNIK</code>). Jeśli MySQL zgłosi „Public Key Retrieval is not allowed”, zajrzyj do <code>docs/ROZWIAZYWANIE-PROBLEMOW.md</code>.</p></div></details><button type="button" class="ans-toggle" data-label="odpowiedź">+ odpowiedź</button><textarea class="ans" data-key="01:4" hidden placeholder="Wpisz wykonane polecenia lub swoje obserwacje…"></textarea></div></li>
 <li><input type="checkbox" id="z-01-5"><div class="taskmain"><label for="z-01-5">Zatrzymaj i uruchom ponownie kontener: <code>docker stop pg-lab</code>, potem <code>docker start pg-lab</code>. Sprawdź, czy dane zostały zachowane.</label><button type="button" class="ans-toggle" data-label="odpowiedź">+ odpowiedź</button><textarea class="ans" data-key="01:5" hidden placeholder="Wpisz wykonane polecenia lub swoje obserwacje…"></textarea></div></li>
 <li><input type="checkbox" id="z-01-6"><div class="taskmain"><label for="z-01-6">Usuń kontenery: <code>docker rm -f pg-lab mysql-lab oracle-lab</code>. Uruchom <code>pg-lab</code> od nowa tym samym poleceniem i sprawdź, co stało się z danymi.</label><button type="button" class="ans-toggle" data-label="odpowiedź">+ odpowiedź</button><textarea class="ans" data-key="01:6" hidden placeholder="Wpisz wykonane polecenia lub swoje obserwacje…"></textarea></div></li>
 <li><input type="checkbox" id="z-01-7"><div class="taskmain"><label for="z-01-7">Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — <code>docker exec -it pg-lab psql -U student</code>.</label></div></li>

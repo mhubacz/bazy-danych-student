@@ -148,7 +148,7 @@ if [ "$PULL_IMAGES" -eq 1 ]; then
   if [ -z "$REPO_DIR" ]; then
     warn "brak repozytorium — nie wiem, które obrazy pobrać."
   else
-    info "Pobieram obrazy baz (to może potrwać; Oracle ma ok. 1,1 GB)"
+    info "Pobieram obrazy baz (to może potrwać; Oracle ma ponad 1 GB)"
     grep -h '^[[:space:]]*image:' "$REPO_DIR"/labs/*/compose.yaml | awk '{print $2}' | sort -u | while read -r img; do
       echo "    docker pull $img"
       $SUDO docker pull "$img" > /dev/null || warn "nie udało się pobrać $img"

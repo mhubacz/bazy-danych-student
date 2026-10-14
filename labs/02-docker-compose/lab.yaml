@@ -16,10 +16,14 @@ przygotowanie:
       docker compose up -d --wait
       docker compose ps
 zadania:
-  - "Wskaż w pliku `compose.yaml`, gdzie podano obrazy, porty, zmienne środowiskowe i wolumeny."
-  - "Otwórz `http://localhost:8080` (Adminer) i połącz się z PostgreSQL (serwer `postgres`) oraz MySQL (serwer `mysql`). Użytkownik i hasło: `student`. Do Oracle użyj DBeaver."
+  - tresc: "Wskaż w pliku `compose.yaml`, gdzie podano obrazy, porty, zmienne środowiskowe i wolumeny."
+    pole: opis
+  - tresc: "Otwórz `http://localhost:8080` (Adminer) i połącz się z PostgreSQL (serwer `postgres`) oraz MySQL (serwer `mysql`). Użytkownik i hasło: `student`. Do Oracle użyj DBeaver."
+    pole: brak
   - "W każdym z trzech silników utwórz tę samą tabelę z kluczem automatycznym i porównaj składnię (`IDENTITY` / `SERIAL` / `AUTO_INCREMENT`)."
   - "Wykonaj w każdym silniku zapytanie łączące imię i nazwisko w jedną kolumnę i filtrujące po dacie. Zapisz, gdzie składnia się różni (`||` vs `CONCAT`, zapis daty)."
-  - "Zatrzymaj zestaw poleceniem `docker compose down`, uruchom go ponownie (`docker compose up -d --wait`) i sprawdź, czy Twoje tabele nadal istnieją. Dlaczego dane przetrwały?"
-  - "Usuń zestaw razem z danymi: `docker compose down -v`. Co się stało z tabelami po ponownym uruchomieniu?"
+  - tresc: "Zatrzymaj zestaw poleceniem `docker compose down`, uruchom go ponownie (`docker compose up -d --wait`) i sprawdź, czy Twoje tabele nadal istnieją. Dlaczego dane przetrwały?"
+    pole: opis
+  - tresc: "Usuń zestaw razem z danymi: `docker compose down -v`. Co się stało z tabelami po ponownym uruchomieniu?"
+    pole: opis
 uwaga_silnik: "Jeśli `up` zgłasza zajęty port 5432/3306/1521, zatrzymaj lub usuń kontenery, które go zajmują (`docker ps`, `docker stop nazwa` lub `docker rm -f nazwa`). Oracle przy pierwszym starcie potrzebuje kilku minut — `--wait` poczeka na niego. Pamiętaj, że każde z laboratoriów 3–7 używa tych samych portów, więc przed ich uruchomieniem wykonaj `docker compose down`."

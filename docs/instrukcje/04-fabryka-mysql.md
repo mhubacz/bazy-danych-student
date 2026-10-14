@@ -19,7 +19,7 @@ Uruchom bazę. Tabele (`hale`, `maszyny`, `operatorzy`, `operator_maszyna`, `awa
 docker compose up -d --wait
 ```
 
-> Połącz się w DBeaver (dane powyżej). W tym laboratorium modyfikujesz dane, więc reset do stanu początkowego jest przydatny: `docker compose down -v`, a potem `docker compose up -d --wait`.
+> Połącz się w DBeaver (dane powyżej). Jeśli DBeaver zgłosi „Public Key Retrieval is not allowed”, w ustawieniach połączenia (*Edit Connection* → *Driver properties*) ustaw `allowPublicKeyRetrieval` na `true`. W tym laboratorium modyfikujesz dane, więc reset do stanu początkowego jest przydatny: `docker compose down -v`, a potem `docker compose up -d --wait`.
 
 ## Zadania
 

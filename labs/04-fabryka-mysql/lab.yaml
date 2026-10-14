@@ -13,7 +13,7 @@ przygotowanie:
   - opis: "Uruchom bazę. Tabele (`hale`, `maszyny`, `operatorzy`, `operator_maszyna`, `awarie`) wczytują się same ze skryptu `init/01_fabryka.sql`:"
     kod: |
       docker compose up -d --wait
-  - uwaga: "Połącz się w DBeaver (dane powyżej). W tym laboratorium modyfikujesz dane, więc reset do stanu początkowego jest przydatny: `docker compose down -v`, a potem `docker compose up -d --wait`."
+  - uwaga: "Połącz się w DBeaver (dane powyżej). Jeśli DBeaver zgłosi „Public Key Retrieval is not allowed”, w ustawieniach połączenia (*Edit Connection* → *Driver properties*) ustaw `allowPublicKeyRetrieval` na `true`. W tym laboratorium modyfikujesz dane, więc reset do stanu początkowego jest przydatny: `docker compose down -v`, a potem `docker compose up -d --wait`."
 zadania:
   - "Dodaj nowego operatora o Twoim imieniu i nazwisku, przy czym przełożonym będzie BOND. Reszta danych wg uznania."
   - "Dodaj nową maszynę „Pakowarka próżniowa” do Magazynu A."

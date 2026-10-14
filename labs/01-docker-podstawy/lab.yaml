@@ -58,7 +58,8 @@ zadania:
           - ["", "PostgreSQL", "MySQL", "Oracle"]
           - ["liczba całkowita (nr indeksu)", "`integer`", "`INT`", "`NUMBER(10)`"]
           - ["tekst (imię, e-mail, kierunek)", "`varchar(30)`", "`VARCHAR(30)`", "`VARCHAR2(30)`"]
-      - opis: "Po utworzeniu tabeli możesz podejrzeć, jak dany silnik zapisał jej definicję: prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*. Porównaj te definicje między silnikami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`). Jeśli MySQL zgłosi „Public Key Retrieval is not allowed”, zajrzyj do `docs/ROZWIAZYWANIE-PROBLEMOW.md`."
+      - opis: "Po utworzeniu tabeli możesz podejrzeć, jak dany silnik zapisał jej definicję: prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*. Porównaj te definicje między silnikami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`)."
+      - opis: "**MySQL — błąd „Public Key Retrieval is not allowed”.** To typowe przy pierwszym połączeniu z MySQL 8. W oknie połączenia przejdź na zakładkę *Driver properties*, znajdź właściwość `allowPublicKeyRetrieval`, ustaw ją na `true` i połącz się ponownie (dla istniejącego połączenia: prawy przycisk → *Edit Connection* → *Driver properties*)."
   - tresc: "Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, czy dane zostały zachowane."
     pole: opis
   - tresc: "Usuń kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`. Uruchom `pg-lab` od nowa tym samym poleceniem i sprawdź, co stało się z danymi."

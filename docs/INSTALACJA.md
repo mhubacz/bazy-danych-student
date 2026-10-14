@@ -88,6 +88,7 @@ Uwagi:
 
 - Przy pierwszym połączeniu DBeaver zaproponuje pobranie sterownika — zgódź się (**Download**).
 - W Oracle wybierz łączenie przez **Service name**, nie przez SID.
+- Po utworzeniu połączenia ustaw pełny widok drzewa: prawy przycisk na połączeniu → *Edit Connection → General → Navigator view: Advanced*. W domyślnym widoku uproszczonym nie da się tworzyć tabel graficznie.
 - Jeśli MySQL zgłosi „Public Key Retrieval is not allowed”: *Edit Connection → Driver properties → `allowPublicKeyRetrieval` = `true`*.
 
 ## Pierwszy test

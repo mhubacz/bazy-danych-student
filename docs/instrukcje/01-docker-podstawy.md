@@ -22,6 +22,14 @@ docker pull mysql:8.4
 docker pull gvenzl/oracle-free:23
 ```
 
+Jeśli wykonujesz tę instrukcję kolejny raz, usuń kontenery z poprzedniego podejścia (przy pierwszym podejściu komunikat `No such container` jest normalny):
+
+```bash
+docker rm -f pg-lab mysql-lab oracle-lab
+```
+
+> Chcesz wrócić do kontenerów z poprzedniego podejścia razem z ich danymi? Zamiast usuwać je i tworzyć od nowa, uruchom je ponownie: `docker start pg-lab mysql-lab oracle-lab`. Polecenie `docker ps` pokazuje tylko działające kontenery — zatrzymane zobaczysz w `docker ps -a`.
+
 Uruchom każdy silnik jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`:
 
 ```bash

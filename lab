@@ -53,6 +53,8 @@ stop_all() {
     [ -f "$f" ] || continue
     docker compose -f "$f" stop > /dev/null 2>&1 || true
   done
+  # kontenery z instrukcji 1/6 (docker run) zajmują te same porty — zatrzymujemy je, dane zostają
+  docker stop pg-lab mysql-lab oracle-lab > /dev/null 2>&1 || true
 }
 
 wait_oracle() {

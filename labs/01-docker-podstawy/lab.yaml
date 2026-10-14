@@ -15,6 +15,10 @@ przygotowanie:
       docker pull postgres:17
       docker pull mysql:8.4
       docker pull gvenzl/oracle-free:23
+  - opis: "Jeśli wykonujesz tę instrukcję kolejny raz, usuń kontenery z poprzedniego podejścia (przy pierwszym podejściu komunikat `No such container` jest normalny):"
+    kod: |
+      docker rm -f pg-lab mysql-lab oracle-lab
+  - uwaga: "Chcesz wrócić do kontenerów z poprzedniego podejścia razem z ich danymi? Zamiast usuwać je i tworzyć od nowa, uruchom je ponownie: `docker start pg-lab mysql-lab oracle-lab`. Polecenie `docker ps` pokazuje tylko działające kontenery — zatrzymane zobaczysz w `docker ps -a`."
   - opis: "Uruchom każdy silnik jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`:"
     kod: |
       docker run --name pg-lab -e POSTGRES_USER=student -e POSTGRES_PASSWORD=student -e POSTGRES_DB=student -p 5432:5432 -d postgres:17

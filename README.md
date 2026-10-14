@@ -15,16 +15,22 @@ cd bazy-danych-student
 
 Możesz też użyć paczki ZIP z e-learningu.
 
-3. **Uruchom bazę laboratorium** (np. trzeciego) i połącz się w DBeaver:
+3. **Otwórz instrukcje** — skoroszyt ze wszystkimi laboratoriami otworzy się w przeglądarce:
+
+```
+./lab site
+```
+
+   Pod każdym zadaniem wpisujesz swoje polecenie SQL, a na końcu generujesz sprawozdanie w PDF.
+   Na Windows w PowerShell: `start docs\index.html` (albo otwórz plik `docs/index.html` dwuklikiem).
+
+4. **Uruchom bazę laboratorium** (np. trzeciego) i połącz się w DBeaver:
 
 ```
 ./lab up 3
 ```
 
-4. **Otwórz instrukcje:** `./lab site` (albo plik `docs/index.html` w przeglądarce). Pod każdym zadaniem wpisujesz swoje polecenie SQL,
-   a na końcu generujesz sprawozdanie w PDF.
-
-Na Windows w PowerShell zamiast `./lab` użyj poleceń `docker compose` z instrukcji (lub *Git Bash*).
+Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z instrukcji (lub *Git Bash*).
 
 ## Laboratoria
 
@@ -42,6 +48,7 @@ Na Windows w PowerShell zamiast `./lab` użyj poleceń `docker compose` z instru
 
 | Polecenie | Co robi |
 |---|---|
+| `./lab site` | otwiera instrukcje (skoroszyt) w przeglądarce |
 | `./lab list` | lista laboratoriów |
 | `./lab up N` | uruchamia bazę laboratorium N (zatrzymuje inne) |
 | `./lab shell N` | konsola SQL w kontenerze |

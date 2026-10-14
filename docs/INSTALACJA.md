@@ -21,7 +21,13 @@ cd bazy-danych-student
 
 Jeśli prowadzący udostępnił paczkę ZIP — rozpakuj ją i wejdź do katalogu.
 
-5. **Test:** w PowerShell, w katalogu repozytorium:
+5. **Instrukcje:** otwórz skoroszyt w przeglądarce (PowerShell, w katalogu repozytorium):
+
+```
+start docs\index.html
+```
+
+6. **Test:** w PowerShell, w katalogu repozytorium:
 
 ```
 cd labs\03-katedra-postgres
@@ -40,6 +46,7 @@ Skrypt `./lab` działa w *Git Bash* lub WSL. W PowerShell używaj bezpośrednio 
 ```
 git clone https://github.com/mhubacz/bazy-danych-student.git
 cd bazy-danych-student
+./lab site      # instrukcje w przeglądarce
 ./lab up 3
 ```
 
@@ -59,6 +66,7 @@ bash install-linux.sh
 Po instalacji **wyloguj się i zaloguj ponownie** (albo wpisz `newgrp docker`), żeby zadziałała grupa `docker`. Potem:
 
 ```
+./lab site      # instrukcje w przeglądarce
 ./lab list
 ./lab up 3
 ```
@@ -85,10 +93,10 @@ Uwagi:
 ## Pierwszy test
 
 ```
+./lab site                # otwórz instrukcje w przeglądarce
 ./lab up 3                # uruchom bazę Katedra
 ./lab shell 3             # (opcjonalnie) konsola SQL w kontenerze; wyjście: \q
 ./lab down                # zatrzymaj; dane zostają
-./lab site                # otwórz instrukcje w przeglądarce
 ```
 
 Coś nie działa? Zajrzyj do `docs/ROZWIAZYWANIE-PROBLEMOW.md`.

@@ -19,6 +19,12 @@ Port 5432, 3306 lub 1521 jest zajęty. Najczęstsze przyczyny:
 - zostały kontenery z instrukcji 1/6: `docker rm -f pg-lab mysql-lab oracle-lab`,
 - na komputerze działa lokalnie zainstalowany PostgreSQL/MySQL: zatrzymaj tę usługę. Sprawdź, co zajmuje port: `docker ps` oraz (Linux/macOS) `sudo lsof -i :5432`.
 
+**`Conflict. The container name "/pg-lab" is already in use`**
+Kontener o tej nazwie został z wcześniejszego podejścia — jest tylko zatrzymany, dlatego nie widać go w `docker ps` (pokaże go `docker ps -a`). Wybierz jedno:
+
+- wznów go razem z danymi: `docker start pg-lab mysql-lab oracle-lab`,
+- albo zacznij od zera (dane kontenera znikną, pobrane obrazy zostają): `docker rm -f pg-lab mysql-lab oracle-lab`, a potem ponownie `docker run ...`.
+
 **Brak miejsca na dysku**
 `docker system df` pokaże zajęcie. Usuń nieużywane dane: `docker system prune` (usuwa zatrzymane kontenery i nieużywane sieci; **nie** używaj `-a` ani `--volumes`, jeśli chcesz zachować pobrane obrazy i swoje dane).
 

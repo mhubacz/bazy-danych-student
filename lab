@@ -17,8 +17,9 @@ Użycie: ./lab <polecenie> [numer]
   shell N [usł.]  otwórz konsolę SQL w kontenerze (np. ./lab shell 2 postgres)
   logs N          pokaż logi (Ctrl+C kończy)
   status          pokaż działające kontenery
-  clean [-y]      koniec zajęć na komputerze w sali: usuwa WSZYSTKIE kontenery i dane baz, materiały,
-                  połączenia DBeavera, dane przeglądarek (zapisane odpowiedzi), historię, Pobrane
+  clean [-y]      komputer w sali (początek i koniec zajęć): usuwa WSZYSTKIE kontenery i dane baz,
+                  połączenia i skrypty DBeavera, dane zamkniętej przeglądarki, historię, Pobrane;
+                  materiały, obrazy baz i ustawienia DBeavera zostają
   clean --dom [-y]  własny komputer: usuwa tylko kontenery i dane laboratoriów
                   (obrazy baz zostają zawsze; -y: bez pytania)
   site            otwórz stronę z instrukcjami w przeglądarce
@@ -173,27 +174,31 @@ cmd_status() {
 }
 
 clean_station() {
-  # pozostałości po poprzedniej osobie na komputerze współdzielonym (obrazy i sterowniki zostają)
-  local dbd="$HOME/.local/share/DBeaverData" d
-  pkill -f '/dbeaver' > /dev/null 2>&1 || true
-  pkill -x firefox > /dev/null 2>&1 || true
-  pkill -x chromium > /dev/null 2>&1 || true
-  sleep 2
-  [ -d "$dbd" ] && find "$dbd" -mindepth 1 -maxdepth 1 ! -name drivers -exec rm -rf {} +
-  rm -rf "$HOME/.eclipse/org.eclipse.equinox.security" \
-         "$HOME/snap/firefox/common/.mozilla" "$HOME/.mozilla" \
-         "$HOME/.config/chromium" "$HOME/snap/chromium/common/chromium"
+  # pozostałości po poprzedniej osobie na komputerze współdzielonym.
+  # Zostają: materiały (ten katalog), obrazy baz, ustawienia i sterowniki DBeavera.
+  local ws d
+  if pkill -f '/dbeaver' > /dev/null 2>&1; then sleep 2; fi
+  # DBeaver: tylko połączenia, zapisane hasła i skrypty SQL (ustawienia programu zostają)
+  for ws in "$HOME/.local/share/DBeaverData/workspace6" \
+            "$HOME/snap/dbeaver-ce/current/.local/share/DBeaverData/workspace6"; do
+    [ -d "$ws" ] || continue
+    find "$ws" -path '*/.dbeaver/*' \( -name 'data-sources*.json' -o -name 'credentials-config*.json' \) -delete
+    find "$ws" -mindepth 2 -maxdepth 2 -type d -name Scripts -exec sh -c 'rm -rf "$1"/*' _ {} \;
+  done
+  # przeglądarki: tylko gdy są zamknięte (ta strona może być właśnie otwarta)
+  if pgrep -x firefox > /dev/null 2>&1 || pgrep -f 'firefox|chromium' > /dev/null 2>&1; then
+    echo "Przeglądarka jest otwarta — jej dane pominięto. Odpowiedzi poprzedniej osoby usuń przyciskiem"
+    echo "\"Wyczyść\" w sekcji \"Sprawozdanie\" na stronie z instrukcjami (albo zamknij przeglądarkę i powtórz ./lab clean)."
+  else
+    rm -rf "$HOME/snap/firefox/common/.mozilla" "$HOME/.mozilla" \
+           "$HOME/.config/chromium" "$HOME/snap/chromium/common/chromium"
+  fi
   rm -f "$HOME/.bash_history" "$HOME/.psql_history" "$HOME/.mysql_history" "$HOME/.python_history" \
         "$HOME/.local/share/recently-used.xbel" "$HOME/.git-credentials"
   rm -rf "$HOME/.local/share/Trash/"*
   for d in "$HOME/Pobrane" "$HOME/Downloads"; do
     [ -d "$d" ] && find "$d" -mindepth 1 -delete
   done
-  # materiały — kolejna osoba sklonuje aktualną wersję (skrypt działa dalej, bo bash ma już otwarty plik)
-  cd "$HOME"
-  if [ -f "$ROOT/lab" ] && [ -d "$ROOT/labs" ] && [ "$ROOT" != "$HOME" ] && [ "$ROOT" != "/" ]; then
-    rm -rf "$ROOT"
-  fi
 }
 
 cmd_clean() {
@@ -210,8 +215,8 @@ cmd_clean() {
     if [ "$home" -eq 1 ]; then
       confirm "Usunąć kontenery i dane laboratoriów (obrazy zostaną)?"
     else
-      echo "Czyszczenie KOMPUTERA W SALI. Zostaną usunięte: wszystkie kontenery i dane baz, materiały ($ROOT),"
-      echo "połączenia DBeavera, dane przeglądarek (z zapisanymi odpowiedziami), historia, Pobrane. Obrazy baz zostaną."
+      echo "Czyszczenie KOMPUTERA W SALI. Zostaną usunięte: wszystkie kontenery i dane baz, połączenia i skrypty DBeavera,"
+      echo "dane przeglądarki (jeśli jest zamknięta), historia, Pobrane. Materiały, obrazy baz i ustawienia DBeavera zostaną."
       echo "Na własnym komputerze przerwij (Enter) i użyj:  ./lab clean --dom"
       read -r -p "Wpisz TAK, aby kontynuować: " ans
       [ "$ans" = "TAK" ] || { echo "Anulowano."; exit 0; }
@@ -234,8 +239,7 @@ cmd_clean() {
   docker volume prune -af > /dev/null 2>&1 || docker volume prune -f > /dev/null 2>&1
   docker network prune -f > /dev/null 2>&1
   clean_station
-  echo "Stanowisko wyczyszczone (obrazy baz zostały). Zamknij terminal."
-  echo "Kolejna osoba zaczyna od: git clone https://github.com/mhubacz/bazy-danych-student.git"
+  echo "Stanowisko wyczyszczone (materiały i obrazy baz zostały)."
 }
 
 cmd_site() {

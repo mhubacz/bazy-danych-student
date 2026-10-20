@@ -41,6 +41,6 @@ Limit liczby wierszy w Oracle zapisujesz jako `FETCH FIRST n ROWS ONLY`. Skrypt 
 ## Koniec zajęć — zanim odejdziesz od komputera
 
 1. **Wyślij sprawozdanie.** Wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl). Zrób to przed czyszczeniem — odpowiedzi są zapisane tylko w tej przeglądarce.
-2. **Wyczyść stanowisko.** W katalogu z materiałami wykonaj `./lab clean` i wpisz `TAK`. Polecenie usuwa kontenery i dane baz, połączenia DBeavera, dane przeglądarki (także Twoje zalogowania), historię, Pobrane oraz same materiały — kolejna osoba zaczyna od czystego komputera.
+2. **Zamknij przeglądarkę i wyczyść stanowisko.** W terminalu, w katalogu z materiałami, wykonaj `./lab clean` i wpisz `TAK`. Polecenie usuwa kontenery i dane baz, połączenia DBeavera, dane przeglądarki (także Twoje zalogowania i odpowiedzi), historię i Pobrane — kolejna osoba zaczyna od czystego komputera.
 3. *Pracujesz na własnym komputerze?* Zamiast czyszczenia stanowiska wystarczy `./lab down` (bazy zatrzymane, dane zostają na kolejne zajęcia) albo `./lab clean --dom` (usuwa tylko kontenery i dane laboratoriów; obrazy zostają). Na Windows bez Git Bash: `docker compose down` w katalogu laboratorium.
 

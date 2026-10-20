@@ -2,15 +2,19 @@ id: "01"
 numer: "1/6"
 skrot: "Docker — start"
 tytul: "Uruchamianie bazy danych w kontenerze Docker"
-cel: "Uruchomić własny serwer bazy w kontenerze i połączyć się z nim klientem graficznym. Ten sam schemat działania dla trzech silników."
+cel: "Poznać podstawowe polecenia Dockera, uruchomić serwery trzech baz w kontenerach i połączyć się z nimi klientem graficznym."
 silnik: all
 polaczenie: "host: localhost · użytkownik: student · hasło: student · porty: PostgreSQL 5432, MySQL 3306, Oracle 1521"
 wstep:
-  - "Zainstaluj Docker (Windows/macOS: Docker Desktop, Linux: Docker Engine) — patrz `docs/INSTALACJA.md`."
-  - "Sprawdź instalację: `docker --version` oraz `docker compose version`."
-  - "Zainstaluj klienta DBeaver Community."
+  - "Materiały są pobrane i ta strona jest otwarta zgodnie z „Szybkim startem” w README (`git clone` do `~/bazy-danych-student`, potem `./lab site`)."
+  - "Terminal jest otwarty w katalogu z materiałami: `cd ~/bazy-danych-student`."
+  - "Na własnym komputerze najpierw zainstaluj Docker i DBeaver — patrz `docs/INSTALACJA.md`."
 przygotowanie:
-  - opis: "**Docker w pigułce.** Docker uruchamia programy w **kontenerach** — odizolowanych „pudełkach”, w których program ma wszystko, czego potrzebuje do działania. Dzięki temu serwer bazy danych uruchomisz jednym poleceniem, bez instalowania go w systemie, a po zajęciach usuniesz go bez śladu. Najważniejsze pojęcia:"
+  - opis: "**1. Wyczyść stanowisko.** Komputer mógł zostać po poprzedniej osobie z działającymi kontenerami i połączeniami w DBeaver. Usuń je (pobrane materiały i obrazy baz zostają) i potwierdź, wpisując `TAK`:"
+    kod: |
+      ./lab clean
+  - uwaga: "Polecenie zamyka DBeavera, usuwa wszystkie kontenery i dane baz, połączenia i skrypty DBeavera (jego ustawienia zostają), historię poleceń i Pobrane. Dane przeglądarki usuwa tylko wtedy, gdy przeglądarka jest zamknięta — jeśli na tej stronie widać odpowiedzi poprzedniej osoby, usuń je przyciskiem „Wyczyść” w sekcji „Sprawozdanie”. Na własnym komputerze użyj `./lab clean --dom`."
+  - opis: "**2. Docker w pigułce.** Docker uruchamia programy w **kontenerach** — odizolowanych „pudełkach”, w których program ma wszystko, czego potrzebuje do działania. Dzięki temu serwer bazy danych uruchomisz jednym poleceniem, bez instalowania go w systemie, a po zajęciach usuniesz go bez śladu. Najważniejsze pojęcia:"
     tabela:
       - ["Pojęcie", "Co to jest", "Przykład"]
       - ["**obraz** (image)", "gotowy szablon programu: pliki i ustawienia; pobierasz go raz", "`postgres:17` (nazwa:wersja)"]
@@ -19,22 +23,7 @@ przygotowanie:
       - ["**port** (`-p`)", "„drzwi” z Twojego komputera do programu w kontenerze, zapis `port_komputera:port_kontenera`", "`-p 5432:5432` — DBeaver łączy się z `localhost:5432`"]
       - ["**zmienna środowiskowa** (`-e`)", "ustawienie przekazywane do kontenera przy starcie", "`-e POSTGRES_PASSWORD=student`"]
       - ["**wolumen** (volume)", "trwałe miejsce na dane, niezależne od kontenera — temat instrukcji 2/6", "`pg-data`"]
-  - opis: "Pobierz obrazy trzech silników (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa):"
-    kod: |
-      docker pull postgres:17
-      docker pull mysql:8.4
-      docker pull gvenzl/oracle-free:23
-  - opis: "Jeśli wykonujesz tę instrukcję kolejny raz, usuń kontenery z poprzedniego podejścia (przy pierwszym podejściu komunikat `No such container` jest normalny):"
-    kod: |
-      docker rm -f pg-lab mysql-lab oracle-lab
-  - uwaga: "Chcesz wrócić do kontenerów z poprzedniego podejścia razem z ich danymi? Zamiast usuwać je i tworzyć od nowa, uruchom je ponownie: `docker start pg-lab mysql-lab oracle-lab`. Polecenie `docker ps` pokazuje tylko działające kontenery — zatrzymane zobaczysz w `docker ps -a`."
-  - opis: "Uruchom każdy silnik jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`:"
-    kod: |
-      docker run --name pg-lab -e POSTGRES_USER=student -e POSTGRES_PASSWORD=student -e POSTGRES_DB=student -p 5432:5432 -d postgres:17
-      docker run --name mysql-lab -e MYSQL_ROOT_PASSWORD=student -e MYSQL_USER=student -e MYSQL_PASSWORD=student -e MYSQL_DATABASE=student -p 3306:3306 -d mysql:8.4
-      docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e APP_USER_PASSWORD=student -p 1521:1521 -d gvenzl/oracle-free:23
-  - uwaga: "Budowa polecenia: `docker run` — utwórz i uruchom kontener · `--name pg-lab` — nazwa kontenera · `-e ZMIENNA=wartość` — ustawienia (użytkownik, hasło, nazwa bazy) · `-p 5432:5432` — udostępnienie portu · `-d` — praca w tle · na końcu nazwa obrazu."
-  - uwaga: "Oracle przy pierwszym starcie potrzebuje kilku minut — w tym czasie wykonaj zadania 1–6 z obrazem `hello-world`. Gotowość widać w logach (`docker logs -f oracle-lab`) po komunikacie `DATABASE IS READY TO USE!`."
+  - uwaga: "Zadania 1–6 to ćwiczenia z najmniejszym obrazem `hello-world`; w zadaniach 7–9 pobierzesz i uruchomisz serwery baz danych, a od zadania 10 będziesz z nimi pracować w DBeaver."
 zadania:
   - tresc: "Uruchom najprostszy kontener: `docker run hello-world`. Przeczytaj komunikat i opisz własnymi słowami kroki, które wykonał Docker."
     pole: opis
@@ -54,6 +43,19 @@ zadania:
   - tresc: "Posprzątaj: usuń kontener `docker rm moj-hello`, a potem wszystkie zatrzymane kontenery `docker container prune` (potwierdź literą `y`). Na koniec spróbuj usunąć obraz `docker rmi hello-world` — kiedy się to udaje, a kiedy nie?"
     pole: opis
     podpowiedz: "Obrazu nie da się usunąć, dopóki istnieje kontener (także zatrzymany), który z niego powstał — stąd kolejność: najpierw kontenery, potem obraz. Usunięcie obrazu nie szkodzi: przy kolejnym `docker run hello-world` zostanie pobrany ponownie."
+  - tresc: "Pobierz obrazy trzech silników baz danych (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa; w sali obrazy są już pobrane, więc polecenia skończą się szybko)."
+    pole: brak
+    kod: |
+      docker pull postgres:17
+      docker pull mysql:8.4
+      docker pull gvenzl/oracle-free:23
+  - tresc: "Uruchom serwer każdego silnika jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`."
+    pole: brak
+    kod: |
+      docker run --name pg-lab -e POSTGRES_USER=student -e POSTGRES_PASSWORD=student -e POSTGRES_DB=student -p 5432:5432 -d postgres:17
+      docker run --name mysql-lab -e MYSQL_ROOT_PASSWORD=student -e MYSQL_USER=student -e MYSQL_PASSWORD=student -e MYSQL_DATABASE=student -p 3306:3306 -d mysql:8.4
+      docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e APP_USER_PASSWORD=student -p 1521:1521 -d gvenzl/oracle-free:23
+    podpowiedz: "Budowa polecenia: `docker run` — utwórz i uruchom kontener · `--name pg-lab` — nazwa kontenera · `-e ZMIENNA=wartość` — ustawienia (użytkownik, hasło, nazwa bazy) · `-p 5432:5432` — udostępnienie portu · `-d` — praca w tle · na końcu nazwa obrazu. Oracle przy pierwszym starcie potrzebuje kilku minut; gotowość widać w logach (`docker logs -f oracle-lab`, Ctrl+C kończy podgląd) po komunikacie `DATABASE IS READY TO USE!`."
   - tresc: "Sprawdź, czy kontenery baz danych działają: `docker ps` (kolumny `STATUS` i `PORTS`)."
     pole: brak
   - tresc: "Połącz się w DBeaver z PostgreSQL (host `localhost`, port `5432`, baza `student`, użytkownik `student`, hasło `student`)."
@@ -77,21 +79,21 @@ zadania:
           VALUES (123456, 'Jan', 'Kowalski', 'jan.kowalski@example.com', 'INF');
       - opis: "`PRIMARY KEY` oznacza, że numer indeksu musi być unikalny — próba dodania drugiego wiersza z tym samym numerem zakończy się błędem. `NOT NULL` wymusza podanie wartości. Teksty w SQL zapisujesz w apostrofach: `'Jan'`."
   - tresc: "Wyświetl dane: `SELECT * FROM student;`"
+    pole: brak
     podpowiedz: "Wpisz zapytanie w edytorze SQL i naciśnij **Ctrl+Enter** — wynik pojawi się w panelu pod edytorem. Ten sam widok otrzymasz graficznie: dwuklik na tabeli w drzewie → zakładka *Data*. Jeśli nowej tabeli nie widać w drzewie, odśwież je (**F5**)."
   - tresc: "Połącz się z MySQL (port `3306`, baza `student`) oraz z Oracle (port `1521`, połączenie przez **Service name** `FREEPDB1`, użytkownik `student`). Powtórz dwa poprzednie kroki i zanotuj różnice w składni."
     pole: opis
     podpowiedz:
-      - opis: "Nowe połączenia tworzysz tak samo jak dla PostgreSQL (*Database* → *New Database Connection*). Polecenia z zadania 9 trzeba lekko dostosować — silniki różnią się nazwami typów:"
+      - opis: "Nowe połączenia tworzysz tak samo jak dla PostgreSQL (*Database* → *New Database Connection*). Polecenia z zadania 11 trzeba lekko dostosować — silniki różnią się nazwami typów:"
         tabela:
           - ["", "PostgreSQL", "MySQL", "Oracle"]
           - ["liczba całkowita (nr indeksu)", "`integer`", "`INT`", "`NUMBER(10)`"]
           - ["tekst (imię, e-mail, kierunek)", "`varchar(30)`", "`VARCHAR(30)`", "`VARCHAR2(30)`"]
       - opis: "Po utworzeniu tabeli możesz podejrzeć, jak dany silnik zapisał jej definicję: prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*. Porównaj te definicje między silnikami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`)."
       - opis: "**MySQL — błąd „Public Key Retrieval is not allowed”.** To typowe przy pierwszym połączeniu z MySQL 8. W oknie połączenia przejdź na zakładkę *Driver properties*, znajdź właściwość `allowPublicKeyRetrieval`, ustaw ją na `true` i połącz się ponownie (dla istniejącego połączenia: prawy przycisk → *Edit Connection* → *Driver properties*)."
-  - tresc: "Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, czy dane zostały zachowane."
+  - tresc: "Zatrzymaj i uruchom ponownie kontener (`docker stop pg-lab`, potem `docker start pg-lab`) i sprawdź, czy tabela `student` nadal ma dane. Następnie usuń kontenery (`docker rm -f pg-lab mysql-lab oracle-lab`), uruchom `pg-lab` od nowa poleceniem z zadania 8 i sprawdź tabelę ponownie. Wyjaśnij różnicę."
     pole: opis
-  - tresc: "Usuń kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`. Uruchom `pg-lab` od nowa tym samym poleceniem i sprawdź, co stało się z danymi."
-    pole: opis
+    podpowiedz: "`docker stop` tylko zatrzymuje kontener — jego pliki (a więc i dane bazy) zostają. `docker rm` usuwa kontener razem z danymi zapisanymi w jego warstwie; nowy kontener startuje z pustą bazą. Trwałe dane poznasz w instrukcji 2/6 (wolumeny)."
   - tresc: "Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`."
     pole: brak
-uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (polecenie z zadania 13) — porty muszą być wolne."
+uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Kontenery z tej instrukcji zajmują porty 5432, 3306 i 1521 — przed kolejnymi laboratoriami usuń je (`docker rm -f pg-lab mysql-lab oracle-lab`) albo wykonaj `./lab clean`."

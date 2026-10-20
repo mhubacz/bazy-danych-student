@@ -3,40 +3,45 @@
 Sześć instrukcji laboratoryjnych (plus jedna dodatkowa) z baz danych. Bazy działają w kontenerach Docker na trzech silnikach:
 **PostgreSQL**, **MySQL** i **Oracle**. Każde laboratorium od trzeciego ma przypisany jeden silnik i gotową bazę, która ładuje się sama.
 
-## Szybki start
+## Szybki start (komputer w sali)
 
-1. **Zainstaluj** Docker i DBeaver (Windows, macOS, Linux) — zob. [docs/INSTALACJA.md](docs/INSTALACJA.md).
-2. **Pobierz materiały:**
+1. **Pobierz najnowsze materiały.** Polecenia usuwają starą kopię (jeśli została po poprzednich zajęciach) i pobierają aktualną do katalogu domowego:
 
 ```
-git clone https://github.com/mhubacz/bazy-danych-student.git
-cd bazy-danych-student
+rm -rf ~/bazy-danych-student
+git clone https://github.com/mhubacz/bazy-danych-student.git ~/bazy-danych-student
+cd ~/bazy-danych-student
 ```
 
-Możesz też użyć paczki ZIP z e-learningu.
+2. **Wyczyść stanowisko** (najlepiej przy zamkniętej przeglądarce) i potwierdź, wpisując `TAK`:
 
-3. **Otwórz instrukcje** — strona ze wszystkimi laboratoriami otworzy się w przeglądarce:
+```
+./lab clean
+```
+
+3. **Otwórz instrukcje** i wykonuj tę, którą wskaże prowadzący — każda instrukcja sama mówi, jak uruchomić potrzebną bazę:
 
 ```
 ./lab site
 ```
 
-   Pod każdym zadaniem wpisujesz swoje polecenie SQL, a na końcu generujesz sprawozdanie w PDF.
-   Na Windows w PowerShell: `start docs\index.html` (albo otwórz plik `docs/index.html` dwuklikiem).
+Pod zadaniami wpisujesz swoje rozwiązania, a na końcu generujesz sprawozdanie w PDF.
 
-4. **Uruchom bazę laboratorium** (np. trzeciego) i połącz się w DBeaver:
+*Własny komputer:* najpierw zainstaluj Docker i DBeaver ([docs/INSTALACJA.md](docs/INSTALACJA.md)), a zamiast `./lab clean` używaj `./lab clean --dom`.
+W Windows PowerShell pobranie materiałów i otwarcie instrukcji wygląda tak:
 
 ```
-./lab up 3
+Remove-Item -Recurse -Force "$HOME\bazy-danych-student" -ErrorAction SilentlyContinue
+git clone https://github.com/mhubacz/bazy-danych-student.git "$HOME\bazy-danych-student"
+cd "$HOME\bazy-danych-student"
+start docs\index.html
 ```
-
-Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z instrukcji (lub *Git Bash*).
 
 ## Koniec zajęć
 
 1. **Wyślij sprawozdanie:** wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl) — przed czyszczeniem, bo odpowiedzi są zapisane tylko w przeglądarce.
-2. **Wyczyść stanowisko:** `./lab clean` (potwierdź, wpisując `TAK`) — usuwa kontenery, dane baz, połączenia DBeavera,
-   dane przeglądarki, historię i materiały. Kolejna osoba zaczyna od czystego komputera.
+2. **Zamknij przeglądarkę i wyczyść stanowisko:** `./lab clean` (potwierdź, wpisując `TAK`) — usuwa kontenery, dane baz,
+   połączenia DBeavera, dane przeglądarki, historię i Pobrane. Kolejna osoba zaczyna od czystego komputera.
 
 *Pracujesz na własnym komputerze?* Zamiast kroku 2 wystarczy `./lab down` (dane zostają) albo `./lab clean --dom` (usuwa tylko kontenery i dane laboratoriów). Obrazy baz zostają.
 
@@ -62,7 +67,7 @@ Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z ins
 | `./lab shell N` | konsola SQL w kontenerze |
 | `./lab down` | zatrzymuje wszystko; **dane zostają** |
 | `./lab reset N` | wraca do stanu początkowego (**kasuje dane** tego laboratorium) |
-| `./lab clean` | koniec zajęć na komputerze w sali: usuwa kontenery, dane baz, materiały, połączenia DBeavera i dane przeglądarki (obrazy zostają) |
+| `./lab clean` | komputer w sali (początek i koniec zajęć): usuwa kontenery, dane baz, połączenia DBeavera i dane przeglądarki (materiały i obrazy zostają) |
 | `./lab clean --dom` | własny komputer: usuwa tylko kontenery i dane laboratoriów |
 | `./lab update` | pobiera nowe materiały |
 | `./lab help` | pełna lista |

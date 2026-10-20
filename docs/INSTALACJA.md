@@ -12,11 +12,12 @@ Najbardziej wymagająca jest baza Oracle — Docker musi mieć do dyspozycji co 
    Uruchom Docker Desktop i poczekaj, aż ikona wskaże, że działa.
 2. **DBeaver Community:** https://dbeaver.io/download/
 3. **Git:** https://git-scm.com/downloads (razem z nim dostajesz *Git Bash*).
-4. **Materiały** (w *Git Bash* lub PowerShell):
+4. **Materiały** (PowerShell; stara kopia, jeśli istnieje, zostanie usunięta):
 
 ```
-git clone https://github.com/mhubacz/bazy-danych-student.git
-cd bazy-danych-student
+Remove-Item -Recurse -Force "$HOME\bazy-danych-student" -ErrorAction SilentlyContinue
+git clone https://github.com/mhubacz/bazy-danych-student.git "$HOME\bazy-danych-student"
+cd "$HOME\bazy-danych-student"
 ```
 
 Jeśli prowadzący udostępnił paczkę ZIP — rozpakuj ją i wejdź do katalogu.
@@ -44,8 +45,9 @@ Skrypt `./lab` działa w *Git Bash* lub WSL. W PowerShell używaj bezpośrednio 
 4. **Materiały** (Terminal):
 
 ```
-git clone https://github.com/mhubacz/bazy-danych-student.git
-cd bazy-danych-student
+rm -rf ~/bazy-danych-student
+git clone https://github.com/mhubacz/bazy-danych-student.git ~/bazy-danych-student
+cd ~/bazy-danych-student
 ./lab site      # instrukcje w przeglądarce
 ./lab up 3
 ```
@@ -58,8 +60,9 @@ Jedno polecenie instaluje Dockera, DBeavera i pobiera materiały:
 
 ```
 sudo apt install -y git
-git clone https://github.com/mhubacz/bazy-danych-student.git
-cd bazy-danych-student
+rm -rf ~/bazy-danych-student
+git clone https://github.com/mhubacz/bazy-danych-student.git ~/bazy-danych-student
+cd ~/bazy-danych-student
 bash install-linux.sh
 ```
 

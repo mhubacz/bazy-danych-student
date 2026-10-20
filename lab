@@ -19,6 +19,8 @@ Użycie: ./lab <polecenie> [numer]
   status          pokaż działające kontenery
   clean [-y] [--all]  usuń kontenery i dane laboratoriów, obrazy zostają (KASUJE dane)
                   -y: bez pytania; --all: także WSZYSTKIE inne kontenery i wolumeny
+  clean --stanowisko  komputer współdzielony w sali: jak --all, a do tego usuwa materiały,
+                  połączenia DBeavera, dane przeglądarek (zapisane odpowiedzi), historię, Pobrane
   site            otwórz stronę z instrukcjami w przeglądarce
   update          pobierz najnowsze materiały z repozytorium (git pull)
 
@@ -170,17 +172,48 @@ cmd_status() {
   docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
 }
 
+clean_station() {
+  # pozostałości po poprzedniej osobie na komputerze współdzielonym (obrazy i sterowniki zostają)
+  local dbd="$HOME/.local/share/DBeaverData" d
+  pkill -f '/dbeaver' > /dev/null 2>&1 || true
+  pkill -x firefox > /dev/null 2>&1 || true
+  pkill -x chromium > /dev/null 2>&1 || true
+  sleep 2
+  [ -d "$dbd" ] && find "$dbd" -mindepth 1 -maxdepth 1 ! -name drivers -exec rm -rf {} +
+  rm -rf "$HOME/.eclipse/org.eclipse.equinox.security" \
+         "$HOME/snap/firefox/common/.mozilla" "$HOME/.mozilla" \
+         "$HOME/.config/chromium" "$HOME/snap/chromium/common/chromium"
+  rm -f "$HOME/.bash_history" "$HOME/.psql_history" "$HOME/.mysql_history" "$HOME/.python_history" \
+        "$HOME/.local/share/recently-used.xbel" "$HOME/.git-credentials"
+  rm -rf "$HOME/.local/share/Trash/"*
+  for d in "$HOME/Pobrane" "$HOME/Downloads"; do
+    [ -d "$d" ] && find "$d" -mindepth 1 -delete
+  done
+  # materiały — kolejna osoba sklonuje aktualną wersję (skrypt działa dalej, bo bash ma już otwarty plik)
+  cd "$HOME"
+  if [ -f "$ROOT/lab" ] && [ -d "$ROOT/labs" ] && [ "$ROOT" != "$HOME" ] && [ "$ROOT" != "/" ]; then
+    rm -rf "$ROOT"
+  fi
+}
+
 cmd_clean() {
   need_docker
-  local yes=0 all=0 a f ids
+  local yes=0 all=0 station=0 a f ids ans
   for a in "$@"; do
     case "$a" in
       -y) yes=1 ;;
       --all) all=1 ;;
-      *) die "nieznana opcja: $a (dozwolone: -y, --all)" ;;
+      --stanowisko) station=1; all=1 ;;
+      *) die "nieznana opcja: $a (dozwolone: -y, --all, --stanowisko)" ;;
     esac
   done
-  if [ "$yes" -ne 1 ]; then
+  if [ "$station" -eq 1 ] && [ "$yes" -ne 1 ]; then
+    echo "UWAGA: tryb dla WSPÓŁDZIELONYCH komputerów w sali. Zostaną usunięte: wszystkie kontenery i dane baz,"
+    echo "materiały ($ROOT), połączenia DBeavera, dane przeglądarek (z zapisanymi odpowiedziami), historia, Pobrane."
+    echo "Nie używaj tego na własnym komputerze."
+    read -r -p "Wpisz TAK, aby kontynuować: " ans
+    [ "$ans" = "TAK" ] || { echo "Anulowano."; exit 0; }
+  elif [ "$yes" -ne 1 ]; then
     if [ "$all" -eq 1 ]; then
       confirm "Usunąć WSZYSTKIE kontenery i wolumeny Dockera (obrazy zostaną)?"
     else
@@ -202,6 +235,10 @@ cmd_clean() {
     docker network prune -f > /dev/null 2>&1
   fi
   echo "Posprzątano. Kontenery: $(docker ps -aq | wc -l), obrazy: $(docker images -q | wc -l) (zostają)."
+  if [ "$station" -eq 1 ]; then
+    clean_station
+    echo "Stanowisko wyczyszczone. Zamknij terminal; kolejna osoba zaczyna od: git clone https://github.com/mhubacz/bazy-danych-student.git"
+  fi
 }
 
 cmd_site() {

@@ -55,6 +55,7 @@ Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z ins
 | `./lab down` | zatrzymuje wszystko; **dane zostają** |
 | `./lab reset N` | wraca do stanu początkowego (**kasuje dane** tego laboratorium) |
 | `./lab clean` | usuwa kontenery i dane wszystkich laboratoriów — porządki na koniec zajęć (obrazy zostają) |
+| `./lab clean --stanowisko` | komputer współdzielony w sali: dodatkowo usuwa materiały, połączenia DBeavera i dane przeglądarki |
 | `./lab update` | pobiera nowe materiały |
 | `./lab help` | pełna lista |
 

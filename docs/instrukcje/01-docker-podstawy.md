@@ -14,6 +14,26 @@
 
 ## Przygotowanie bazy
 
+**Docker w pigułce.** Docker uruchamia programy w **kontenerach** — odizolowanych „pudełkach”, w których program ma wszystko, czego potrzebuje do działania. Dzięki temu serwer bazy danych uruchomisz jednym poleceniem, bez instalowania go w systemie, a po zajęciach usuniesz go bez śladu. Najważniejsze pojęcia:
+
+| Pojęcie | Co to jest | Przykład |
+|---|---|---|
+| **obraz** (image) | gotowy szablon programu: pliki i ustawienia; pobierasz go raz | `postgres:17` (nazwa:wersja) |
+| **kontener** (container) | uruchomiona kopia obrazu; z jednego obrazu można uruchomić wiele kontenerów | `pg-lab` |
+| **rejestr** (registry) | serwer, z którego pobiera się obrazy (domyślnie Docker Hub) | `docker pull mysql:8.4` |
+| **port** (`-p`) | „drzwi” z Twojego komputera do programu w kontenerze, zapis `port_komputera:port_kontenera` | `-p 5432:5432` — DBeaver łączy się z `localhost:5432` |
+| **zmienna środowiskowa** (`-e`) | ustawienie przekazywane do kontenera przy starcie | `-e POSTGRES_PASSWORD=student` |
+| **wolumen** (volume) | trwałe miejsce na dane, niezależne od kontenera — temat instrukcji 2/6 | `pg-data` |
+
+Sprawdź, czy Docker działa — uruchom najprostszy możliwy kontener:
+
+```bash
+docker run hello-world
+docker ps -a
+```
+
+> Przeczytaj komunikat: Docker utworzył kontener z obrazu `hello-world` i uruchomił go; program wypisał tekst i zakończył działanie. Jeśli obrazu nie było jeszcze na komputerze, Docker najpierw pobrał go z Docker Hub (komunikat `Unable to find image … locally`). Dlatego `docker ps -a` pokazuje kontener ze stanem `Exited`. Serwer bazy danych przejdzie ten sam cykl — z tą różnicą, że działa, dopóki go nie zatrzymasz.
+
 Pobierz obrazy trzech silników (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa):
 
 ```bash
@@ -37,6 +57,8 @@ docker run --name pg-lab -e POSTGRES_USER=student -e POSTGRES_PASSWORD=student -
 docker run --name mysql-lab -e MYSQL_ROOT_PASSWORD=student -e MYSQL_USER=student -e MYSQL_PASSWORD=student -e MYSQL_DATABASE=student -p 3306:3306 -d mysql:8.4
 docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e APP_USER_PASSWORD=student -p 1521:1521 -d gvenzl/oracle-free:23
 ```
+
+> Budowa polecenia: `docker run` — utwórz i uruchom kontener · `--name pg-lab` — nazwa kontenera · `-e ZMIENNA=wartość` — ustawienia (użytkownik, hasło, nazwa bazy) · `-p 5432:5432` — udostępnienie portu · `-d` — praca w tle · na końcu nazwa obrazu.
 
 > Oracle przy pierwszym starcie potrzebuje kilku minut. Gotowość widać w logach (`docker logs -f oracle-lab`) po komunikacie `DATABASE IS READY TO USE!`.
 

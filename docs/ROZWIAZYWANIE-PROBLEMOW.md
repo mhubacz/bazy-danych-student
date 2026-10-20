@@ -25,6 +25,18 @@ Kontener o tej nazwie został z wcześniejszego podejścia — jest tylko zatrzy
 - wznów go razem z danymi: `docker start pg-lab mysql-lab oracle-lab`,
 - albo zacznij od zera (dane kontenera znikną, pobrane obrazy zostają): `docker rm -f pg-lab mysql-lab oracle-lab`, a potem ponownie `docker run ...`.
 
+**Zostały kontenery z poprzednich zajęć (np. `lab03-katedra-postgres-1`), zajęty port, dziwne dane**
+Każde laboratorium uruchomione przez `./lab up` lub `docker compose up` zostawia kontener (nazwa: `projekt-usługa-1`) i wolumen z danymi,
+także po zamknięciu maszyny. Sprawdź `docker ps -a` i posprzątaj:
+
+```
+./lab clean          # kontenery i dane wszystkich laboratoriów (obrazy zostają)
+./lab clean --all    # dodatkowo WSZYSTKIE inne kontenery i wolumeny
+```
+
+Obrazów (`docker images`) nie trzeba i nie warto usuwać — kontener to nie obraz. Jeśli `docker rmi` zgłasza, że obraz jest używany,
+najpierw usuń kontener (`docker rm -f nazwa`).
+
 **Brak miejsca na dysku**
 `docker system df` pokaże zajęcie. Usuń nieużywane dane: `docker system prune` (usuwa zatrzymane kontenery i nieużywane sieci; **nie** używaj `-a` ani `--volumes`, jeśli chcesz zachować pobrane obrazy i swoje dane).
 

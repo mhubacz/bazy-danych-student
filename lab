@@ -17,7 +17,8 @@ Użycie: ./lab <polecenie> [numer]
   shell N [usł.]  otwórz konsolę SQL w kontenerze (np. ./lab shell 2 postgres)
   logs N          pokaż logi (Ctrl+C kończy)
   status          pokaż działające kontenery
-  clean           usuń wszystkie kontenery i dane laboratoriów (KASUJE dane)
+  clean [-y] [--all]  usuń kontenery i dane laboratoriów, obrazy zostają (KASUJE dane)
+                  -y: bez pytania; --all: także WSZYSTKIE inne kontenery i wolumeny
   site            otwórz stronę z instrukcjami w przeglądarce
   update          pobierz najnowsze materiały z repozytorium (git pull)
 
@@ -171,14 +172,36 @@ cmd_status() {
 
 cmd_clean() {
   need_docker
-  confirm "Usunąć WSZYSTKIE kontenery i dane laboratoriów?"
-  local f
+  local yes=0 all=0 a f ids
+  for a in "$@"; do
+    case "$a" in
+      -y) yes=1 ;;
+      --all) all=1 ;;
+      *) die "nieznana opcja: $a (dozwolone: -y, --all)" ;;
+    esac
+  done
+  if [ "$yes" -ne 1 ]; then
+    if [ "$all" -eq 1 ]; then
+      confirm "Usunąć WSZYSTKIE kontenery i wolumeny Dockera (obrazy zostaną)?"
+    else
+      confirm "Usunąć kontenery i dane laboratoriów (obrazy zostaną)?"
+    fi
+  fi
   for f in "$LABS"/*/compose.yaml; do
     [ -f "$f" ] || continue
-    docker compose -f "$f" down -v > /dev/null 2>&1 || true
+    docker compose -f "$f" down -v --remove-orphans > /dev/null 2>&1 || true
   done
+  # kontenery z instrukcji 1/6 (docker run) i z testu hello-world
   docker rm -f pg-lab mysql-lab oracle-lab > /dev/null 2>&1 || true
-  echo "Posprzątano."
+  ids="$(docker ps -aq --filter ancestor=hello-world)"
+  [ -n "$ids" ] && docker rm -f $ids > /dev/null 2>&1
+  if [ "$all" -eq 1 ]; then
+    ids="$(docker ps -aq)"
+    [ -n "$ids" ] && docker rm -f $ids > /dev/null 2>&1
+    docker volume prune -af > /dev/null 2>&1 || docker volume prune -f > /dev/null 2>&1
+    docker network prune -f > /dev/null 2>&1
+  fi
+  echo "Posprzątano. Kontenery: $(docker ps -aq | wc -l), obrazy: $(docker images -q | wc -l) (zostają)."
 }
 
 cmd_site() {
@@ -213,7 +236,7 @@ case "${1:-help}" in
   shell)  cmd_shell "${2:-}" "${3:-}" ;;
   logs)   cmd_logs "${2:-}" ;;
   status) cmd_status ;;
-  clean)  cmd_clean ;;
+  clean)  shift; cmd_clean "$@" ;;
   site)   cmd_site ;;
   update) cmd_update "${2:-}" ;;
   help|-h|--help) usage ;;

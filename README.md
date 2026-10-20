@@ -54,6 +54,7 @@ Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z ins
 | `./lab shell N` | konsola SQL w kontenerze |
 | `./lab down` | zatrzymuje wszystko; **dane zostają** |
 | `./lab reset N` | wraca do stanu początkowego (**kasuje dane** tego laboratorium) |
+| `./lab clean` | usuwa kontenery i dane wszystkich laboratoriów — porządki na koniec zajęć (obrazy zostają) |
 | `./lab update` | pobiera nowe materiały |
 | `./lab help` | pełna lista |
 

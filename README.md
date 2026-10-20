@@ -34,10 +34,11 @@ Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z ins
 
 ## Koniec zajęć
 
-1. **Najpierw wygeneruj sprawozdanie (PDF)** i zapisz je poza komputerem — odpowiedzi są tylko w przeglądarce, a czyszczenie je usuwa.
-2. **Komputer w sali (współdzielony):** `./lab clean --stanowisko` (potwierdź, wpisując `TAK`) — usuwa kontenery, dane baz, połączenia DBeavera,
-   dane przeglądarki, historię i materiały. Kolejna osoba zaczyna od czystego stanowiska.
-3. **Własny komputer:** `./lab down` (dane zostają) albo `./lab clean` (usuwa kontenery i dane laboratoriów). Obrazy baz zostają.
+1. **Wyślij sprawozdanie:** wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl) — przed czyszczeniem, bo odpowiedzi są zapisane tylko w przeglądarce.
+2. **Wyczyść stanowisko:** `./lab clean --stanowisko` (potwierdź, wpisując `TAK`) — usuwa kontenery, dane baz, połączenia DBeavera,
+   dane przeglądarki, historię i materiały. Kolejna osoba zaczyna od czystego komputera.
+
+*Pracujesz na własnym komputerze?* Zamiast kroku 2 wystarczy `./lab down` (dane zostają) albo `./lab clean` (usuwa kontenery i dane laboratoriów). Obrazy baz zostają.
 
 ## Laboratoria
 

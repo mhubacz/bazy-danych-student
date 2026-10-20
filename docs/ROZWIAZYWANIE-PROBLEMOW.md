@@ -30,8 +30,8 @@ Każde laboratorium uruchomione przez `./lab up` lub `docker compose up` zostawi
 także po zamknięciu maszyny. Sprawdź `docker ps -a` i posprzątaj:
 
 ```
-./lab clean          # kontenery i dane wszystkich laboratoriów (obrazy zostają)
-./lab clean --all    # dodatkowo WSZYSTKIE inne kontenery i wolumeny
+./lab clean          # komputer w sali: wszystkie kontenery i dane baz + pozostałości po poprzedniej osobie
+./lab clean --dom    # własny komputer: tylko kontenery i dane laboratoriów (obrazy zostają)
 ```
 
 Obrazów (`docker images`) nie trzeba i nie warto usuwać — kontener to nie obraz. Jeśli `docker rmi` zgłasza, że obraz jest używany,

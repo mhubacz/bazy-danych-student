@@ -35,10 +35,10 @@ Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z ins
 ## Koniec zajęć
 
 1. **Wyślij sprawozdanie:** wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl) — przed czyszczeniem, bo odpowiedzi są zapisane tylko w przeglądarce.
-2. **Wyczyść stanowisko:** `./lab clean --stanowisko` (potwierdź, wpisując `TAK`) — usuwa kontenery, dane baz, połączenia DBeavera,
+2. **Wyczyść stanowisko:** `./lab clean` (potwierdź, wpisując `TAK`) — usuwa kontenery, dane baz, połączenia DBeavera,
    dane przeglądarki, historię i materiały. Kolejna osoba zaczyna od czystego komputera.
 
-*Pracujesz na własnym komputerze?* Zamiast kroku 2 wystarczy `./lab down` (dane zostają) albo `./lab clean` (usuwa kontenery i dane laboratoriów). Obrazy baz zostają.
+*Pracujesz na własnym komputerze?* Zamiast kroku 2 wystarczy `./lab down` (dane zostają) albo `./lab clean --dom` (usuwa tylko kontenery i dane laboratoriów). Obrazy baz zostają.
 
 ## Laboratoria
 
@@ -62,8 +62,8 @@ Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z ins
 | `./lab shell N` | konsola SQL w kontenerze |
 | `./lab down` | zatrzymuje wszystko; **dane zostają** |
 | `./lab reset N` | wraca do stanu początkowego (**kasuje dane** tego laboratorium) |
-| `./lab clean` | usuwa kontenery i dane wszystkich laboratoriów — porządki na koniec zajęć (obrazy zostają) |
-| `./lab clean --stanowisko` | komputer współdzielony w sali: dodatkowo usuwa materiały, połączenia DBeavera i dane przeglądarki |
+| `./lab clean` | koniec zajęć na komputerze w sali: usuwa kontenery, dane baz, materiały, połączenia DBeavera i dane przeglądarki (obrazy zostają) |
+| `./lab clean --dom` | własny komputer: usuwa tylko kontenery i dane laboratoriów |
 | `./lab update` | pobiera nowe materiały |
 | `./lab help` | pełna lista |
 

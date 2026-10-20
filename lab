@@ -17,10 +17,10 @@ Użycie: ./lab <polecenie> [numer]
   shell N [usł.]  otwórz konsolę SQL w kontenerze (np. ./lab shell 2 postgres)
   logs N          pokaż logi (Ctrl+C kończy)
   status          pokaż działające kontenery
-  clean [-y] [--all]  usuń kontenery i dane laboratoriów, obrazy zostają (KASUJE dane)
-                  -y: bez pytania; --all: także WSZYSTKIE inne kontenery i wolumeny
-  clean --stanowisko  komputer współdzielony w sali: jak --all, a do tego usuwa materiały,
+  clean [-y]      koniec zajęć na komputerze w sali: usuwa WSZYSTKIE kontenery i dane baz, materiały,
                   połączenia DBeavera, dane przeglądarek (zapisane odpowiedzi), historię, Pobrane
+  clean --dom [-y]  własny komputer: usuwa tylko kontenery i dane laboratoriów
+                  (obrazy baz zostają zawsze; -y: bez pytania)
   site            otwórz stronę z instrukcjami w przeglądarce
   update          pobierz najnowsze materiały z repozytorium (git pull)
 
@@ -198,47 +198,44 @@ clean_station() {
 
 cmd_clean() {
   need_docker
-  local yes=0 all=0 station=0 a f ids ans
+  local yes=0 home=0 a f ids ans
   for a in "$@"; do
     case "$a" in
       -y) yes=1 ;;
-      --all) all=1 ;;
-      --stanowisko) station=1; all=1 ;;
-      *) die "nieznana opcja: $a (dozwolone: -y, --all, --stanowisko)" ;;
+      --dom) home=1 ;;
+      *) die "nieznana opcja: $a (dozwolone: --dom, -y)" ;;
     esac
   done
-  if [ "$station" -eq 1 ] && [ "$yes" -ne 1 ]; then
-    echo "UWAGA: tryb dla WSPÓŁDZIELONYCH komputerów w sali. Zostaną usunięte: wszystkie kontenery i dane baz,"
-    echo "materiały ($ROOT), połączenia DBeavera, dane przeglądarek (z zapisanymi odpowiedziami), historia, Pobrane."
-    echo "Nie używaj tego na własnym komputerze."
-    read -r -p "Wpisz TAK, aby kontynuować: " ans
-    [ "$ans" = "TAK" ] || { echo "Anulowano."; exit 0; }
-  elif [ "$yes" -ne 1 ]; then
-    if [ "$all" -eq 1 ]; then
-      confirm "Usunąć WSZYSTKIE kontenery i wolumeny Dockera (obrazy zostaną)?"
-    else
+  if [ "$yes" -ne 1 ]; then
+    if [ "$home" -eq 1 ]; then
       confirm "Usunąć kontenery i dane laboratoriów (obrazy zostaną)?"
+    else
+      echo "Czyszczenie KOMPUTERA W SALI. Zostaną usunięte: wszystkie kontenery i dane baz, materiały ($ROOT),"
+      echo "połączenia DBeavera, dane przeglądarek (z zapisanymi odpowiedziami), historia, Pobrane. Obrazy baz zostaną."
+      echo "Na własnym komputerze przerwij (Enter) i użyj:  ./lab clean --dom"
+      read -r -p "Wpisz TAK, aby kontynuować: " ans
+      [ "$ans" = "TAK" ] || { echo "Anulowano."; exit 0; }
     fi
   fi
   for f in "$LABS"/*/compose.yaml; do
     [ -f "$f" ] || continue
     docker compose -f "$f" down -v --remove-orphans > /dev/null 2>&1 || true
   done
-  # kontenery z instrukcji 1/6 (docker run) i z testu hello-world
+  # kontenery z instrukcji 1/6 (docker run) i z ćwiczeń z hello-world
   docker rm -f pg-lab mysql-lab oracle-lab > /dev/null 2>&1 || true
   ids="$(docker ps -aq --filter ancestor=hello-world)"
   [ -n "$ids" ] && docker rm -f $ids > /dev/null 2>&1
-  if [ "$all" -eq 1 ]; then
-    ids="$(docker ps -aq)"
-    [ -n "$ids" ] && docker rm -f $ids > /dev/null 2>&1
-    docker volume prune -af > /dev/null 2>&1 || docker volume prune -f > /dev/null 2>&1
-    docker network prune -f > /dev/null 2>&1
+  if [ "$home" -eq 1 ]; then
+    echo "Posprzątano. Kontenery: $(docker ps -aq | wc -l), obrazy: $(docker images -q | wc -l) (zostają)."
+    return 0
   fi
-  echo "Posprzątano. Kontenery: $(docker ps -aq | wc -l), obrazy: $(docker images -q | wc -l) (zostają)."
-  if [ "$station" -eq 1 ]; then
-    clean_station
-    echo "Stanowisko wyczyszczone. Zamknij terminal; kolejna osoba zaczyna od: git clone https://github.com/mhubacz/bazy-danych-student.git"
-  fi
+  ids="$(docker ps -aq)"
+  [ -n "$ids" ] && docker rm -f $ids > /dev/null 2>&1
+  docker volume prune -af > /dev/null 2>&1 || docker volume prune -f > /dev/null 2>&1
+  docker network prune -f > /dev/null 2>&1
+  clean_station
+  echo "Stanowisko wyczyszczone (obrazy baz zostały). Zamknij terminal."
+  echo "Kolejna osoba zaczyna od: git clone https://github.com/mhubacz/bazy-danych-student.git"
 }
 
 cmd_site() {

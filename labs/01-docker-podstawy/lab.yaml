@@ -19,11 +19,6 @@ przygotowanie:
       - ["**port** (`-p`)", "„drzwi” z Twojego komputera do programu w kontenerze, zapis `port_komputera:port_kontenera`", "`-p 5432:5432` — DBeaver łączy się z `localhost:5432`"]
       - ["**zmienna środowiskowa** (`-e`)", "ustawienie przekazywane do kontenera przy starcie", "`-e POSTGRES_PASSWORD=student`"]
       - ["**wolumen** (volume)", "trwałe miejsce na dane, niezależne od kontenera — temat instrukcji 2/6", "`pg-data`"]
-  - opis: "Sprawdź, czy Docker działa — uruchom najprostszy możliwy kontener:"
-    kod: |
-      docker run hello-world
-      docker ps -a
-  - uwaga: "Przeczytaj komunikat: Docker utworzył kontener z obrazu `hello-world` i uruchomił go; program wypisał tekst i zakończył działanie. Jeśli obrazu nie było jeszcze na komputerze, Docker najpierw pobrał go z Docker Hub (komunikat `Unable to find image … locally`). Dlatego `docker ps -a` pokazuje kontener ze stanem `Exited`. Serwer bazy danych przejdzie ten sam cykl — z tą różnicą, że działa, dopóki go nie zatrzymasz."
   - opis: "Pobierz obrazy trzech silników (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa):"
     kod: |
       docker pull postgres:17
@@ -39,9 +34,27 @@ przygotowanie:
       docker run --name mysql-lab -e MYSQL_ROOT_PASSWORD=student -e MYSQL_USER=student -e MYSQL_PASSWORD=student -e MYSQL_DATABASE=student -p 3306:3306 -d mysql:8.4
       docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e APP_USER_PASSWORD=student -p 1521:1521 -d gvenzl/oracle-free:23
   - uwaga: "Budowa polecenia: `docker run` — utwórz i uruchom kontener · `--name pg-lab` — nazwa kontenera · `-e ZMIENNA=wartość` — ustawienia (użytkownik, hasło, nazwa bazy) · `-p 5432:5432` — udostępnienie portu · `-d` — praca w tle · na końcu nazwa obrazu."
-  - uwaga: "Oracle przy pierwszym starcie potrzebuje kilku minut. Gotowość widać w logach (`docker logs -f oracle-lab`) po komunikacie `DATABASE IS READY TO USE!`."
+  - uwaga: "Oracle przy pierwszym starcie potrzebuje kilku minut — w tym czasie wykonaj zadania 1–6 z obrazem `hello-world`. Gotowość widać w logach (`docker logs -f oracle-lab`) po komunikacie `DATABASE IS READY TO USE!`."
 zadania:
-  - tresc: "Sprawdź działające kontenery: `docker ps`."
+  - tresc: "Uruchom najprostszy kontener: `docker run hello-world`. Przeczytaj komunikat i opisz własnymi słowami kroki, które wykonał Docker."
+    pole: opis
+    podpowiedz: "Komunikat sam wymienia kroki (lista 1–4). Jeśli obrazu nie było na komputerze, na początku zobaczysz też `Unable to find image 'hello-world:latest' locally` i pobieranie. Brak znacznika wersji oznacza `:latest`."
+  - tresc: "Wyświetl pobrane obrazy (`docker images`) oraz kontenery: `docker ps` i `docker ps -a`. Dlaczego kontenera z zadania 1 nie widać w `docker ps`?"
+    pole: opis
+    podpowiedz: "`docker ps` pokazuje tylko **działające** kontenery, `docker ps -a` — wszystkie. Zwróć uwagę na kolumnę `STATUS` (np. `Exited (0)`) i na nazwę nadaną automatycznie w kolumnie `NAMES`."
+  - tresc: "Uruchom `docker run hello-world` jeszcze dwa razy i ponownie wykonaj `docker ps -a`. Ile jest teraz kontenerów? Czy obraz był pobierany ponownie? Następnie uruchom `docker run --rm hello-world` i sprawdź, czy przybył kolejny kontener."
+    pole: opis
+    podpowiedz: "Każde `docker run` tworzy **nowy** kontener z tego samego obrazu. Obraz pobierany jest tylko raz. Opcja `--rm` usuwa kontener automatycznie po zakończeniu działania."
+  - tresc: "Utwórz kontener z własną nazwą: `docker run --name moj-hello hello-world`. Wykonaj to samo polecenie drugi raz — jaki błąd się pojawił i dlaczego? Uruchom istniejący kontener ponownie: `docker start -a moj-hello`."
+    pole: opis
+    podpowiedz: "Nazwa kontenera musi być unikalna, więc drugie `docker run --name moj-hello` kończy się błędem `Conflict… already in use`. `docker start` uruchamia **istniejący** kontener zamiast tworzyć nowy; `-a` wyświetla jego wynik w terminalu."
+  - tresc: "Sprawdź, co wypisał kontener i jak zakończył działanie: `docker logs moj-hello` oraz `docker inspect -f '{{.State.ExitCode}}' moj-hello`. Co oznacza kod wyjścia 0?"
+    pole: opis
+    podpowiedz: "`docker logs` pokazuje wszystko, co program wypisał (także z wcześniejszych uruchomień). `docker inspect` zwraca pełny opis kontenera; `-f` wybiera jedno pole. Kod 0 oznacza poprawne zakończenie programu."
+  - tresc: "Posprzątaj: usuń kontener `docker rm moj-hello`, a potem wszystkie zatrzymane kontenery `docker container prune` (potwierdź literą `y`). Na koniec spróbuj usunąć obraz `docker rmi hello-world` — kiedy się to udaje, a kiedy nie?"
+    pole: opis
+    podpowiedz: "Obrazu nie da się usunąć, dopóki istnieje kontener (także zatrzymany), który z niego powstał — stąd kolejność: najpierw kontenery, potem obraz. Usunięcie obrazu nie szkodzi: przy kolejnym `docker run hello-world` zostanie pobrany ponownie."
+  - tresc: "Sprawdź, czy kontenery baz danych działają: `docker ps` (kolumny `STATUS` i `PORTS`)."
     pole: brak
   - tresc: "Połącz się w DBeaver z PostgreSQL (host `localhost`, port `5432`, baza `student`, użytkownik `student`, hasło `student`)."
     pole: brak
@@ -68,7 +81,7 @@ zadania:
   - tresc: "Połącz się z MySQL (port `3306`, baza `student`) oraz z Oracle (port `1521`, połączenie przez **Service name** `FREEPDB1`, użytkownik `student`). Powtórz dwa poprzednie kroki i zanotuj różnice w składni."
     pole: opis
     podpowiedz:
-      - opis: "Nowe połączenia tworzysz tak samo jak dla PostgreSQL (*Database* → *New Database Connection*). Polecenia z zadania 3 trzeba lekko dostosować — silniki różnią się nazwami typów:"
+      - opis: "Nowe połączenia tworzysz tak samo jak dla PostgreSQL (*Database* → *New Database Connection*). Polecenia z zadania 9 trzeba lekko dostosować — silniki różnią się nazwami typów:"
         tabela:
           - ["", "PostgreSQL", "MySQL", "Oracle"]
           - ["liczba całkowita (nr indeksu)", "`integer`", "`INT`", "`NUMBER(10)`"]
@@ -81,4 +94,4 @@ zadania:
     pole: opis
   - tresc: "Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`."
     pole: brak
-uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (polecenie z zadania 7) — porty muszą być wolne."
+uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (polecenie z zadania 13) — porty muszą być wolne."

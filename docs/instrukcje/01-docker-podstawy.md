@@ -25,15 +25,6 @@
 | **zmienna środowiskowa** (`-e`) | ustawienie przekazywane do kontenera przy starcie | `-e POSTGRES_PASSWORD=student` |
 | **wolumen** (volume) | trwałe miejsce na dane, niezależne od kontenera — temat instrukcji 2/6 | `pg-data` |
 
-Sprawdź, czy Docker działa — uruchom najprostszy możliwy kontener:
-
-```bash
-docker run hello-world
-docker ps -a
-```
-
-> Przeczytaj komunikat: Docker utworzył kontener z obrazu `hello-world` i uruchomił go; program wypisał tekst i zakończył działanie. Jeśli obrazu nie było jeszcze na komputerze, Docker najpierw pobrał go z Docker Hub (komunikat `Unable to find image … locally`). Dlatego `docker ps -a` pokazuje kontener ze stanem `Exited`. Serwer bazy danych przejdzie ten sam cykl — z tą różnicą, że działa, dopóki go nie zatrzymasz.
-
 Pobierz obrazy trzech silników (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa):
 
 ```bash
@@ -60,18 +51,54 @@ docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e A
 
 > Budowa polecenia: `docker run` — utwórz i uruchom kontener · `--name pg-lab` — nazwa kontenera · `-e ZMIENNA=wartość` — ustawienia (użytkownik, hasło, nazwa bazy) · `-p 5432:5432` — udostępnienie portu · `-d` — praca w tle · na końcu nazwa obrazu.
 
-> Oracle przy pierwszym starcie potrzebuje kilku minut. Gotowość widać w logach (`docker logs -f oracle-lab`) po komunikacie `DATABASE IS READY TO USE!`.
+> Oracle przy pierwszym starcie potrzebuje kilku minut — w tym czasie wykonaj zadania 1–6 z obrazem `hello-world`. Gotowość widać w logach (`docker logs -f oracle-lab`) po komunikacie `DATABASE IS READY TO USE!`.
 
 ## Zadania
 
-1. Sprawdź działające kontenery: `docker ps`.
-2. Połącz się w DBeaver z PostgreSQL (host `localhost`, port `5432`, baza `student`, użytkownik `student`, hasło `student`).
+1. Uruchom najprostszy kontener: `docker run hello-world`. Przeczytaj komunikat i opisz własnymi słowami kroki, które wykonał Docker.
+
+   **Podpowiedź:**
+
+   Komunikat sam wymienia kroki (lista 1–4). Jeśli obrazu nie było na komputerze, na początku zobaczysz też `Unable to find image 'hello-world:latest' locally` i pobieranie. Brak znacznika wersji oznacza `:latest`.
+
+2. Wyświetl pobrane obrazy (`docker images`) oraz kontenery: `docker ps` i `docker ps -a`. Dlaczego kontenera z zadania 1 nie widać w `docker ps`?
+
+   **Podpowiedź:**
+
+   `docker ps` pokazuje tylko **działające** kontenery, `docker ps -a` — wszystkie. Zwróć uwagę na kolumnę `STATUS` (np. `Exited (0)`) i na nazwę nadaną automatycznie w kolumnie `NAMES`.
+
+3. Uruchom `docker run hello-world` jeszcze dwa razy i ponownie wykonaj `docker ps -a`. Ile jest teraz kontenerów? Czy obraz był pobierany ponownie? Następnie uruchom `docker run --rm hello-world` i sprawdź, czy przybył kolejny kontener.
+
+   **Podpowiedź:**
+
+   Każde `docker run` tworzy **nowy** kontener z tego samego obrazu. Obraz pobierany jest tylko raz. Opcja `--rm` usuwa kontener automatycznie po zakończeniu działania.
+
+4. Utwórz kontener z własną nazwą: `docker run --name moj-hello hello-world`. Wykonaj to samo polecenie drugi raz — jaki błąd się pojawił i dlaczego? Uruchom istniejący kontener ponownie: `docker start -a moj-hello`.
+
+   **Podpowiedź:**
+
+   Nazwa kontenera musi być unikalna, więc drugie `docker run --name moj-hello` kończy się błędem `Conflict… already in use`. `docker start` uruchamia **istniejący** kontener zamiast tworzyć nowy; `-a` wyświetla jego wynik w terminalu.
+
+5. Sprawdź, co wypisał kontener i jak zakończył działanie: `docker logs moj-hello` oraz `docker inspect -f '{{.State.ExitCode}}' moj-hello`. Co oznacza kod wyjścia 0?
+
+   **Podpowiedź:**
+
+   `docker logs` pokazuje wszystko, co program wypisał (także z wcześniejszych uruchomień). `docker inspect` zwraca pełny opis kontenera; `-f` wybiera jedno pole. Kod 0 oznacza poprawne zakończenie programu.
+
+6. Posprzątaj: usuń kontener `docker rm moj-hello`, a potem wszystkie zatrzymane kontenery `docker container prune` (potwierdź literą `y`). Na koniec spróbuj usunąć obraz `docker rmi hello-world` — kiedy się to udaje, a kiedy nie?
+
+   **Podpowiedź:**
+
+   Obrazu nie da się usunąć, dopóki istnieje kontener (także zatrzymany), który z niego powstał — stąd kolejność: najpierw kontenery, potem obraz. Usunięcie obrazu nie szkodzi: przy kolejnym `docker run hello-world` zostanie pobrany ponownie.
+
+7. Sprawdź, czy kontenery baz danych działają: `docker ps` (kolumny `STATUS` i `PORTS`).
+8. Połącz się w DBeaver z PostgreSQL (host `localhost`, port `5432`, baza `student`, użytkownik `student`, hasło `student`).
 
    **Podpowiedź:**
 
    W DBeaver: *Database* → *New Database Connection* → **PostgreSQL** → *Next*. Wpisz host, port, bazę, użytkownika i hasło, kliknij *Test Connection* (za pierwszym razem DBeaver zaproponuje pobranie sterownika — zgódź się), potem *Finish*.
 
-3. Utwórz tabelę `student` (numer indeksu, imię, nazwisko, e-mail, skrót kierunku studiów) i dodaj do niej swoje dane poleceniem `INSERT`.
+9. Utwórz tabelę `student` (numer indeksu, imię, nazwisko, e-mail, skrót kierunku studiów) i dodaj do niej swoje dane poleceniem `INSERT`.
 
    **Podpowiedź:**
 
@@ -93,17 +120,17 @@ docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e A
 
    `PRIMARY KEY` oznacza, że numer indeksu musi być unikalny — próba dodania drugiego wiersza z tym samym numerem zakończy się błędem. `NOT NULL` wymusza podanie wartości. Teksty w SQL zapisujesz w apostrofach: `'Jan'`.
 
-4. Wyświetl dane: `SELECT * FROM student;`
+10. Wyświetl dane: `SELECT * FROM student;`
 
    **Podpowiedź:**
 
    Wpisz zapytanie w edytorze SQL i naciśnij **Ctrl+Enter** — wynik pojawi się w panelu pod edytorem. Ten sam widok otrzymasz graficznie: dwuklik na tabeli w drzewie → zakładka *Data*. Jeśli nowej tabeli nie widać w drzewie, odśwież je (**F5**).
 
-5. Połącz się z MySQL (port `3306`, baza `student`) oraz z Oracle (port `1521`, połączenie przez **Service name** `FREEPDB1`, użytkownik `student`). Powtórz dwa poprzednie kroki i zanotuj różnice w składni.
+11. Połącz się z MySQL (port `3306`, baza `student`) oraz z Oracle (port `1521`, połączenie przez **Service name** `FREEPDB1`, użytkownik `student`). Powtórz dwa poprzednie kroki i zanotuj różnice w składni.
 
    **Podpowiedź:**
 
-   Nowe połączenia tworzysz tak samo jak dla PostgreSQL (*Database* → *New Database Connection*). Polecenia z zadania 3 trzeba lekko dostosować — silniki różnią się nazwami typów:
+   Nowe połączenia tworzysz tak samo jak dla PostgreSQL (*Database* → *New Database Connection*). Polecenia z zadania 9 trzeba lekko dostosować — silniki różnią się nazwami typów:
 
    |  | PostgreSQL | MySQL | Oracle |
    |---|---|---|---|
@@ -114,11 +141,11 @@ docker run --name oracle-lab -e ORACLE_PASSWORD=student -e APP_USER=student -e A
 
    **MySQL — błąd „Public Key Retrieval is not allowed”.** To typowe przy pierwszym połączeniu z MySQL 8. W oknie połączenia przejdź na zakładkę *Driver properties*, znajdź właściwość `allowPublicKeyRetrieval`, ustaw ją na `true` i połącz się ponownie (dla istniejącego połączenia: prawy przycisk → *Edit Connection* → *Driver properties*).
 
-6. Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, czy dane zostały zachowane.
-7. Usuń kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`. Uruchom `pg-lab` od nowa tym samym poleceniem i sprawdź, co stało się z danymi.
-8. Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`.
+12. Zatrzymaj i uruchom ponownie kontener: `docker stop pg-lab`, potem `docker start pg-lab`. Sprawdź, czy dane zostały zachowane.
+13. Usuń kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`. Uruchom `pg-lab` od nowa tym samym poleceniem i sprawdź, co stało się z danymi.
+14. Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`.
 
 ## Uwagi
 
-Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (polecenie z zadania 7) — porty muszą być wolne.
+Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Przed następnymi laboratoriami usuń kontenery z tej instrukcji (polecenie z zadania 13) — porty muszą być wolne.
 

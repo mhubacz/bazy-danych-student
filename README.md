@@ -32,6 +32,13 @@ Możesz też użyć paczki ZIP z e-learningu.
 
 Na Windows w PowerShell zamiast `./lab up` użyj poleceń `docker compose` z instrukcji (lub *Git Bash*).
 
+## Koniec zajęć
+
+1. **Najpierw wygeneruj sprawozdanie (PDF)** i zapisz je poza komputerem — odpowiedzi są tylko w przeglądarce, a czyszczenie je usuwa.
+2. **Komputer w sali (współdzielony):** `./lab clean --stanowisko` (potwierdź, wpisując `TAK`) — usuwa kontenery, dane baz, połączenia DBeavera,
+   dane przeglądarki, historię i materiały. Kolejna osoba zaczyna od czystego stanowiska.
+3. **Własny komputer:** `./lab down` (dane zostają) albo `./lab clean` (usuwa kontenery i dane laboratoriów). Obrazy baz zostają.
+
 ## Laboratoria
 
 | Nr | Silnik | Baza | Temat | Katalog |

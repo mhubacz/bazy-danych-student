@@ -185,6 +185,8 @@ clean_station() {
     find "$ws" -path '*/.dbeaver/*' \( -name 'data-sources*.json' -o -name 'credentials-config*.json' \) -delete
     find "$ws" -mindepth 2 -maxdepth 2 -type d -name Scripts -exec sh -c 'rm -rf "$1"/*' _ {} \;
   done
+  # SQL Developer: tylko zapisane połączenia (ustawienia zostają)
+  find "$HOME/.sqldeveloper" -path '*o.jdeveloper.db.connection*' -name 'connections*.json' -delete 2> /dev/null || true
   # przeglądarki: tylko gdy są zamknięte (ta strona może być właśnie otwarta)
   if pgrep -x firefox > /dev/null 2>&1 || pgrep -f 'firefox|chromium' > /dev/null 2>&1; then
     echo "Przeglądarka jest otwarta — jej dane pominięto. Odpowiedzi poprzedniej osoby usuń przyciskiem"

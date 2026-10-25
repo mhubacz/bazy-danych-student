@@ -142,13 +142,30 @@
 
    **MySQL — błąd „Public Key Retrieval is not allowed”.** To typowe przy pierwszym połączeniu z MySQL 8. W oknie połączenia przejdź na zakładkę *Driver properties*, znajdź właściwość `allowPublicKeyRetrieval`, ustaw ją na `true` i połącz się ponownie (dla istniejącego połączenia: prawy przycisk → *Edit Connection* → *Driver properties*).
 
-14. Zatrzymaj i uruchom ponownie kontener (`docker stop pg-lab`, potem `docker start pg-lab`) i sprawdź, czy tabela `student` nadal ma dane. Następnie usuń kontenery (`docker rm -f pg-lab mysql-lab oracle-lab`), uruchom `pg-lab` od nowa poleceniem z zadania 8 i sprawdź tabelę ponownie. Wyjaśnij różnicę.
+14. Połącz się z tą samą bazą Oracle drugim klientem — **Oracle SQL Developer** (w sali jest w menu aplikacji, polecenie `sqldeveloper`). Wykonaj `SELECT * FROM student;`. Czy widzisz wiersz dodany wcześniej w DBeaver? Dlaczego?
+
+   **Podpowiedź:**
+
+   W panelu *Connections* kliknij zielony **+** (*New Connection*) i wpisz:
+
+   | Pole | Wartość |
+   |---|---|
+   | Name | dowolna, np. `oracle-lab` |
+   | Username / Password | `student` / `student` |
+   | Hostname / Port | `localhost` / `1521` |
+   | Service name | `FREEPDB1` (zaznacz *Service name*, nie *SID*) |
+
+   Kliknij *Test* — w lewym dolnym rogu powinno pojawić się *Status: Success* — potem *Connect*. Zapytanie wpisz w arkuszu (*Worksheet*) i wykonaj **Ctrl+Enter**. DBeaver i SQL Developer to tylko **klienty**: oba łączą się z tym samym serwerem w kontenerze `oracle-lab`, więc widzą te same, zatwierdzone (*commit*) dane.
+
+   Na własnym komputerze SQL Developer jest opcjonalny — pobierzesz go ze strony Oracle (wymaga Java 17 lub nowszej). Jeśli go nie masz, pomiń to zadanie.
+
+15. Zatrzymaj i uruchom ponownie kontener (`docker stop pg-lab`, potem `docker start pg-lab`) i sprawdź, czy tabela `student` nadal ma dane. Następnie usuń kontenery (`docker rm -f pg-lab mysql-lab oracle-lab`), uruchom `pg-lab` od nowa poleceniem z zadania 8 i sprawdź tabelę ponownie. Wyjaśnij różnicę.
 
    **Podpowiedź:**
 
    `docker stop` tylko zatrzymuje kontener — jego pliki (a więc i dane bazy) zostają. `docker rm` usuwa kontener razem z danymi zapisanymi w jego warstwie; nowy kontener startuje z pustą bazą. Trwałe dane poznasz w instrukcji 2/6 (wolumeny).
 
-15. Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`.
+16. Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`.
 
 ## Uwagi
 

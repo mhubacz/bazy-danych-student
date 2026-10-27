@@ -10,11 +10,7 @@ wstep:
   - "Terminal jest otwarty w katalogu z materiałami: `cd ~/bazy-danych-student`."
   - "Na własnym komputerze najpierw zainstaluj Docker i DBeaver — patrz `docs/INSTALACJA.md`."
 przygotowanie:
-  - opis: "**1. Wyczyść stanowisko.** Komputer mógł zostać po poprzedniej osobie z działającymi kontenerami i połączeniami w DBeaver. Usuń je (pobrane materiały i obrazy baz zostają) i potwierdź, wpisując `TAK`:"
-    kod: |
-      ./lab clean
-  - uwaga: "Polecenie zamyka DBeavera, usuwa wszystkie kontenery i dane baz, połączenia i skrypty DBeavera (jego ustawienia zostają), historię poleceń i Pobrane. Dane przeglądarki usuwa tylko wtedy, gdy przeglądarka jest zamknięta — jeśli na tej stronie widać odpowiedzi poprzedniej osoby, usuń je przyciskiem „Wyczyść” w sekcji „Sprawozdanie”. Na własnym komputerze użyj `./lab clean --dom`."
-  - opis: "**2. Docker w pigułce.** Docker uruchamia programy w **kontenerach** — odizolowanych „pudełkach”, w których program ma wszystko, czego potrzebuje do działania. Dzięki temu serwer bazy danych uruchomisz jednym poleceniem, bez instalowania go w systemie, a po zajęciach usuniesz go bez śladu. Najważniejsze pojęcia:"
+  - opis: "**Docker w pigułce.** Docker uruchamia programy w **kontenerach** — odizolowanych „pudełkach”, w których program ma wszystko, czego potrzebuje do działania. Dzięki temu serwer bazy danych uruchomisz jednym poleceniem, bez instalowania go w systemie, a po zajęciach usuniesz go bez śladu. Najważniejsze pojęcia:"
     tabela:
       - ["Pojęcie", "Co to jest", "Przykład"]
       - ["**obraz** (image)", "gotowy szablon programu: pliki i ustawienia; pobierasz go raz", "`postgres:17` (nazwa:wersja)"]

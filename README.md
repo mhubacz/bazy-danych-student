@@ -13,13 +13,7 @@ git clone https://github.com/mhubacz/bazy-danych-student.git ~/bazy-danych-stude
 cd ~/bazy-danych-student
 ```
 
-2. **Wyczyść stanowisko** (najlepiej przy zamkniętej przeglądarce) i potwierdź, wpisując `TAK`:
-
-```
-./lab clean
-```
-
-3. **Otwórz instrukcje** i wykonuj tę, którą wskaże prowadzący — każda instrukcja sama mówi, jak uruchomić potrzebną bazę:
+2. **Otwórz instrukcje** i wykonuj tę, którą wskaże prowadzący — każda instrukcja sama mówi, jak uruchomić potrzebną bazę:
 
 ```
 ./lab site
@@ -27,7 +21,7 @@ cd ~/bazy-danych-student
 
 Pod zadaniami wpisujesz swoje rozwiązania, a na końcu generujesz sprawozdanie w PDF.
 
-*Własny komputer:* najpierw zainstaluj Docker i DBeaver ([docs/INSTALACJA.md](docs/INSTALACJA.md)), a zamiast `./lab clean` używaj `./lab clean --dom`.
+*Własny komputer:* najpierw zainstaluj Docker i DBeaver ([docs/INSTALACJA.md](docs/INSTALACJA.md)), a po zajęciach zatrzymaj bazy poleceniem `./lab down` (lub usuń je razem z danymi: `./lab clean`).
 W Windows PowerShell pobranie materiałów i otwarcie instrukcji wygląda tak:
 
 ```
@@ -39,11 +33,11 @@ start docs\index.html
 
 ## Koniec zajęć
 
-1. **Wyślij sprawozdanie:** wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl) — przed czyszczeniem, bo odpowiedzi są zapisane tylko w przeglądarce.
-2. **Zamknij przeglądarkę i wyczyść stanowisko:** `./lab clean` (potwierdź, wpisując `TAK`) — usuwa kontenery, dane baz,
-   połączenia DBeavera, dane przeglądarki, historię i Pobrane. Kolejna osoba zaczyna od czystego komputera.
+1. **Wyślij sprawozdanie:** wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl).
+2. **Wyłącz maszynę wirtualną.** Przed kolejnymi zajęciami prowadzący przywraca ją do stanu początkowego, więc nic nie trzeba sprzątać —
+   ale też nic, czego nie wysłałeś, nie przetrwa.
 
-*Pracujesz na własnym komputerze?* Zamiast kroku 2 wystarczy `./lab down` (dane zostają) albo `./lab clean --dom` (usuwa tylko kontenery i dane laboratoriów). Obrazy baz zostają.
+*Własny komputer:* `./lab down` (bazy zatrzymane, dane zostają) albo `./lab clean` (usuwa kontenery i dane laboratoriów; obrazy zostają).
 
 ## Laboratoria
 
@@ -67,8 +61,7 @@ start docs\index.html
 | `./lab shell N` | konsola SQL w kontenerze |
 | `./lab down` | zatrzymuje wszystko; **dane zostają** |
 | `./lab reset N` | wraca do stanu początkowego (**kasuje dane** tego laboratorium) |
-| `./lab clean` | komputer w sali (początek i koniec zajęć): usuwa kontenery, dane baz, połączenia DBeavera i dane przeglądarki (materiały i obrazy zostają) |
-| `./lab clean --dom` | własny komputer: usuwa tylko kontenery i dane laboratoriów |
+| `./lab clean` | usuwa kontenery i dane wszystkich laboratoriów (obrazy zostają) |
 | `./lab update` | pobiera nowe materiały |
 | `./lab help` | pełna lista |
 

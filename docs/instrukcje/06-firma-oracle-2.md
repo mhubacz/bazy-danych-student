@@ -40,9 +40,9 @@ docker compose logs -f oracle
 `JOIN`, `GROUP BY`, `HAVING`, `COUNT` i `AVG` działają standardowo. Imię i nazwisko łączysz operatorem `||`. Zadania 1–4 powtarzają materiał z 5/6 — to celowa powtórka przed grupowaniem.
 
 
-## Koniec zajęć — zanim odejdziesz od komputera
+## Koniec zajęć
 
-1. **Wyślij sprawozdanie.** Wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl). Zrób to przed czyszczeniem — odpowiedzi są zapisane tylko w tej przeglądarce.
-2. **Zamknij przeglądarkę i wyczyść stanowisko.** W terminalu, w katalogu z materiałami, wykonaj `./lab clean` i wpisz `TAK`. Polecenie usuwa kontenery i dane baz, połączenia DBeavera, dane przeglądarki (także Twoje zalogowania i odpowiedzi), historię i Pobrane — kolejna osoba zaczyna od czystego komputera.
-3. *Pracujesz na własnym komputerze?* Zamiast czyszczenia stanowiska wystarczy `./lab down` (bazy zatrzymane, dane zostają na kolejne zajęcia) albo `./lab clean --dom` (usuwa tylko kontenery i dane laboratoriów; obrazy zostają). Na Windows bez Git Bash: `docker compose down` w katalogu laboratorium.
+1. **Wyślij sprawozdanie.** Wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl). Odpowiedzi są zapisane tylko w tej przeglądarce.
+2. **Wyłącz maszynę wirtualną.** Przed kolejnymi zajęciami zostanie przywrócona do stanu początkowego — sprzątać nie trzeba, ale nic niewysłanego nie przetrwa.
+3. *Pracujesz na własnym komputerze?* `./lab down` zatrzymuje bazy (dane zostają na kolejne zajęcia), a `./lab clean` usuwa kontenery i dane laboratoriów (obrazy zostają). Na Windows bez Git Bash: `docker compose down` w katalogu laboratorium.
 

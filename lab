@@ -17,11 +17,7 @@ Użycie: ./lab <polecenie> [numer]
   shell N [usł.]  otwórz konsolę SQL w kontenerze (np. ./lab shell 2 postgres)
   logs N          pokaż logi (Ctrl+C kończy)
   status          pokaż działające kontenery
-  clean [-y]      komputer w sali (początek i koniec zajęć): usuwa WSZYSTKIE kontenery i dane baz,
-                  połączenia i skrypty DBeavera, dane zamkniętej przeglądarki, historię, Pobrane;
-                  materiały, obrazy baz i ustawienia DBeavera zostają
-  clean --dom [-y]  własny komputer: usuwa tylko kontenery i dane laboratoriów
-                  (obrazy baz zostają zawsze; -y: bez pytania)
+  clean [-y]      usuń kontenery i dane wszystkich laboratoriów; obrazy baz zostają (-y: bez pytania)
   site            otwórz stronę z instrukcjami w przeglądarce
   update          pobierz najnowsze materiały z repozytorium (git pull)
 
@@ -173,57 +169,17 @@ cmd_status() {
   docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
 }
 
-clean_station() {
-  # pozostałości po poprzedniej osobie na komputerze współdzielonym.
-  # Zostają: materiały (ten katalog), obrazy baz, ustawienia i sterowniki DBeavera.
-  local ws d
-  if pkill -f '/dbeaver' > /dev/null 2>&1; then sleep 2; fi
-  # DBeaver: tylko połączenia, zapisane hasła i skrypty SQL (ustawienia programu zostają)
-  for ws in "$HOME/.local/share/DBeaverData/workspace6" \
-            "$HOME/snap/dbeaver-ce/current/.local/share/DBeaverData/workspace6"; do
-    [ -d "$ws" ] || continue
-    find "$ws" -path '*/.dbeaver/*' \( -name 'data-sources*.json' -o -name 'credentials-config*.json' \) -delete
-    find "$ws" -mindepth 2 -maxdepth 2 -type d -name Scripts -exec sh -c 'rm -rf "$1"/*' _ {} \;
-  done
-  # SQL Developer: tylko zapisane połączenia (ustawienia zostają)
-  find "$HOME/.sqldeveloper" -path '*o.jdeveloper.db.connection*' -name 'connections*.json' -delete 2> /dev/null || true
-  # przeglądarki: tylko gdy są zamknięte (ta strona może być właśnie otwarta)
-  if pgrep -x firefox > /dev/null 2>&1 || pgrep -f 'firefox|chromium' > /dev/null 2>&1; then
-    echo "Przeglądarka jest otwarta — jej dane pominięto. Odpowiedzi poprzedniej osoby usuń przyciskiem"
-    echo "\"Wyczyść\" w sekcji \"Sprawozdanie\" na stronie z instrukcjami (albo zamknij przeglądarkę i powtórz ./lab clean)."
-  else
-    rm -rf "$HOME/snap/firefox/common/.mozilla" "$HOME/.mozilla" \
-           "$HOME/.config/chromium" "$HOME/snap/chromium/common/chromium"
-  fi
-  rm -f "$HOME/.bash_history" "$HOME/.psql_history" "$HOME/.mysql_history" "$HOME/.python_history" \
-        "$HOME/.local/share/recently-used.xbel" "$HOME/.git-credentials"
-  rm -rf "$HOME/.local/share/Trash/"*
-  for d in "$HOME/Pobrane" "$HOME/Downloads"; do
-    [ -d "$d" ] && find "$d" -mindepth 1 -delete
-  done
-}
-
 cmd_clean() {
   need_docker
-  local yes=0 home=0 a f ids ans
+  local yes=0 a f ids
   for a in "$@"; do
     case "$a" in
       -y) yes=1 ;;
-      --dom) home=1 ;;
-      *) die "nieznana opcja: $a (dozwolone: --dom, -y)" ;;
+      --dom) ;;  # dawna opcja — teraz zachowanie domyślne
+      *) die "nieznana opcja: $a (dozwolone: -y)" ;;
     esac
   done
-  if [ "$yes" -ne 1 ]; then
-    if [ "$home" -eq 1 ]; then
-      confirm "Usunąć kontenery i dane laboratoriów (obrazy zostaną)?"
-    else
-      echo "Czyszczenie KOMPUTERA W SALI. Zostaną usunięte: wszystkie kontenery i dane baz, połączenia i skrypty DBeavera,"
-      echo "dane przeglądarki (jeśli jest zamknięta), historia, Pobrane. Materiały, obrazy baz i ustawienia DBeavera zostaną."
-      echo "Na własnym komputerze przerwij (Enter) i użyj:  ./lab clean --dom"
-      read -r -p "Wpisz TAK, aby kontynuować: " ans
-      [ "$ans" = "TAK" ] || { echo "Anulowano."; exit 0; }
-    fi
-  fi
+  [ "$yes" -eq 1 ] || confirm "Usunąć kontenery i dane laboratoriów (obrazy baz zostaną)?"
   for f in "$LABS"/*/compose.yaml; do
     [ -f "$f" ] || continue
     docker compose -f "$f" down -v --remove-orphans > /dev/null 2>&1 || true
@@ -232,16 +188,7 @@ cmd_clean() {
   docker rm -f pg-lab mysql-lab oracle-lab > /dev/null 2>&1 || true
   ids="$(docker ps -aq --filter ancestor=hello-world)"
   [ -n "$ids" ] && docker rm -f $ids > /dev/null 2>&1
-  if [ "$home" -eq 1 ]; then
-    echo "Posprzątano. Kontenery: $(docker ps -aq | wc -l), obrazy: $(docker images -q | wc -l) (zostają)."
-    return 0
-  fi
-  ids="$(docker ps -aq)"
-  [ -n "$ids" ] && docker rm -f $ids > /dev/null 2>&1
-  docker volume prune -af > /dev/null 2>&1 || docker volume prune -f > /dev/null 2>&1
-  docker network prune -f > /dev/null 2>&1
-  clean_station
-  echo "Stanowisko wyczyszczone (materiały i obrazy baz zostały)."
+  echo "Posprzątano. Kontenery: $(docker ps -aq | wc -l), obrazy: $(docker images -q | wc -l) (zostają)."
 }
 
 cmd_site() {

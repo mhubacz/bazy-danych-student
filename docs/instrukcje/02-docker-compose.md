@@ -2,18 +2,29 @@
 
 **Silnik:** wszystkie silniki
 
-**Cel:** Uruchomić trzy silniki jednym poleceniem, poznać wolumeny i porównać różnice w składni SQL.
+**Cel:** Uruchomić trzy silniki jednym poleceniem z pliku Compose, poznać wolumeny (trwałe dane) i porównać składnię SQL w trzech silnikach.
 
 **Połączenie:** host: localhost · użytkownik: student · hasło: student · baza: student · porty: PostgreSQL 5432, MySQL 3306, Oracle 1521 (Service name: FREEPDB1) · Adminer: http://localhost:8080
 
 ## Czynności wstępne
 
-1. Zakończ instrukcję 1/6 (usuń jej kontenery: `docker rm -f pg-lab mysql-lab oracle-lab`).
-2. Przejdź do katalogu laboratorium: `cd labs/02-docker-compose`.
+1. Materiały są pobrane i ta strona jest otwarta zgodnie z „Szybkim startem” w README.
+2. Porty 5432, 3306 i 1521 są wolne: jeśli w tej sesji zostały kontenery z instrukcji 1, usuń je (`docker rm -f pg-lab mysql-lab oracle-lab` albo `./lab clean`).
+3. Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/02-docker-compose`.
 
 ## Przygotowanie bazy
 
-Przeczytaj plik `compose.yaml` z tego katalogu. Opisuje on cztery usługi — trzy bazy i klienta Adminer:
+**Docker Compose w pigułce.** W instrukcji 1 każdy kontener uruchamiałeś osobnym, długim poleceniem `docker run`. Compose zapisuje te same ustawienia w pliku `compose.yaml` i uruchamia cały zestaw jednym poleceniem. Najważniejsze pojęcia:
+
+| Pojęcie | Co to jest | W pliku `compose.yaml` |
+|---|---|---|
+| **usługa** (service) | jeden kontener opisany w pliku; nazwa usługi jest też nazwą hosta w sieci zestawu | `postgres:`, `mysql:`, `oracle:`, `adminer:` |
+| **projekt** | cały zestaw usług; jego nazwa jest przedrostkiem nazw kontenerów i wolumenów | `name: lab02-wiele-silnikow` |
+| **wolumen nazwany** | trwałe miejsce na dane, które przetrwa usunięcie kontenera | `volumes: ["pg-data:/var/lib/postgresql/data"]` |
+| **sieć** | wspólna sieć zestawu: usługi widzą się po nazwach (np. Adminer łączy się z serwerem `postgres`) | tworzona automatycznie |
+| **healthcheck** | test gotowości usługi; `--wait` czeka, aż wszystkie będą zdrowe (`healthy`) | `healthcheck:` |
+
+Plik `compose.yaml` z tego katalogu opisuje cztery usługi — trzy bazy i klienta WWW Adminer:
 
 Plik `labs/02-docker-compose/compose.yaml`:
 
@@ -79,25 +90,83 @@ volumes:
   oracle-data:
 ```
 
-Uruchom cały zestaw i sprawdź stan (opcja `--wait` czeka, aż bazy będą gotowe):
+| Polecenie | Działanie |
+|---|---|
+| `docker compose up -d` | utwórz i uruchom cały zestaw w tle (`--wait` — poczekaj na gotowość) |
+| `docker compose ps` | stan usług zestawu |
+| `docker compose logs -f oracle` | logi jednej usługi na żywo (Ctrl+C kończy podgląd) |
+| `docker compose down` | zatrzymaj i usuń kontenery — **wolumeny z danymi zostają** |
+| `docker compose down -v` | jak wyżej, ale usuwa też wolumeny — **dane znikają** |
 
-```bash
-docker compose up -d --wait
-docker compose ps
-```
+> Wszystkie polecenia `docker compose` wykonuj w katalogu z plikiem `compose.yaml`.
 
 ## Zadania
 
-1. Wskaż w pliku `compose.yaml`, gdzie podano obrazy, porty, zmienne środowiskowe i wolumeny.
-2. Otwórz `http://localhost:8080` (Adminer) i połącz się z PostgreSQL (serwer `postgres`) oraz MySQL (serwer `mysql`). Użytkownik i hasło: `student`. Do Oracle użyj DBeaver.
-3. W każdym z trzech silników utwórz tę samą tabelę z kluczem automatycznym i porównaj składnię (`IDENTITY` / `SERIAL` / `AUTO_INCREMENT`).
-4. Wykonaj w każdym silniku zapytanie łączące imię i nazwisko w jedną kolumnę i filtrujące po dacie. Zapisz, gdzie składnia się różni (`||` vs `CONCAT`, zapis daty).
-5. Zatrzymaj zestaw poleceniem `docker compose down`, uruchom go ponownie (`docker compose up -d --wait`) i sprawdź, czy Twoje tabele nadal istnieją. Dlaczego dane przetrwały?
-6. Usuń zestaw razem z danymi: `docker compose down -v`. Co się stało z tabelami po ponownym uruchomieniu?
+1. Uruchom cały zestaw i sprawdź stan usług. Oracle przy pierwszym starcie potrzebuje kilku minut — w tym czasie wykonaj zadanie 2.
+
+   ```bash
+   docker compose up -d
+   docker compose ps
+   ```
+
+   **Podpowiedź:**
+
+   W kolumnie `STATUS` zobaczysz `health: starting`, a po chwili `healthy`. Polecenie `docker compose up -d --wait` czeka, aż wszystkie usługi będą gotowe — przy Oracle to kilka minut. Nazwy kontenerów mają postać `projekt-usługa-1`, np. `lab02-wiele-silnikow-postgres-1`.
+
+2. Wskaż w pliku `compose.yaml`, gdzie podano obrazy, porty, zmienne środowiskowe i wolumeny. Które opcje polecenia `docker run` z instrukcji 1 (zadanie 8) im odpowiadają?
+
+   **Podpowiedź:**
+
+   | `docker run` | `compose.yaml` |
+   |---|---|
+   | `--name pg-lab` | nazwa usługi (`postgres:`) + nazwa projektu |
+   | `-e POSTGRES_USER=student` | `environment:` |
+   | `-p 5432:5432` | `ports:` |
+   | *brak — dane w kontenerze* | `volumes:` (wolumen nazwany) |
+   | `-d` | `docker compose up -d` |
+   | `postgres:17` na końcu | `image:` |
+
+3. Otwórz `http://localhost:8080` (Adminer) i zaloguj się do PostgreSQL (System: PostgreSQL, serwer `postgres`) oraz do MySQL (System: MySQL, serwer `mysql`); użytkownik, hasło i baza: `student`. Z Oracle połącz się w DBeaver albo SQL Developer — jak w instrukcji 1.
+
+   **Podpowiedź:**
+
+   Adminer działa **w kontenerze** w tej samej sieci co bazy, dlatego jako serwer podajesz **nazwę usługi** (`postgres`, `mysql`), a nie `localhost` — dla Adminera `localhost` to jego własny kontener. DBeaver i SQL Developer działają poza Dockerem, więc łączą się z `localhost` i portem udostępnionym przez `ports:`. Połączenia z instrukcji 1 mogły zniknąć (maszyna jest przywracana do stanu początkowego) — utwórz je ponownie: Oracle `localhost:1521`, **Service name** `FREEPDB1`, `student`/`student`.
+
+4. W każdym z trzech silników utwórz tabelę `osoba` (`id` — klucz główny nadawany automatycznie, `imie`, `nazwisko`, `data_urodzenia`) i dodaj do niej **swoje dane** oraz co najmniej dwie inne osoby, nie podając `id`. Porównaj składnię klucza automatycznego.
+
+   **Podpowiedź:**
+
+   Kolumna `id` ma się wypełniać sama — w `INSERT` wymieniasz tylko pozostałe kolumny. Składnia klucza automatycznego:
+
+   | PostgreSQL | MySQL | Oracle |
+   |---|---|---|
+   | `id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY` (starszy skrót: `id SERIAL PRIMARY KEY`) | `id INT AUTO_INCREMENT PRIMARY KEY` | `id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY` |
+
+   Typy pozostałych kolumn dobierz jak w instrukcji 1 (`varchar` / `VARCHAR` / `VARCHAR2`), a datę zapisz typem `date` / `DATE`. Datę w `INSERT` najbezpieczniej podać jako `DATE '2001-05-12'` — działa we wszystkich trzech silnikach.
+
+5. W każdym silniku napisz zapytanie, które zwraca imię i nazwisko połączone w jedną kolumnę (ze spacją) dla osób urodzonych po 1 stycznia 2000. Zapisz, gdzie składnia się różni.
+
+   **Podpowiedź:**
+
+   Łączenie tekstu: `||` w PostgreSQL i Oracle, `CONCAT(a, ' ', b)` w MySQL — tam `||` oznacza OR i zwróci 0. Jeśli wynik jest pusty, dodaj w zadaniu 4 osobę urodzoną po 2000 roku. Zestawienie różnic znajdziesz w sekcji „Różnice dialektów” na stronie z instrukcjami.
+
+6. Zatrzymaj zestaw poleceniem `docker compose down`, wyświetl wolumeny (`docker volume ls`), uruchom zestaw ponownie (`docker compose up -d --wait`) i sprawdź, czy tabele `osoba` nadal istnieją. Dlaczego dane przetrwały, choć w instrukcji 1 po `docker rm` znikały?
+
+   **Podpowiedź:**
+
+   `docker compose down` usuwa kontenery, ale nie wolumeny nazwane — na liście zobaczysz np. `lab02-wiele-silnikow_pg-data`. Bazy zapisują dane właśnie w wolumenach, więc nowe kontenery widzą stare dane. W instrukcji 1 kontenery nie miały wolumenów, więc dane były w samym kontenerze.
+
+7. Usuń zestaw razem z danymi: `docker compose down -v`, sprawdź `docker volume ls` i uruchom zestaw ponownie. Co się stało z tabelami? Kiedy w praktyce używa się opcji `-v`?
+
+   **Podpowiedź:**
+
+   `-v` usuwa wolumeny zestawu, więc bazy startują od zera — tak samo działa `./lab reset N` w kolejnych laboratoriach (powrót do stanu początkowego bazy).
+
+8. Dla chętnych: wejdź do konsoli SQL w kontenerze bez instalowania klienta — `docker compose exec postgres psql -U student` (wyjście: `\q`) — i wykonaj `SELECT * FROM osoba;`.
 
 ## Uwagi
 
-Jeśli `up` zgłasza zajęty port 5432/3306/1521, zatrzymaj lub usuń kontenery, które go zajmują (`docker ps`, `docker stop nazwa` lub `docker rm -f nazwa`). Oracle przy pierwszym starcie potrzebuje kilku minut — `--wait` poczeka na niego. Pamiętaj, że każde z laboratoriów 3–7 używa tych samych portów, więc przed ich uruchomieniem wykonaj `docker compose down`.
+Przed laboratoriami 3–7 zatrzymaj zestaw (`docker compose down` w tym katalogu albo `./lab down`) — używają tych samych portów 5432, 3306 i 1521. Jeśli `up` zgłasza zajęty port, sprawdź `docker ps` i zatrzymaj kontener, który go zajmuje (`docker stop nazwa`).
 
 
 ## Koniec zajęć

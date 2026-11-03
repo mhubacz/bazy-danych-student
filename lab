@@ -114,7 +114,11 @@ cmd_up() {
     docker compose -f "$f" up -d --wait
   fi
   echo
-  echo "Połączenie (DBeaver): $(yaml_field "$d/lab.yaml" polaczenie)"
+  case "$(yaml_field "$d/lab.yaml" silnik)" in
+    oracle) echo "Połączenie (SQL Developer): $(yaml_field "$d/lab.yaml" polaczenie)" ;;
+    all)    echo "Połączenie: $(yaml_field "$d/lab.yaml" polaczenie)" ;;
+    *)      echo "Połączenie (DBeaver): $(yaml_field "$d/lab.yaml" polaczenie)" ;;
+  esac
 }
 
 cmd_down() {

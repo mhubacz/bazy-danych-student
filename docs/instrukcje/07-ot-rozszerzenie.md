@@ -8,7 +8,7 @@
 
 ## Czynności wstępne
 
-1. Docker działa, a poprzednie bazy są zatrzymane.
+1. Bazy z poprzednich zajęć są wyłączone — wszystkie laboratoria używają tych samych portów (5432, 3306, 1521). Wyłączysz je poleceniem `~/bazy-danych-student/lab down`. Jeśli `docker compose up` mimo to zgłosi zajęty port, sprawdź `docker ps` i zatrzymaj kontener, który go zajmuje (`docker stop nazwa`).
 2. Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/07-ot-rozszerzenie`.
 3. Przejrzyj diagram ER schematu OT (sekcja „Bazy danych” na stronie z instrukcjami).
 

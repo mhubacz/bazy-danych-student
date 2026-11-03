@@ -168,13 +168,9 @@ volumes:
 
    **Podpowiedź:**
 
-   `-v` usuwa wolumeny zestawu, więc bazy startują od zera — tak samo działa `./lab reset N` w kolejnych laboratoriach (powrót do stanu początkowego bazy).
+   `-v` usuwa także wolumeny, więc serwery startują z pustymi bazami — tabel `osoba` już nie ma. W praktyce używa się tego, gdy chcesz zacząć od nowa (np. po zepsuciu danych w trakcie ćwiczeń) albo kończysz pracę z projektem i chcesz zwolnić miejsce na dysku. Tej operacji nie da się cofnąć.
 
 8. Dla chętnych: wejdź do konsoli SQL w kontenerze bez instalowania klienta — `docker compose exec postgres psql -U student` (wyjście: `\q`) — i wykonaj `SELECT * FROM osoba;`.
-
-## Uwagi
-
-Przed laboratoriami 3–7 wyłącz zestaw (`docker compose down` w tym katalogu albo `./lab down` — kontenery są usuwane, dane w wolumenach zostają) — używają tych samych portów 5432, 3306 i 1521. Jeśli `up` zgłasza zajęty port, sprawdź `docker ps` i zatrzymaj kontener, który go zajmuje (`docker stop nazwa`).
 
 
 ## Koniec zajęć

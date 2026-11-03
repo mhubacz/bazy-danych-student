@@ -99,4 +99,4 @@ zadania:
     podpowiedz: "`docker stop` tylko zatrzymuje kontener — jego pliki (a więc i dane bazy) zostają. `docker rm` usuwa kontener razem z danymi zapisanymi w jego warstwie; nowy kontener startuje z pustą bazą. Trwałe dane poznasz w instrukcji 2/6 (wolumeny)."
   - tresc: "Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`."
     pole: brak
-uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Kontenery z tej instrukcji zajmują porty 5432, 3306 i 1521 — przed kolejnymi laboratoriami usuń je (`docker rm -f pg-lab mysql-lab oracle-lab`) albo wykonaj `./lab clean`."
+uwaga_silnik: "Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6."

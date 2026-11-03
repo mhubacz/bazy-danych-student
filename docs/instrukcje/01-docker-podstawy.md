@@ -154,7 +154,7 @@
 
 ## Uwagi
 
-Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6. Kontenery z tej instrukcji zajmują porty 5432, 3306 i 1521 — przed kolejnymi laboratoriami usuń je (`docker rm -f pg-lab mysql-lab oracle-lab`) albo wykonaj `./lab clean`.
+Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikają. Trwałe przechowywanie danych poznasz w instrukcji 2/6.
 
 
 ## Koniec zajęć

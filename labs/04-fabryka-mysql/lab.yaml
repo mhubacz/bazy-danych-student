@@ -8,7 +8,7 @@ baza: Fabryka
 polaczenie: "host: localhost · port: 3306 · baza: fabryka · użytkownik: student · hasło: student"
 wstep:
   - "Docker działa, a poprzednie bazy są zatrzymane (`docker compose down` w ich katalogach)."
-  - "Przejdź do katalogu laboratorium: `cd labs/04-fabryka-mysql`."
+  - "Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/04-fabryka-mysql`."
 przygotowanie:
   - opis: "Uruchom bazę. Tabele (`hale`, `maszyny`, `operatorzy`, `operator_maszyna`, `awarie`) wczytują się same ze skryptu `init/01_fabryka.sql`:"
     kod: |

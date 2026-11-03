@@ -5,6 +5,9 @@ Sześć instrukcji laboratoryjnych (plus jedna dodatkowa) z baz danych. Bazy dzi
 
 ## Szybki start (komputer w sali)
 
+0. **Przywróć maszynę do stanu początkowego** (przy wyłączonej maszynie): w VirtualBox zaznacz maszynę → *Migawki* →
+   zaznacz migawkę `Czysta` → *Przywróć* (na pytanie o zapisanie bieżącego stanu odpowiedz **nie**), potem uruchom maszynę.
+
 1. **Pobierz najnowsze materiały.** Polecenia usuwają starą kopię (jeśli została po poprzednich zajęciach) i pobierają aktualną do katalogu domowego:
 
 ```
@@ -34,8 +37,7 @@ start docs\index.html
 ## Koniec zajęć
 
 1. **Wyślij sprawozdanie:** wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl).
-2. **Wyłącz maszynę wirtualną.** Przed kolejnymi zajęciami prowadzący przywraca ją do stanu początkowego, więc nic nie trzeba sprzątać —
-   ale też nic, czego nie wysłałeś, nie przetrwa.
+2. **Wyłącz maszynę wirtualną.** Kolejna osoba przywróci migawkę `Czysta`, więc nic nie trzeba sprzątać — ale też nic, czego nie wysłałeś, nie przetrwa.
 
 *Własny komputer:* `./lab down` (bazy zatrzymane, dane zostają) albo `./lab clean` (usuwa kontenery i dane laboratoriów; obrazy zostają).
 

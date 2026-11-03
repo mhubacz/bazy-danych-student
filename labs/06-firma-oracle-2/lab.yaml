@@ -8,7 +8,7 @@ baza: Firma handlowa
 polaczenie: "host: localhost · port: 1521 · Service name: FREEPDB1 · użytkownik: student · hasło: student"
 wstep:
   - "Docker działa, a poprzednie bazy są zatrzymane."
-  - "Przejdź do katalogu laboratorium: `cd labs/06-firma-oracle-2`."
+  - "Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/06-firma-oracle-2`."
 przygotowanie:
   - opis: "Uruchom bazę. To ta sama baza i ten sam wolumen co w instrukcji 5/6 — jeśli baza była już utworzona, dane i Twoje zmiany są na miejscu:"
     kod: |

@@ -8,9 +8,8 @@
 
 ## Czynności wstępne
 
-1. Materiały są pobrane i ta strona jest otwarta zgodnie z „Szybkim startem” w README (`git clone` do `~/bazy-danych-student`, potem `./lab site`).
-2. Terminal jest otwarty w katalogu z materiałami: `cd ~/bazy-danych-student`.
-3. Na własnym komputerze najpierw zainstaluj Docker i DBeaver — patrz `docs/INSTALACJA.md`.
+1. Otwórz terminal i przejdź do katalogu z materiałami: `cd ~/bazy-danych-student`. Wszystkie polecenia z tej instrukcji wpisujesz w tym terminalu.
+2. Na własnym komputerze najpierw zainstaluj Docker i DBeaver — patrz `docs/INSTALACJA.md`.
 
 ## Przygotowanie bazy
 
@@ -167,6 +166,6 @@ Ta instrukcja nie używa jeszcze wolumenów, dlatego po `docker rm` dane znikaj�
 ## Koniec zajęć
 
 1. **Wyślij sprawozdanie.** Wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl). Odpowiedzi są zapisane tylko w tej przeglądarce.
-2. **Wyłącz maszynę wirtualną.** Przed kolejnymi zajęciami zostanie przywrócona do stanu początkowego — sprzątać nie trzeba, ale nic niewysłanego nie przetrwa.
+2. **Wyłącz maszynę wirtualną.** Na kolejnych zajęciach zostanie przywrócona migawka `Czysta` — sprzątać nie trzeba, ale nic niewysłanego nie przetrwa.
 3. *Pracujesz na własnym komputerze?* `./lab down` zatrzymuje bazy (dane zostają na kolejne zajęcia), a `./lab clean` usuwa kontenery i dane laboratoriów (obrazy zostają). Na Windows bez Git Bash: `docker compose down` w katalogu laboratorium.
 

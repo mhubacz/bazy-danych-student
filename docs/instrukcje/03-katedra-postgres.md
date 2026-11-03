@@ -9,7 +9,7 @@
 ## Czynności wstępne
 
 1. Docker działa, a bazy z poprzednich instrukcji są zatrzymane (`docker ps` nie pokazuje kontenerów z portem 5432).
-2. Przejdź do katalogu laboratorium: `cd labs/03-katedra-postgres`.
+2. Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/03-katedra-postgres`.
 
 ## Przygotowanie bazy
 
@@ -41,6 +41,6 @@ W zadaniu 9 `LIKE 'M%'` w PostgreSQL rozróżnia wielkość liter — użyj `ILI
 ## Koniec zajęć
 
 1. **Wyślij sprawozdanie.** Wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl). Odpowiedzi są zapisane tylko w tej przeglądarce.
-2. **Wyłącz maszynę wirtualną.** Przed kolejnymi zajęciami zostanie przywrócona do stanu początkowego — sprzątać nie trzeba, ale nic niewysłanego nie przetrwa.
+2. **Wyłącz maszynę wirtualną.** Na kolejnych zajęciach zostanie przywrócona migawka `Czysta` — sprzątać nie trzeba, ale nic niewysłanego nie przetrwa.
 3. *Pracujesz na własnym komputerze?* `./lab down` zatrzymuje bazy (dane zostają na kolejne zajęcia), a `./lab clean` usuwa kontenery i dane laboratoriów (obrazy zostają). Na Windows bez Git Bash: `docker compose down` w katalogu laboratorium.
 

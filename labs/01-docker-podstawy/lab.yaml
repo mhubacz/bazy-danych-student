@@ -6,8 +6,7 @@ cel: "Poznać podstawowe polecenia Dockera, uruchomić serwery trzech baz w kont
 silnik: all
 polaczenie: "host: localhost · użytkownik: student · hasło: student · porty: PostgreSQL 5432, MySQL 3306, Oracle 1521"
 wstep:
-  - "Materiały są pobrane i ta strona jest otwarta zgodnie z „Szybkim startem” w README (`git clone` do `~/bazy-danych-student`, potem `./lab site`)."
-  - "Terminal jest otwarty w katalogu z materiałami: `cd ~/bazy-danych-student`."
+  - "Otwórz terminal i przejdź do katalogu z materiałami: `cd ~/bazy-danych-student`. Wszystkie polecenia z tej instrukcji wpisujesz w tym terminalu."
   - "Na własnym komputerze najpierw zainstaluj Docker i DBeaver — patrz `docs/INSTALACJA.md`."
 przygotowanie:
   - opis: "**Docker w pigułce.** Docker uruchamia programy w **kontenerach** — odizolowanych „pudełkach”, w których program ma wszystko, czego potrzebuje do działania. Dzięki temu serwer bazy danych uruchomisz jednym poleceniem, bez instalowania go w systemie, a po zajęciach usuniesz go bez śladu. Najważniejsze pojęcia:"

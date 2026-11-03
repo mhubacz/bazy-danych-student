@@ -8,7 +8,7 @@ baza: Firma handlowa
 polaczenie: "host: localhost · port: 1521 · Service name: FREEPDB1 · użytkownik: student · hasło: student"
 wstep:
   - "Docker działa, a poprzednie bazy są zatrzymane."
-  - "Przejdź do katalogu laboratorium: `cd labs/05-firma-oracle-1`."
+  - "Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/05-firma-oracle-1`."
 przygotowanie:
   - opis: "Uruchom bazę. Pierwszy start trwa kilka minut — Oracle inicjalizuje się, a skrypt `init/01_firma.sql` ładuje dane ze skryptu `bdemobld.sql`:"
     kod: |

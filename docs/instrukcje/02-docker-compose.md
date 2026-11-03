@@ -8,9 +8,8 @@
 
 ## Czynności wstępne
 
-1. Materiały są pobrane i ta strona jest otwarta zgodnie z „Szybkim startem” w README.
-2. Porty 5432, 3306 i 1521 są wolne: jeśli w tej sesji zostały kontenery z instrukcji 1, usuń je (`docker rm -f pg-lab mysql-lab oracle-lab` albo `./lab clean`).
-3. Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/02-docker-compose`.
+1. Porty 5432, 3306 i 1521 są wolne: jeśli w tej sesji zostały kontenery z instrukcji 1, usuń je (`docker rm -f pg-lab mysql-lab oracle-lab` albo `./lab clean`).
+2. Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/02-docker-compose`.
 
 ## Przygotowanie bazy
 
@@ -29,7 +28,7 @@ Plik `compose.yaml` z tego katalogu opisuje cztery usługi — trzy bazy i klien
 Plik `labs/02-docker-compose/compose.yaml`:
 
 ```yaml
-# Laboratorium 2/6 — trzy silniki naraz + Adminer (klient w przeglądarce).
+# Laboratorium 2/6 — trzy silniki naraz + Adminer (klient w przeglądarce; obsługuje PostgreSQL i MySQL, NIE Oracle).
 # Uruchomienie:  docker compose up -d      Zatrzymanie:  docker compose down
 # Dane są w wolumenach; kasuje je dopiero:  docker compose down -v
 name: lab02-wiele-silnikow
@@ -126,11 +125,11 @@ volumes:
    | `-d` | `docker compose up -d` |
    | `postgres:17` na końcu | `image:` |
 
-3. Otwórz `http://localhost:8080` (Adminer) i zaloguj się do PostgreSQL (System: PostgreSQL, serwer `postgres`) oraz do MySQL (System: MySQL, serwer `mysql`); użytkownik, hasło i baza: `student`. Z Oracle połącz się w DBeaver albo SQL Developer — jak w instrukcji 1.
+3. Otwórz `http://localhost:8080` (Adminer) i zaloguj się do PostgreSQL (System: PostgreSQL, serwer `postgres`) oraz do MySQL (System: MySQL, serwer `mysql`); użytkownik, hasło i baza: `student`. Z Oracle połącz się w DBeaver albo SQL Developer — jak w instrukcji 1 (Adminer w tym zestawie nie obsługuje Oracle).
 
    **Podpowiedź:**
 
-   Adminer działa **w kontenerze** w tej samej sieci co bazy, dlatego jako serwer podajesz **nazwę usługi** (`postgres`, `mysql`), a nie `localhost` — dla Adminera `localhost` to jego własny kontener. DBeaver i SQL Developer działają poza Dockerem, więc łączą się z `localhost` i portem udostępnionym przez `ports:`. Połączenia z instrukcji 1 mogły zniknąć (maszyna jest przywracana do stanu początkowego) — utwórz je ponownie: Oracle `localhost:1521`, **Service name** `FREEPDB1`, `student`/`student`.
+   Adminer działa **w kontenerze** w tej samej sieci co bazy, dlatego jako serwer podajesz **nazwę usługi** (`postgres`, `mysql`), a nie `localhost` — dla Adminera `localhost` to jego własny kontener. Wybranie w Adminerze systemu *Oracle* kończy się błędem `None of the supported PHP extensions (OCI8, PDO_OCI) are available` — obraz `adminer` nie zawiera sterownika Oracle, dlatego do Oracle służą DBeaver i SQL Developer. DBeaver i SQL Developer działają poza Dockerem, więc łączą się z `localhost` i portem udostępnionym przez `ports:`. Połączenia z instrukcji 1 mogły zniknąć (po przywróceniu migawki `Czysta`) — utwórz je ponownie: Oracle `localhost:1521`, **Service name** `FREEPDB1`, `student`/`student`.
 
 4. W każdym z trzech silników utwórz tabelę `osoba` (`id` — klucz główny nadawany automatycznie, `imie`, `nazwisko`, `data_urodzenia`) i dodaj do niej **swoje dane** oraz co najmniej dwie inne osoby, nie podając `id`. Porównaj składnię klucza automatycznego.
 
@@ -172,6 +171,6 @@ Przed laboratoriami 3–7 zatrzymaj zestaw (`docker compose down` w tym katalogu
 ## Koniec zajęć
 
 1. **Wyślij sprawozdanie.** Wygeneruj sprawozdanie (PDF) i prześlij je na [sprawozdania.kia.prz.edu.pl](https://sprawozdania.kia.prz.edu.pl). Odpowiedzi są zapisane tylko w tej przeglądarce.
-2. **Wyłącz maszynę wirtualną.** Przed kolejnymi zajęciami zostanie przywrócona do stanu początkowego — sprzątać nie trzeba, ale nic niewysłanego nie przetrwa.
+2. **Wyłącz maszynę wirtualną.** Na kolejnych zajęciach zostanie przywrócona migawka `Czysta` — sprzątać nie trzeba, ale nic niewysłanego nie przetrwa.
 3. *Pracujesz na własnym komputerze?* `./lab down` zatrzymuje bazy (dane zostają na kolejne zajęcia), a `./lab clean` usuwa kontenery i dane laboratoriów (obrazy zostają). Na Windows bez Git Bash: `docker compose down` w katalogu laboratorium.
 

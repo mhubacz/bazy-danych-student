@@ -8,7 +8,7 @@ baza: Katedra
 polaczenie: "host: localhost · port: 5432 · baza: katedra · użytkownik: student · hasło: student"
 wstep:
   - "Docker działa, a bazy z poprzednich instrukcji są zatrzymane (`docker ps` nie pokazuje kontenerów z portem 5432)."
-  - "Przejdź do katalogu laboratorium: `cd labs/03-katedra-postgres`."
+  - "Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/03-katedra-postgres`."
 przygotowanie:
   - opis: "Uruchom bazę. Dane (tabele `zespol`, `etat`, `pracownik`) wczytują się same ze skryptu `init/01_katedra.sql`:"
     kod: |

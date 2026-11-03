@@ -143,11 +143,19 @@ volumes:
 
    Typy pozostałych kolumn dobierz jak w instrukcji 1 (`varchar` / `VARCHAR` / `VARCHAR2`), a datę zapisz typem `date` / `DATE`. Datę w `INSERT` najbezpieczniej podać jako `DATE '2001-05-12'` — działa we wszystkich trzech systemach.
 
-5. W każdym systemie bazodanowym napisz zapytanie, które zwraca imię i nazwisko połączone w jedną kolumnę (ze spacją) dla osób urodzonych po 1 stycznia 2000. Zapisz, gdzie składnia się różni.
+5. Wyświetl imię i nazwisko połączone spacją w jedną kolumnę dla osób urodzonych po 1 stycznia 2000. W **każdym** z trzech systemów wypróbuj oba sposoby łączenia: operator `imie || ' ' || nazwisko` oraz funkcję `CONCAT(imie, ' ', nazwisko)`. Warunek na datę zapisz najpierw jako zwykły napis `'2000-01-01'`, a potem jako `DATE '2000-01-01'`. Zanotuj, który wariant działa, a który daje błąd albo dziwny wynik (w każdym systemie).
 
    **Podpowiedź:**
 
-   Łączenie tekstu: `||` w PostgreSQL i Oracle, `CONCAT(a, ' ', b)` w MySQL — tam `||` oznacza OR i zwróci 0. Jeśli wynik jest pusty, dodaj w zadaniu 4 osobę urodzoną po 2000 roku. Zestawienie różnic znajdziesz w sekcji „Różnice dialektów” na stronie z instrukcjami.
+   Jeśli wynik jest pusty, dodaj w zadaniu 4 osobę urodzoną po 2000 roku. Przykład zapytania do modyfikacji:
+
+   ```sql
+   SELECT imie || ' ' || nazwisko AS osoba
+   FROM osoba
+   WHERE data_urodzenia > DATE '2000-01-01';
+   ```
+
+   Zwróć uwagę na komunikaty o błędach i na to, *co* zwraca zapytanie — nie każdy niepoprawny wariant kończy się błędem. W PostgreSQL działają oba sposoby łączenia, w MySQL i Oracle — tylko jeden z nich (w każdym inny). Zestawienie różnic znajdziesz w sekcji „Różnice dialektów” na stronie z instrukcjami.
 
 6. Zatrzymaj zestaw poleceniem `docker compose down`, wyświetl wolumeny (`docker volume ls`), uruchom zestaw ponownie (`docker compose up -d --wait`) i sprawdź, czy tabele `osoba` nadal istnieją. Dlaczego dane przetrwały, choć w instrukcji 1 po `docker rm` znikały?
 

@@ -14,7 +14,7 @@ przygotowanie:
     kod: |
       docker compose up -d
       docker compose logs -f oracle
-  - uwaga: "Poczekaj na komunikat `DATABASE IS READY TO USE!` (Ctrl+C kończy podgląd logów). Reset do stanu początkowego: `docker compose down -v`, potem ponownie `docker compose up -d`."
+  - uwaga: "Poczekaj na komunikat `DATABASE IS READY TO USE!` (Ctrl+C kończy podgląd logów) i połącz się w **SQL Developer** (`localhost`, `1521`, **Service name** `FREEPDB1`, `student`/`student`). Reset do stanu początkowego: `docker compose down -v`, potem ponownie `docker compose up -d`."
 zadania:
   - "Napisz polecenie SQL zwracające klientów i ich sprzedawców z limitem kredytowym powyżej 5000 (nazwa, adres, limit, nazwisko i imię pracownika — sprzedawcy)."
   - "Napisz polecenie SQL zwracające łączną liczbę sztuk każdego wyrobu zamówionego po 1990 roku (id, opis, liczba sztuk)."

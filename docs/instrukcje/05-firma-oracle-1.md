@@ -20,7 +20,7 @@ docker compose up -d
 docker compose logs -f oracle
 ```
 
-> Gdy w logach pojawi się `DATABASE IS READY TO USE!`, zakończ podgląd (Ctrl+C) i połącz się w DBeaver — wybierz połączenie przez **Service name** `FREEPDB1`. Błędy `ORA-00942` na początku ładowania (instrukcje DROP nieistniejących tabel) są normalne. Laboratorium 6/6 kontynuuje tę samą bazę.
+> Gdy w logach pojawi się `DATABASE IS READY TO USE!`, zakończ podgląd (Ctrl+C) i połącz się w **SQL Developer** (*New Connection*: `localhost`, `1521`, **Service name** `FREEPDB1`, `student`/`student`). Błędy `ORA-00942` na początku ładowania (instrukcje DROP nieistniejących tabel) są normalne. Laboratorium 6/6 kontynuuje tę samą bazę.
 
 ## Zadania
 
@@ -40,7 +40,7 @@ docker compose logs -f oracle
 
 ## Uwagi
 
-Daty zapisuj jako `DATE '1985-04-01'`. Imię i nazwisko łączysz operatorem `||`. Zapytanie bez tabeli zapisuje się w Oracle tradycyjnie z `FROM dual` (od wersji 23ai `FROM` można pominąć). W DBeaver domyślnie działa tryb auto-commit, więc `INSERT` zatwierdza się od razu.
+Daty zapisuj jako `DATE '1985-04-01'`. Imię i nazwisko łączysz operatorem `||`. Zapytanie bez tabeli zapisuje się w Oracle tradycyjnie z `FROM dual` (od wersji 23ai `FROM` można pominąć). W SQL Developer auto-commit jest domyślnie **wyłączony**: po `INSERT`, `UPDATE` i `DELETE` wykonaj `COMMIT;` (lub **F11**), inaczej zmiany widzi tylko Twoja sesja.
 
 
 ## Koniec zajęć

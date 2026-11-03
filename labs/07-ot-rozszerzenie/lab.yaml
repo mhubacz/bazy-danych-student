@@ -15,7 +15,7 @@ przygotowanie:
     kod: |
       docker compose up -d
       docker compose logs -f oracle
-  - uwaga: "Poczekaj na komunikat `DATABASE IS READY TO USE!`. Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych)."
+  - uwaga: "Poczekaj na komunikat `DATABASE IS READY TO USE!` i połącz się w **SQL Developer** (`localhost`, `1521`, **Service name** `FREEPDB1`, `student`/`student`). Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych)."
 zadania:
   - "Wyświetl klientów (`CUSTOMERS`) z limitem kredytowym powyżej 5000, posortowanych malejąco po limicie."
   - "Wyświetl zamówienia (`ORDERS`) ze statusem „Pending” wraz z nazwą klienta."

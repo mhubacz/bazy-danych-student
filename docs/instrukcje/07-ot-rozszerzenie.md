@@ -21,7 +21,7 @@ docker compose up -d
 docker compose logs -f oracle
 ```
 
-> Poczekaj na komunikat `DATABASE IS READY TO USE!`. Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych).
+> Poczekaj na komunikat `DATABASE IS READY TO USE!` i połącz się w **SQL Developer** (`localhost`, `1521`, **Service name** `FREEPDB1`, `student`/`student`). Źródło schematu: oracletutorial.com (wyłącznie do celów edukacyjnych).
 
 ## Zadania
 

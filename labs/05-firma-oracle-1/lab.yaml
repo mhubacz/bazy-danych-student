@@ -14,7 +14,7 @@ przygotowanie:
     kod: |
       docker compose up -d
       docker compose logs -f oracle
-  - uwaga: "Gdy w logach pojawi się `DATABASE IS READY TO USE!`, zakończ podgląd (Ctrl+C) i połącz się w DBeaver — wybierz połączenie przez **Service name** `FREEPDB1`. Błędy `ORA-00942` na początku ładowania (instrukcje DROP nieistniejących tabel) są normalne. Laboratorium 6/6 kontynuuje tę samą bazę."
+  - uwaga: "Gdy w logach pojawi się `DATABASE IS READY TO USE!`, zakończ podgląd (Ctrl+C) i połącz się w **SQL Developer** (*New Connection*: `localhost`, `1521`, **Service name** `FREEPDB1`, `student`/`student`). Błędy `ORA-00942` na początku ładowania (instrukcje DROP nieistniejących tabel) są normalne. Laboratorium 6/6 kontynuuje tę samą bazę."
 zadania:
   - "Wprowadź do tabeli `CUSTOMER` nowy wpis, podając w kolumnie `NAME` swoje imię i nazwisko. Pozostałe dane wg własnego uznania."
   - "Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników (`EMPLOYEE`), którzy otrzymują prowizję większą niż 900 lub mniejszą niż 500."
@@ -29,4 +29,4 @@ zadania:
   - "Napisz polecenie SQL zwracające klientów i ich sprzedawców z limitem kredytowym powyżej 5000 (nazwa, adres, limit, nazwisko i imię pracownika — sprzedawcy)."
   - "Napisz polecenie SQL zwracające nazwisko, imię i pensję pracowników, których pensja mieści się w przedziale 2000–3000."
   - "Napisz polecenie SQL zwracające zamówienia (identyfikator zamówienia, data jego złożenia, nazwa klienta) dla zamówień o wartości powyżej 200."
-uwaga_silnik: "Daty zapisuj jako `DATE '1985-04-01'`. Imię i nazwisko łączysz operatorem `||`. Zapytanie bez tabeli zapisuje się w Oracle tradycyjnie z `FROM dual` (od wersji 23ai `FROM` można pominąć). W DBeaver domyślnie działa tryb auto-commit, więc `INSERT` zatwierdza się od razu."
+uwaga_silnik: "Daty zapisuj jako `DATE '1985-04-01'`. Imię i nazwisko łączysz operatorem `||`. Zapytanie bez tabeli zapisuje się w Oracle tradycyjnie z `FROM dual` (od wersji 23ai `FROM` można pominąć). W SQL Developer auto-commit jest domyślnie **wyłączony**: po `INSERT`, `UPDATE` i `DELETE` wykonaj `COMMIT;` (lub **F11**), inaczej zmiany widzi tylko Twoja sesja."

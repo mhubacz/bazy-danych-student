@@ -57,13 +57,16 @@ Skrypty z `init/` wykonują się **tylko przy pierwszym starcie z pustym wolumen
 W DBeaver połączenie powinno używać UTF-8 (to domyślne ustawienie). Przy pracy w konsoli kontenera użyj polecenia `./lab shell 4`, które ustawia `utf8mb4`.
 Jeśli dane już zostały załadowane błędnie, wykonaj `./lab reset 4`.
 
-## Połączenie w DBeaver
+## Połączenie z bazą (DBeaver, SQL Developer)
 
 **Oracle: `ORA-12514` / `listener does not currently know of service`**
 Łączysz się przez SID zamiast **Service name**. Wybierz *Service name* i wpisz `FREEPDB1`. Jeśli baza jeszcze się uruchamia, odczekaj do komunikatu `DATABASE IS READY TO USE!`.
 
 **Oracle: `ORA-01017 invalid username/password`**
 Użytkownik i hasło to `student` / `student` (małymi literami). To samo dotyczy PostgreSQL i MySQL.
+
+**Oracle (SQL Developer): wstawione wiersze „znikają” albo nie widać ich w innym programie**
+SQL Developer domyślnie nie zatwierdza zmian. Po `INSERT`/`UPDATE`/`DELETE` wykonaj `COMMIT;` (lub **F11**).
 
 **MySQL: `Public Key Retrieval is not allowed`**
 *Edit Connection → Driver properties → `allowPublicKeyRetrieval` = `true`*.

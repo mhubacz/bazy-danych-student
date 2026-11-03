@@ -20,7 +20,7 @@ docker compose up -d
 docker compose logs -f oracle
 ```
 
-> Poczekaj na komunikat `DATABASE IS READY TO USE!` (Ctrl+C kończy podgląd logów). Reset do stanu początkowego: `docker compose down -v`, potem ponownie `docker compose up -d`.
+> Poczekaj na komunikat `DATABASE IS READY TO USE!` (Ctrl+C kończy podgląd logów) i połącz się w **SQL Developer** (`localhost`, `1521`, **Service name** `FREEPDB1`, `student`/`student`). Reset do stanu początkowego: `docker compose down -v`, potem ponownie `docker compose up -d`.
 
 ## Zadania
 

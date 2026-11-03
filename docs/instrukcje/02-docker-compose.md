@@ -125,11 +125,11 @@ volumes:
    | `-d` | `docker compose up -d` |
    | `postgres:17` na końcu | `image:` |
 
-3. Otwórz `http://localhost:8080` (Adminer) i zaloguj się do PostgreSQL (System: PostgreSQL, serwer `postgres`) oraz do MySQL (System: MySQL, serwer `mysql`); użytkownik, hasło i baza: `student`. Z Oracle połącz się w DBeaver albo SQL Developer — jak w instrukcji 1 (Adminer w tym zestawie nie obsługuje Oracle).
+3. Otwórz `http://localhost:8080` (Adminer) i zaloguj się do PostgreSQL (System: PostgreSQL, serwer `postgres`) oraz do MySQL (System: MySQL, serwer `mysql`); użytkownik, hasło i baza: `student`. Z Oracle połącz się w SQL Developer — jak w instrukcji 1 (Adminer w tym zestawie nie obsługuje Oracle).
 
    **Podpowiedź:**
 
-   Adminer działa **w kontenerze** w tej samej sieci co bazy, dlatego jako serwer podajesz **nazwę usługi** (`postgres`, `mysql`), a nie `localhost` — dla Adminera `localhost` to jego własny kontener. Wybranie w Adminerze systemu *Oracle* kończy się błędem `None of the supported PHP extensions (OCI8, PDO_OCI) are available` — obraz `adminer` nie zawiera sterownika Oracle, dlatego do Oracle służą DBeaver i SQL Developer. DBeaver i SQL Developer działają poza Dockerem, więc łączą się z `localhost` i portem udostępnionym przez `ports:`. Połączenia z instrukcji 1 mogły zniknąć (po przywróceniu migawki `Czysta`) — utwórz je ponownie: Oracle `localhost:1521`, **Service name** `FREEPDB1`, `student`/`student`.
+   Adminer działa **w kontenerze** w tej samej sieci co bazy, dlatego jako serwer podajesz **nazwę usługi** (`postgres`, `mysql`), a nie `localhost` — dla Adminera `localhost` to jego własny kontener. Wybranie w Adminerze systemu *Oracle* kończy się błędem `None of the supported PHP extensions (OCI8, PDO_OCI) are available` — obraz `adminer` nie zawiera sterownika Oracle, dlatego do Oracle służy SQL Developer. DBeaver i SQL Developer działają poza Dockerem, więc łączą się z `localhost` i portem udostępnionym przez `ports:`. Połączenia z instrukcji 1 mogły zniknąć (po przywróceniu migawki `Czysta`) — utwórz je ponownie: Oracle `localhost:1521`, **Service name** `FREEPDB1`, `student`/`student`.
 
 4. W każdym z trzech silników utwórz tabelę `osoba` (`id` — klucz główny nadawany automatycznie, `imie`, `nazwisko`, `data_urodzenia`) i dodaj do niej **swoje dane** oraz co najmniej dwie inne osoby, nie podając `id`. Porównaj składnię klucza automatycznego.
 

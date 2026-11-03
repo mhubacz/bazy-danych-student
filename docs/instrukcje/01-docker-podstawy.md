@@ -9,7 +9,7 @@
 ## Czynności wstępne
 
 1. Otwórz terminal i przejdź do katalogu z materiałami: `cd ~/bazy-danych-student`. Wszystkie polecenia z tej instrukcji wpisujesz w tym terminalu.
-2. Na własnym komputerze najpierw zainstaluj Docker i DBeaver — patrz `docs/INSTALACJA.md`.
+2. Na własnym komputerze najpierw zainstaluj Docker, DBeaver i SQL Developer — patrz `docs/INSTALACJA.md`.
 
 ## Przygotowanie bazy
 
@@ -24,7 +24,7 @@
 | **zmienna środowiskowa** (`-e`) | ustawienie przekazywane do kontenera przy starcie | `-e POSTGRES_PASSWORD=student` |
 | **wolumen** (volume) | trwałe miejsce na dane, niezależne od kontenera — temat instrukcji 2/6 | `pg-data` |
 
-> Zadania 1–6 to ćwiczenia z najmniejszym obrazem `hello-world`; w zadaniach 7–9 pobierzesz i uruchomisz serwery baz danych, a od zadania 10 będziesz z nimi pracować w DBeaver.
+> Zadania 1–6 to ćwiczenia z najmniejszym obrazem `hello-world`; w zadaniach 7–9 pobierzesz i uruchomisz serwery baz danych, a od zadania 10 będziesz z nimi pracować: z PostgreSQL i MySQL w DBeaver, z Oracle w SQL Developer.
 
 ## Zadania
 
@@ -118,26 +118,11 @@
 
    Wpisz zapytanie w edytorze SQL i naciśnij **Ctrl+Enter** — wynik pojawi się w panelu pod edytorem. Ten sam widok otrzymasz graficznie: dwuklik na tabeli w drzewie → zakładka *Data*. Jeśli nowej tabeli nie widać w drzewie, odśwież je (**F5**).
 
-13. Połącz się z MySQL (port `3306`, baza `student`) oraz z Oracle (port `1521`, połączenie przez **Service name** `FREEPDB1`, użytkownik `student`). Powtórz dwa poprzednie kroki i zanotuj różnice w składni.
+13. Połącz się z MySQL w DBeaver (port `3306`, baza `student`) oraz z Oracle w **SQL Developer** (port `1521`, **Service name** `FREEPDB1`, użytkownik `student`). W obu bazach powtórz dwa poprzednie kroki i zanotuj różnice w składni.
 
    **Podpowiedź:**
 
-   Nowe połączenia tworzysz tak samo jak dla PostgreSQL (*Database* → *New Database Connection*). Polecenia z zadania 11 trzeba lekko dostosować — silniki różnią się nazwami typów:
-
-   |  | PostgreSQL | MySQL | Oracle |
-   |---|---|---|---|
-   | liczba całkowita (nr indeksu) | `integer` | `INT` | `NUMBER(10)` |
-   | tekst (imię, e-mail, kierunek) | `varchar(30)` | `VARCHAR(30)` | `VARCHAR2(30)` |
-
-   Po utworzeniu tabeli możesz podejrzeć, jak dany silnik zapisał jej definicję: prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*. Porównaj te definicje między silnikami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`).
-
-   **MySQL — błąd „Public Key Retrieval is not allowed”.** To typowe przy pierwszym połączeniu z MySQL 8. W oknie połączenia przejdź na zakładkę *Driver properties*, znajdź właściwość `allowPublicKeyRetrieval`, ustaw ją na `true` i połącz się ponownie (dla istniejącego połączenia: prawy przycisk → *Edit Connection* → *Driver properties*).
-
-14. Połącz się z tą samą bazą Oracle drugim klientem — **Oracle SQL Developer** (w sali jest w menu aplikacji, polecenie `sqldeveloper`). Wykonaj `SELECT * FROM student;`. Czy widzisz wiersz dodany wcześniej w DBeaver? Dlaczego?
-
-   **Podpowiedź:**
-
-   W panelu *Connections* kliknij zielony **+** (*New Connection*) i wpisz:
+   **MySQL** łączysz w DBeaver tak samo jak PostgreSQL (*Database* → *New Database Connection*). **Oracle** łączysz w SQL Developer (w sali: menu aplikacji, polecenie `sqldeveloper`): w panelu *Connections* kliknij zielony **+** (*New Connection*) i wpisz:
 
    | Pole | Wartość |
    |---|---|
@@ -146,17 +131,26 @@
    | Hostname / Port | `localhost` / `1521` |
    | Service name | `FREEPDB1` (zaznacz *Service name*, nie *SID*) |
 
-   Kliknij *Test* — w lewym dolnym rogu powinno pojawić się *Status: Success* — potem *Connect*. Zapytanie wpisz w arkuszu (*Worksheet*) i wykonaj **Ctrl+Enter**. DBeaver i SQL Developer to tylko **klienty**: oba łączą się z tym samym serwerem w kontenerze `oracle-lab`, więc widzą te same, zatwierdzone (*commit*) dane.
+   Kliknij *Test* (*Status: Success* w lewym dolnym rogu), potem *Connect*. Polecenia wpisuj w arkuszu (*Worksheet*); **Ctrl+Enter** wykonuje polecenie pod kursorem, **F5** cały skrypt. W SQL Developer zmiany trzeba zatwierdzić: po `INSERT` wykonaj `COMMIT;` (lub **F11**).
 
-   Na własnym komputerze SQL Developer jest opcjonalny — pobierzesz go ze strony Oracle (wymaga Java 17 lub nowszej). Jeśli go nie masz, pomiń to zadanie.
+   Polecenia z zadania 11 trzeba lekko dostosować — silniki różnią się nazwami typów:
 
-15. Zatrzymaj i uruchom ponownie kontener (`docker stop pg-lab`, potem `docker start pg-lab`) i sprawdź, czy tabela `student` nadal ma dane. Następnie usuń kontenery (`docker rm -f pg-lab mysql-lab oracle-lab`), uruchom `pg-lab` od nowa poleceniem z zadania 8 i sprawdź tabelę ponownie. Wyjaśnij różnicę.
+   |  | PostgreSQL | MySQL | Oracle |
+   |---|---|---|---|
+   | liczba całkowita (nr indeksu) | `integer` | `INT` | `NUMBER(10)` |
+   | tekst (imię, e-mail, kierunek) | `varchar(30)` | `VARCHAR(30)` | `VARCHAR2(30)` |
+
+   Po utworzeniu tabeli możesz podejrzeć, jak silnik zapisał jej definicję: w DBeaver prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*, w SQL Developer — kliknij tabelę w drzewie połączenia i otwórz zakładkę *SQL*. Porównaj te definicje między silnikami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`).
+
+   **MySQL — błąd „Public Key Retrieval is not allowed”.** To typowe przy pierwszym połączeniu z MySQL 8. W oknie połączenia przejdź na zakładkę *Driver properties*, znajdź właściwość `allowPublicKeyRetrieval`, ustaw ją na `true` i połącz się ponownie (dla istniejącego połączenia: prawy przycisk → *Edit Connection* → *Driver properties*).
+
+14. Zatrzymaj i uruchom ponownie kontener (`docker stop pg-lab`, potem `docker start pg-lab`) i sprawdź, czy tabela `student` nadal ma dane. Następnie usuń kontenery (`docker rm -f pg-lab mysql-lab oracle-lab`), uruchom `pg-lab` od nowa poleceniem z zadania 8 i sprawdź tabelę ponownie. Wyjaśnij różnicę.
 
    **Podpowiedź:**
 
    `docker stop` tylko zatrzymuje kontener — jego pliki (a więc i dane bazy) zostają. `docker rm` usuwa kontener razem z danymi zapisanymi w jego warstwie; nowy kontener startuje z pustą bazą. Trwałe dane poznasz w instrukcji 2/6 (wolumeny).
 
-16. Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`.
+15. Dla chętnych: wejdź do kontenera i wykonaj zapytanie z wiersza poleceń — `docker exec -it pg-lab psql -U student`.
 
 ## Uwagi
 

@@ -1,6 +1,7 @@
 # Instalacja środowiska
 
-Potrzebujesz trzech rzeczy: **Dockera** (uruchamia bazy), **DBeavera** (klient do pisania zapytań) i **materiałów** z repozytorium.
+Potrzebujesz: **Dockera** (uruchamia bazy), **DBeavera** (klient do PostgreSQL i MySQL), **SQL Developera** (klient do Oracle) i **materiałów** z repozytorium.
+SQL Developer pobierzesz ze strony https://www.oracle.com/database/sqldeveloper/technologies/download/ (wymaga Java 17 lub nowszej).
 Instrukcja dla własnego komputera (Windows, macOS, Linux).
 
 Wymagania: ok. 20 GB wolnego miejsca (obrazy baz zajmują kilka GB) i co najmniej 8 GB pamięci RAM.
@@ -77,15 +78,15 @@ Po instalacji **wyloguj się i zaloguj ponownie** (albo wpisz `newgrp docker`), 
 Opcje instalatora: `bash install-linux.sh --help`. Na innych dystrybucjach skrypt zainstaluje Dockera, ale DBeavera zainstaluj ze strony https://dbeaver.io/download/.
 Gdy `./lab` zgłasza „Permission denied”: `chmod +x lab` albo `bash lab up 3`.
 
-## Pierwsze połączenie w DBeaver
+## Pierwsze połączenie: DBeaver (PostgreSQL, MySQL) i SQL Developer (Oracle)
 
-*Baza danych → Nowe połączenie*, wybierz silnik i wpisz dane z karty „Połączenie” w instrukcji danego laboratorium:
+W DBeaver: *Database → New Database Connection*; w SQL Developer: zielony **+** w panelu *Connections*. Dane z karty „Połączenie” w instrukcji danego laboratorium:
 
 | Silnik | Host | Port | Baza | Użytkownik / hasło |
 |---|---|---|---|---|
 | PostgreSQL (lab 3) | `localhost` | 5432 | `katedra` | `student` / `student` |
 | MySQL (lab 4) | `localhost` | 3306 | `fabryka` | `student` / `student` |
-| Oracle (lab 5, 6, dod.) | `localhost` | 1521 | **Service name:** `FREEPDB1` | `student` / `student` |
+| Oracle (lab 5, 6, dod.) — SQL Developer | `localhost` | 1521 | **Service name:** `FREEPDB1` | `student` / `student` |
 
 Uwagi:
 

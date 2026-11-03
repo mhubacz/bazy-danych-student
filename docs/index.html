@@ -2019,7 +2019,7 @@ VALUES (123456, 'Jan', 'Kowalski', 'jan.kowalski@example.com', 'INF');</code></p
 <div class="lab-body">
 <div class="conn-card"><span>host <b>localhost</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span><span>baza <b>student</b></span><span>porty <b>PostgreSQL 5432, MySQL 3306, Oracle 1521 (Service name: FREEPDB1)</b></span><span>Adminer <b>http://localhost:8080</b></span></div>
 <h4>Czynności wstępne</h4><ol class="tasks">
-<li><input type="checkbox" id="w-02-0"><label for="w-02-0">Porty 5432, 3306 i 1521 są wolne: jeśli w tej sesji zostały kontenery z instrukcji 1, usuń je (<code>docker rm -f pg-lab mysql-lab oracle-lab</code> albo <code>./lab clean</code>).</label></li>
+<li><input type="checkbox" id="w-02-0"><label for="w-02-0"><em>Na własnym komputerze:</em> jeśli zostały kontenery z instrukcji 1, usuń je (<code>~/bazy-danych-student/lab clean</code>) — zajmują te same porty.</label></li>
 <li><input type="checkbox" id="w-02-1"><label for="w-02-1">Przejdź do katalogu laboratorium: <code>cd ~/bazy-danych-student/labs/02-docker-compose</code>.</label></li>
 </ol>
 <h4>Przygotowanie bazy</h4>
@@ -2109,7 +2109,7 @@ WHERE data_urodzenia &gt; DATE '2000-01-01';</code></pre><div class="btns"><butt
 <div class="lab-body">
 <div class="conn-card"><span>host <b>localhost</b></span><span>port <b>5432</b></span><span>baza <b>katedra</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
 <h4>Czynności wstępne</h4><ol class="tasks">
-<li><input type="checkbox" id="w-03-0"><label for="w-03-0">Bazy z poprzednich zajęć są wyłączone — wszystkie laboratoria używają tych samych portów (5432, 3306, 1521). Wyłączysz je poleceniem <code>~/bazy-danych-student/lab down</code>. Jeśli <code>docker compose up</code> mimo to zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
+<li><input type="checkbox" id="w-03-0"><label for="w-03-0"><em>Na własnym komputerze:</em> wyłącz bazy z poprzednich zajęć (<code>~/bazy-danych-student/lab down</code>) — wszystkie laboratoria używają tych samych portów. Jeśli <code>docker compose up</code> zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
 <li><input type="checkbox" id="w-03-1"><label for="w-03-1">Przejdź do katalogu laboratorium: <code>cd ~/bazy-danych-student/labs/03-katedra-postgres</code>.</label></li>
 </ol>
 <h4>Przygotowanie bazy</h4>
@@ -2136,7 +2136,7 @@ WHERE data_urodzenia &gt; DATE '2000-01-01';</code></pre><div class="btns"><butt
 <div class="lab-body">
 <div class="conn-card"><span>host <b>localhost</b></span><span>port <b>3306</b></span><span>baza <b>fabryka</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
 <h4>Czynności wstępne</h4><ol class="tasks">
-<li><input type="checkbox" id="w-04-0"><label for="w-04-0">Bazy z poprzednich zajęć są wyłączone — wszystkie laboratoria używają tych samych portów (5432, 3306, 1521). Wyłączysz je poleceniem <code>~/bazy-danych-student/lab down</code>. Jeśli <code>docker compose up</code> mimo to zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
+<li><input type="checkbox" id="w-04-0"><label for="w-04-0"><em>Na własnym komputerze:</em> wyłącz bazy z poprzednich zajęć (<code>~/bazy-danych-student/lab down</code>) — wszystkie laboratoria używają tych samych portów. Jeśli <code>docker compose up</code> zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
 <li><input type="checkbox" id="w-04-1"><label for="w-04-1">Przejdź do katalogu laboratorium: <code>cd ~/bazy-danych-student/labs/04-fabryka-mysql</code>.</label></li>
 </ol>
 <h4>Przygotowanie bazy</h4>
@@ -2167,7 +2167,7 @@ WHERE data_urodzenia &gt; DATE '2000-01-01';</code></pre><div class="btns"><butt
 <div class="lab-body">
 <div class="conn-card"><span>host <b>localhost</b></span><span>port <b>1521</b></span><span>Service name <b>FREEPDB1</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
 <h4>Czynności wstępne</h4><ol class="tasks">
-<li><input type="checkbox" id="w-05-0"><label for="w-05-0">Bazy z poprzednich zajęć są wyłączone — wszystkie laboratoria używają tych samych portów (5432, 3306, 1521). Wyłączysz je poleceniem <code>~/bazy-danych-student/lab down</code>. Jeśli <code>docker compose up</code> mimo to zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
+<li><input type="checkbox" id="w-05-0"><label for="w-05-0"><em>Na własnym komputerze:</em> wyłącz bazy z poprzednich zajęć (<code>~/bazy-danych-student/lab down</code>) — wszystkie laboratoria używają tych samych portów. Jeśli <code>docker compose up</code> zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
 <li><input type="checkbox" id="w-05-1"><label for="w-05-1">Przejdź do katalogu laboratorium: <code>cd ~/bazy-danych-student/labs/05-firma-oracle-1</code>.</label></li>
 </ol>
 <h4>Przygotowanie bazy</h4>
@@ -2199,7 +2199,7 @@ docker compose logs -f oracle</code></pre><div class="btns"><button class="btn c
 <div class="lab-body">
 <div class="conn-card"><span>host <b>localhost</b></span><span>port <b>1521</b></span><span>Service name <b>FREEPDB1</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
 <h4>Czynności wstępne</h4><ol class="tasks">
-<li><input type="checkbox" id="w-06-0"><label for="w-06-0">Bazy z poprzednich zajęć są wyłączone — wszystkie laboratoria używają tych samych portów (5432, 3306, 1521). Wyłączysz je poleceniem <code>~/bazy-danych-student/lab down</code>. Jeśli <code>docker compose up</code> mimo to zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
+<li><input type="checkbox" id="w-06-0"><label for="w-06-0"><em>Na własnym komputerze:</em> wyłącz bazy z poprzednich zajęć (<code>~/bazy-danych-student/lab down</code>) — wszystkie laboratoria używają tych samych portów. Jeśli <code>docker compose up</code> zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
 <li><input type="checkbox" id="w-06-1"><label for="w-06-1">Przejdź do katalogu laboratorium: <code>cd ~/bazy-danych-student/labs/06-firma-oracle-2</code>.</label></li>
 </ol>
 <h4>Przygotowanie bazy</h4>
@@ -2228,7 +2228,7 @@ docker compose logs -f oracle</code></pre><div class="btns"><button class="btn c
 <div class="lab-body">
 <div class="conn-card"><span>host <b>localhost</b></span><span>port <b>1521</b></span><span>Service name <b>FREEPDB1</b></span><span>użytkownik <b>student</b></span><span>hasło <b>student</b></span></div>
 <h4>Czynności wstępne</h4><ol class="tasks">
-<li><input type="checkbox" id="w-07-0"><label for="w-07-0">Bazy z poprzednich zajęć są wyłączone — wszystkie laboratoria używają tych samych portów (5432, 3306, 1521). Wyłączysz je poleceniem <code>~/bazy-danych-student/lab down</code>. Jeśli <code>docker compose up</code> mimo to zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
+<li><input type="checkbox" id="w-07-0"><label for="w-07-0"><em>Na własnym komputerze:</em> wyłącz bazy z poprzednich zajęć (<code>~/bazy-danych-student/lab down</code>) — wszystkie laboratoria używają tych samych portów. Jeśli <code>docker compose up</code> zgłosi zajęty port, sprawdź <code>docker ps</code> i zatrzymaj kontener, który go zajmuje (<code>docker stop nazwa</code>).</label></li>
 <li><input type="checkbox" id="w-07-1"><label for="w-07-1">Przejdź do katalogu laboratorium: <code>cd ~/bazy-danych-student/labs/07-ot-rozszerzenie</code>.</label></li>
 <li><input type="checkbox" id="w-07-2"><label for="w-07-2">Przejrzyj diagram ER schematu OT (sekcja „Bazy danych” na stronie z instrukcjami).</label></li>
 </ol>

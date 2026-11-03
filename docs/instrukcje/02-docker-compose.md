@@ -8,7 +8,7 @@
 
 ## Czynności wstępne
 
-1. Porty 5432, 3306 i 1521 są wolne: jeśli w tej sesji zostały kontenery z instrukcji 1, usuń je (`docker rm -f pg-lab mysql-lab oracle-lab` albo `./lab clean`).
+1. *Na własnym komputerze:* jeśli zostały kontenery z instrukcji 1, usuń je (`~/bazy-danych-student/lab clean`) — zajmują te same porty.
 2. Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/02-docker-compose`.
 
 ## Przygotowanie bazy

@@ -6,7 +6,7 @@ cel: "Uruchomić trzy serwery baz danych jednym poleceniem z pliku Compose, pozn
 silnik: all
 polaczenie: "host: localhost · użytkownik: student · hasło: student · baza: student · porty: PostgreSQL 5432, MySQL 3306, Oracle 1521 (Service name: FREEPDB1) · Adminer: http://localhost:8080"
 wstep:
-  - "Porty 5432, 3306 i 1521 są wolne: jeśli w tej sesji zostały kontenery z instrukcji 1, usuń je (`docker rm -f pg-lab mysql-lab oracle-lab` albo `./lab clean`)."
+  - "*Na własnym komputerze:* jeśli zostały kontenery z instrukcji 1, usuń je (`~/bazy-danych-student/lab clean`) — zajmują te same porty."
   - "Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/02-docker-compose`."
 przygotowanie:
   - opis: "**Docker Compose w pigułce.** W instrukcji 1 każdy kontener uruchamiałeś osobnym, długim poleceniem `docker run`. Compose zapisuje te same ustawienia w pliku `compose.yaml` i uruchamia cały zestaw jednym poleceniem. Najważniejsze pojęcia:"

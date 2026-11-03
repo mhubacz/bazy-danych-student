@@ -8,7 +8,7 @@
 
 ## Czynności wstępne
 
-1. Bazy z poprzednich zajęć są wyłączone — wszystkie laboratoria używają tych samych portów (5432, 3306, 1521). Wyłączysz je poleceniem `~/bazy-danych-student/lab down`. Jeśli `docker compose up` mimo to zgłosi zajęty port, sprawdź `docker ps` i zatrzymaj kontener, który go zajmuje (`docker stop nazwa`).
+1. *Na własnym komputerze:* wyłącz bazy z poprzednich zajęć (`~/bazy-danych-student/lab down`) — wszystkie laboratoria używają tych samych portów. Jeśli `docker compose up` zgłosi zajęty port, sprawdź `docker ps` i zatrzymaj kontener, który go zajmuje (`docker stop nazwa`).
 2. Przejdź do katalogu laboratorium: `cd ~/bazy-danych-student/labs/03-katedra-postgres`.
 
 ## Przygotowanie bazy

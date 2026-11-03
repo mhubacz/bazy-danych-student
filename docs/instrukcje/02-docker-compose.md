@@ -29,7 +29,7 @@ Plik `labs/02-docker-compose/compose.yaml`:
 
 ```yaml
 # Laboratorium 2/6 — trzy serwery baz danych naraz + Adminer (klient w przeglądarce; obsługuje PostgreSQL i MySQL, NIE Oracle).
-# Uruchomienie:  docker compose up -d      Zatrzymanie:  docker compose down
+# Uruchomienie:  docker compose up -d      Wyłączenie (usuwa kontenery, dane zostają):  docker compose down
 # Dane są w wolumenach; kasuje je dopiero:  docker compose down -v
 name: lab02-wiele-baz
 
@@ -94,7 +94,8 @@ volumes:
 | `docker compose up -d` | utwórz i uruchom cały zestaw w tle (`--wait` — poczekaj na gotowość) |
 | `docker compose ps` | stan usług zestawu |
 | `docker compose logs -f oracle` | logi jednej usługi na żywo (Ctrl+C kończy podgląd) |
-| `docker compose down` | zatrzymaj i usuń kontenery — **wolumeny z danymi zostają** |
+| `docker compose stop` / `start` | tylko zatrzymaj / wznów kontenery (jak `docker stop` / `docker start`) |
+| `docker compose down` | zatrzymaj i **usuń** kontenery oraz sieć zestawu (jak `docker stop` + `docker rm`) — **wolumeny z danymi zostają** |
 | `docker compose down -v` | jak wyżej, ale usuwa też wolumeny — **dane znikają** |
 
 > Wszystkie polecenia `docker compose` wykonuj w katalogu z plikiem `compose.yaml`.
@@ -157,11 +158,11 @@ volumes:
 
    Zwróć uwagę na komunikaty o błędach i na to, *co* zwraca zapytanie — nie każdy niepoprawny wariant kończy się błędem. W PostgreSQL działają oba sposoby łączenia, w MySQL i Oracle — tylko jeden z nich (w każdym inny). Zestawienie różnic znajdziesz w sekcji „Różnice dialektów” na stronie z instrukcjami.
 
-6. Zatrzymaj zestaw poleceniem `docker compose down`, wyświetl wolumeny (`docker volume ls`), uruchom zestaw ponownie (`docker compose up -d --wait`) i sprawdź, czy tabele `osoba` nadal istnieją. Dlaczego dane przetrwały, choć w instrukcji 1 po `docker rm` znikały?
+6. Porównaj zatrzymanie z usunięciem. Wykonaj `docker compose stop` i sprawdź `docker compose ps -a` — kontenery nadal istnieją (status *Exited*). Teraz wykonaj `docker compose down` i ponownie `docker compose ps -a` — kontenery zostały **usunięte**, tak jak po `docker rm` w instrukcji 1. Wyświetl wolumeny (`docker volume ls`), uruchom zestaw ponownie (`docker compose up -d --wait`) i sprawdź, czy tabele `osoba` nadal istnieją. Dlaczego dane przetrwały, choć w instrukcji 1 po `docker rm` znikały?
 
    **Podpowiedź:**
 
-   `docker compose down` usuwa kontenery, ale nie wolumeny nazwane — na liście zobaczysz np. `lab02-wiele-baz_pg-data`. Bazy zapisują dane właśnie w wolumenach, więc nowe kontenery widzą stare dane. W instrukcji 1 kontenery nie miały wolumenów, więc dane były w samym kontenerze.
+   `docker compose down` usuwa kontenery (i sieć zestawu), ale nie wolumeny nazwane — na liście zobaczysz np. `lab02-wiele-baz_pg-data`. Bazy zapisują dane właśnie w wolumenach, więc nowe kontenery widzą stare dane. W instrukcji 1 kontenery nie miały wolumenów, więc dane były w samym kontenerze.
 
 7. Usuń zestaw razem z danymi: `docker compose down -v`, sprawdź `docker volume ls` i uruchom zestaw ponownie. Co się stało z tabelami? Kiedy w praktyce używa się opcji `-v`?
 
@@ -173,7 +174,7 @@ volumes:
 
 ## Uwagi
 
-Przed laboratoriami 3–7 zatrzymaj zestaw (`docker compose down` w tym katalogu albo `./lab down`) — używają tych samych portów 5432, 3306 i 1521. Jeśli `up` zgłasza zajęty port, sprawdź `docker ps` i zatrzymaj kontener, który go zajmuje (`docker stop nazwa`).
+Przed laboratoriami 3–7 wyłącz zestaw (`docker compose down` w tym katalogu albo `./lab down` — kontenery są usuwane, dane w wolumenach zostają) — używają tych samych portów 5432, 3306 i 1521. Jeśli `up` zgłasza zajęty port, sprawdź `docker ps` i zatrzymaj kontener, który go zajmuje (`docker stop nazwa`).
 
 
 ## Koniec zajęć

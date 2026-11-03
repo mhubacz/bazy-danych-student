@@ -1,5 +1,5 @@
 # Laboratorium 2/6 — trzy serwery baz danych naraz + Adminer (klient w przeglądarce; obsługuje PostgreSQL i MySQL, NIE Oracle).
-# Uruchomienie:  docker compose up -d      Zatrzymanie:  docker compose down
+# Uruchomienie:  docker compose up -d      Wyłączenie (usuwa kontenery, dane zostają):  docker compose down
 # Dane są w wolumenach; kasuje je dopiero:  docker compose down -v
 name: lab02-wiele-baz
 

@@ -2451,24 +2451,53 @@ docker compose logs -f oracle</code></pre><div class="btns"><button class="btn c
     applyState({ __meta: { name: nameEl.value, group: groupEl.value } });
   });
 
-  // ---- aktywna pozycja w menu bocznym ----
+  // ---- menu boczne: przejście do sekcji i aktywna pozycja ----
   var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
   var map = {};
+  var ids = [];
   links.forEach(function (a) {
     var id = a.getAttribute('href').slice(1);
-    if (document.getElementById(id)) map[id] = a;
+    if (document.getElementById(id)) { map[id] = a; ids.push(id); }
   });
-  if ('IntersectionObserver' in window) {
-    var obs = new IntersectionObserver(function (es) {
-      es.forEach(function (en) {
-        if (en.isIntersecting) {
-          links.forEach(function (l) { l.classList.remove('active'); });
-          var a = map[en.target.id];
-          if (a) a.classList.add('active');
-        }
-      });
-    }, { rootMargin: '-40% 0px -55% 0px' });
-    Object.keys(map).forEach(function (id) { obs.observe(document.getElementById(id)); });
+  function setActive(id) {
+    links.forEach(function (l) { l.classList.toggle('active', l === map[id]); });
+  }
+  function openLab(id) {
+    var sec = document.getElementById(id);
+    var lab = sec && sec.querySelector('.lab');
+    if (lab) lab.classList.add('open');
+  }
+  var lockUntil = 0;
+  links.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href').slice(1);
+      var sec = document.getElementById(id);
+      if (!sec) return;
+      e.preventDefault();
+      openLab(id);
+      setActive(id);
+      lockUntil = Date.now() + 1200;
+      sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      try { history.replaceState(null, '', '#' + id); } catch (err) { /* plik lokalny */ }
+    });
+  });
+  function onScroll() {
+    if (Date.now() < lockUntil) return;
+    var cur = ids[0];
+    ids.forEach(function (id) {
+      if (document.getElementById(id).getBoundingClientRect().top <= 120) cur = id;
+    });
+    setActive(cur);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  if (location.hash && map[location.hash.slice(1)]) {
+    var hid = location.hash.slice(1);
+    openLab(hid);
+    setActive(hid);
+    lockUntil = Date.now() + 1200;
+    document.getElementById(hid).scrollIntoView({ block: 'start' });
+  } else {
+    onScroll();
   }
 })();
 

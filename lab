@@ -10,7 +10,7 @@ usage() {
   cat << 'HELP'
 Użycie: ./lab <polecenie> [numer]
 
-  list            lista laboratoriów (numer, silnik, tytuł)
+  list            lista laboratoriów (numer, system, tytuł)
   up N            uruchom bazę laboratorium N (inne laboratoria zostaną zatrzymane)
   down [N]        zatrzymaj laboratorium N (bez N: wszystkie); dane zostają
   reset N         wróć do stanu początkowego (KASUJE dane tego laboratorium)
@@ -84,7 +84,7 @@ confirm() {
 
 cmd_list() {
   local d id sil tyt
-  printf '%-4s %-11s %s\n' "NR" "SILNIK" "TYTUŁ"
+  printf '%-4s %-11s %s\n' "NR" "SYSTEM" "TYTUŁ"
   for d in "$LABS"/*/; do
     [ -f "$d/lab.yaml" ] || continue
     id="$(yaml_field "$d/lab.yaml" id)"

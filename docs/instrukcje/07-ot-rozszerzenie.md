@@ -1,6 +1,6 @@
 # Laboratorium dod. — Laboratorium dodatkowe — schemat OT (Oracle)
 
-**Silnik:** Oracle · **Baza:** OT
+**System bazodanowy:** Oracle · **Baza:** OT
 
 **Cel:** Złączenia wielotabelowe na rozbudowanym schemacie: klienci, zamówienia, produkty, magazyny i lokalizacje.
 

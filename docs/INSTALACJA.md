@@ -82,7 +82,7 @@ Gdy `./lab` zgłasza „Permission denied”: `chmod +x lab` albo `bash lab up 3
 
 W DBeaver: *Database → New Database Connection*; w SQL Developer: zielony **+** w panelu *Connections*. Dane z karty „Połączenie” w instrukcji danego laboratorium:
 
-| Silnik | Host | Port | Baza | Użytkownik / hasło |
+| System | Host | Port | Baza | Użytkownik / hasło |
 |---|---|---|---|---|
 | PostgreSQL (lab 3) | `localhost` | 5432 | `katedra` | `student` / `student` |
 | MySQL (lab 4) | `localhost` | 3306 | `fabryka` | `student` / `student` |

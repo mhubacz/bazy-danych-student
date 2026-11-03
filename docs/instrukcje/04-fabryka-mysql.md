@@ -1,6 +1,6 @@
 # Laboratorium 4/6 — INSERT, UPDATE, DELETE — baza „Fabryka”
 
-**Silnik:** MySQL · **Baza:** Fabryka
+**System bazodanowy:** MySQL · **Baza:** Fabryka
 
 **Cel:** Modyfikacja danych poleceniami INSERT, UPDATE i DELETE oraz zapytania z warunkami i prostymi złączeniami.
 

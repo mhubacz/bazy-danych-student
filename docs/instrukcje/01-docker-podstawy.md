@@ -1,6 +1,6 @@
 # Laboratorium 1/6 — Uruchamianie bazy danych w kontenerze Docker
 
-**Silnik:** wszystkie silniki
+**System bazodanowy:** wszystkie systemy
 
 **Cel:** Poznać podstawowe polecenia Dockera, uruchomić serwery trzech baz w kontenerach i połączyć się z nimi klientem graficznym.
 
@@ -64,14 +64,14 @@
 
    Obrazu nie da się usunąć, dopóki istnieje kontener (także zatrzymany), który z niego powstał — stąd kolejność: najpierw kontenery, potem obraz. Usunięcie obrazu nie szkodzi: przy kolejnym `docker run hello-world` zostanie pobrany ponownie.
 
-7. Pobierz obrazy trzech silników baz danych (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa; w sali obrazy są już pobrane, więc polecenia skończą się szybko).
+7. Pobierz obrazy trzech systemów bazodanowych (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa; w sali obrazy są już pobrane, więc polecenia skończą się szybko).
 
    ```bash
    docker pull postgres:17
    docker pull mysql:8.4
    docker pull gvenzl/oracle-free:23
    ```
-8. Uruchom serwer każdego silnika jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`.
+8. Uruchom każdy serwer bazy danych jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`.
 
    ```bash
    docker run --name pg-lab -e POSTGRES_USER=student -e POSTGRES_PASSWORD=student -e POSTGRES_DB=student -p 5432:5432 -d postgres:17
@@ -133,14 +133,14 @@
 
    Kliknij *Test* (*Status: Success* w lewym dolnym rogu), potem *Connect*. Polecenia wpisuj w arkuszu (*Worksheet*); **Ctrl+Enter** wykonuje polecenie pod kursorem, **F5** cały skrypt. W SQL Developer zmiany trzeba zatwierdzić: po `INSERT` wykonaj `COMMIT;` (lub **F11**).
 
-   Polecenia z zadania 11 trzeba lekko dostosować — silniki różnią się nazwami typów:
+   Polecenia z zadania 11 trzeba lekko dostosować — systemy bazodanowe różnią się nazwami typów:
 
    |  | PostgreSQL | MySQL | Oracle |
    |---|---|---|---|
    | liczba całkowita (nr indeksu) | `integer` | `INT` | `NUMBER(10)` |
    | tekst (imię, e-mail, kierunek) | `varchar(30)` | `VARCHAR(30)` | `VARCHAR2(30)` |
 
-   Po utworzeniu tabeli możesz podejrzeć, jak silnik zapisał jej definicję: w DBeaver prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*, w SQL Developer — kliknij tabelę w drzewie połączenia i otwórz zakładkę *SQL*. Porównaj te definicje między silnikami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`).
+   Po utworzeniu tabeli możesz podejrzeć, jak serwer bazy danych zapisał jej definicję: w DBeaver prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*, w SQL Developer — kliknij tabelę w drzewie połączenia i otwórz zakładkę *SQL*. Porównaj te definicje między systemami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`).
 
    **MySQL — błąd „Public Key Retrieval is not allowed”.** To typowe przy pierwszym połączeniu z MySQL 8. W oknie połączenia przejdź na zakładkę *Driver properties*, znajdź właściwość `allowPublicKeyRetrieval`, ustaw ją na `true` i połącz się ponownie (dla istniejącego połączenia: prawy przycisk → *Edit Connection* → *Driver properties*).
 

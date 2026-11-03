@@ -1,7 +1,7 @@
 # Bazy danych (SQL) — laboratoria w Dockerze
 
-Sześć instrukcji laboratoryjnych (plus jedna dodatkowa) z baz danych. Bazy działają w kontenerach Docker na trzech silnikach:
-**PostgreSQL**, **MySQL** i **Oracle**. Każde laboratorium od trzeciego ma przypisany jeden silnik i gotową bazę, która ładuje się sama.
+Sześć instrukcji laboratoryjnych (plus jedna dodatkowa) z baz danych. Bazy działają w kontenerach Docker w trzech systemach bazodanowych:
+**PostgreSQL**, **MySQL** i **Oracle**. Każde laboratorium od trzeciego ma przypisany jeden system bazodanowy i gotową bazę, która ładuje się sama.
 
 ## Szybki start (komputer w sali)
 
@@ -43,7 +43,7 @@ start docs\index.html
 
 ## Laboratoria
 
-| Nr | Silnik | Baza | Temat | Katalog |
+| Nr | System | Baza | Temat | Katalog |
 |---|---|---|---|---|
 | 1/6 | wszystkie | — | Uruchamianie bazy w kontenerze | `labs/01-docker-podstawy` |
 | 2/6 | wszystkie | — | Docker Compose, wolumeny, różnice dialektów | `labs/02-docker-compose` |

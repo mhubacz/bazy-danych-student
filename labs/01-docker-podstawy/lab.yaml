@@ -38,13 +38,13 @@ zadania:
   - tresc: "Posprzątaj: usuń kontener `docker rm moj-hello`, a potem wszystkie zatrzymane kontenery `docker container prune` (potwierdź literą `y`). Na koniec spróbuj usunąć obraz `docker rmi hello-world` — kiedy się to udaje, a kiedy nie?"
     pole: opis
     podpowiedz: "Obrazu nie da się usunąć, dopóki istnieje kontener (także zatrzymany), który z niego powstał — stąd kolejność: najpierw kontenery, potem obraz. Usunięcie obrazu nie szkodzi: przy kolejnym `docker run hello-world` zostanie pobrany ponownie."
-  - tresc: "Pobierz obrazy trzech silników baz danych (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa; w sali obrazy są już pobrane, więc polecenia skończą się szybko)."
+  - tresc: "Pobierz obrazy trzech systemów bazodanowych (obraz Oracle ma ponad 1 GB — pobieranie chwilę trwa; w sali obrazy są już pobrane, więc polecenia skończą się szybko)."
     pole: brak
     kod: |
       docker pull postgres:17
       docker pull mysql:8.4
       docker pull gvenzl/oracle-free:23
-  - tresc: "Uruchom serwer każdego silnika jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`."
+  - tresc: "Uruchom każdy serwer bazy danych jednym poleceniem. We wszystkich trzech użytkownik i hasło to `student`."
     pole: brak
     kod: |
       docker run --name pg-lab -e POSTGRES_USER=student -e POSTGRES_PASSWORD=student -e POSTGRES_DB=student -p 5432:5432 -d postgres:17
@@ -87,12 +87,12 @@ zadania:
           - ["Hostname / Port", "`localhost` / `1521`"]
           - ["Service name", "`FREEPDB1` (zaznacz *Service name*, nie *SID*)"]
       - opis: "Kliknij *Test* (*Status: Success* w lewym dolnym rogu), potem *Connect*. Polecenia wpisuj w arkuszu (*Worksheet*); **Ctrl+Enter** wykonuje polecenie pod kursorem, **F5** cały skrypt. W SQL Developer zmiany trzeba zatwierdzić: po `INSERT` wykonaj `COMMIT;` (lub **F11**)."
-      - opis: "Polecenia z zadania 11 trzeba lekko dostosować — silniki różnią się nazwami typów:"
+      - opis: "Polecenia z zadania 11 trzeba lekko dostosować — systemy bazodanowe różnią się nazwami typów:"
         tabela:
           - ["", "PostgreSQL", "MySQL", "Oracle"]
           - ["liczba całkowita (nr indeksu)", "`integer`", "`INT`", "`NUMBER(10)`"]
           - ["tekst (imię, e-mail, kierunek)", "`varchar(30)`", "`VARCHAR(30)`", "`VARCHAR2(30)`"]
-      - opis: "Po utworzeniu tabeli możesz podejrzeć, jak silnik zapisał jej definicję: w DBeaver prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*, w SQL Developer — kliknij tabelę w drzewie połączenia i otwórz zakładkę *SQL*. Porównaj te definicje między silnikami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`)."
+      - opis: "Po utworzeniu tabeli możesz podejrzeć, jak serwer bazy danych zapisał jej definicję: w DBeaver prawy przycisk na tabeli w drzewie (odśwież je klawiszem **F5**) → *Generate SQL* → *DDL*, w SQL Developer — kliknij tabelę w drzewie połączenia i otwórz zakładkę *SQL*. Porównaj te definicje między systemami. W Oracle nazwy zapisane bez cudzysłowów trafiają do bazy wielkimi literami (`STUDENT`)."
       - opis: "**MySQL — błąd „Public Key Retrieval is not allowed”.** To typowe przy pierwszym połączeniu z MySQL 8. W oknie połączenia przejdź na zakładkę *Driver properties*, znajdź właściwość `allowPublicKeyRetrieval`, ustaw ją na `true` i połącz się ponownie (dla istniejącego połączenia: prawy przycisk → *Edit Connection* → *Driver properties*)."
   - tresc: "Zatrzymaj i uruchom ponownie kontener (`docker stop pg-lab`, potem `docker start pg-lab`) i sprawdź, czy tabela `student` nadal ma dane. Następnie usuń kontenery (`docker rm -f pg-lab mysql-lab oracle-lab`), uruchom `pg-lab` od nowa poleceniem z zadania 8 i sprawdź tabelę ponownie. Wyjaśnij różnicę."
     pole: opis

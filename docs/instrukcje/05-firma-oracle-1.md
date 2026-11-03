@@ -1,6 +1,6 @@
 # Laboratorium 5/6 — Baza „Firma handlowa” — część I
 
-**Silnik:** Oracle · **Baza:** Firma handlowa
+**System bazodanowy:** Oracle · **Baza:** Firma handlowa
 
 **Cel:** Warunki złożone, przedziały, daty i pierwsze złączenia.
 

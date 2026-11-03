@@ -1,6 +1,6 @@
 # Laboratorium 6/6 — Złączenia, grupowanie i funkcje agregujące
 
-**Silnik:** Oracle · **Baza:** Firma handlowa
+**System bazodanowy:** Oracle · **Baza:** Firma handlowa
 
 **Cel:** JOIN, GROUP BY, COUNT, AVG i HAVING na bazie „Firma handlowa”.
 

@@ -1,6 +1,6 @@
 # Laboratorium 3/6 — Zapytania proste — baza „Katedra”
 
-**Silnik:** PostgreSQL · **Baza:** Katedra
+**System bazodanowy:** PostgreSQL · **Baza:** Katedra
 
 **Cel:** Proste zapytania SELECT: warunki, sortowanie, obliczenia i filtrowanie tekstu.
 

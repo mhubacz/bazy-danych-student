@@ -1,8 +1,8 @@
 id: "02"
 numer: "2/6"
 skrot: "Docker Compose"
-tytul: "Wiele silników i Docker Compose"
-cel: "Uruchomić trzy silniki jednym poleceniem z pliku Compose, poznać wolumeny (trwałe dane) i porównać składnię SQL w trzech silnikach."
+tytul: "Wiele baz danych i Docker Compose"
+cel: "Uruchomić trzy serwery baz danych jednym poleceniem z pliku Compose, poznać wolumeny (trwałe dane) i porównać składnię SQL w trzech systemach bazodanowych."
 silnik: all
 polaczenie: "host: localhost · użytkownik: student · hasło: student · baza: student · porty: PostgreSQL 5432, MySQL 3306, Oracle 1521 (Service name: FREEPDB1) · Adminer: http://localhost:8080"
 wstep:
@@ -13,7 +13,7 @@ przygotowanie:
     tabela:
       - ["Pojęcie", "Co to jest", "W pliku `compose.yaml`"]
       - ["**usługa** (service)", "jeden kontener opisany w pliku; nazwa usługi jest też nazwą hosta w sieci zestawu", "`postgres:`, `mysql:`, `oracle:`, `adminer:`"]
-      - ["**projekt**", "cały zestaw usług; jego nazwa jest przedrostkiem nazw kontenerów i wolumenów", "`name: lab02-wiele-silnikow`"]
+      - ["**projekt**", "cały zestaw usług; jego nazwa jest przedrostkiem nazw kontenerów i wolumenów", "`name: lab02-wiele-baz`"]
       - ["**wolumen nazwany**", "trwałe miejsce na dane, które przetrwa usunięcie kontenera", "`volumes: [\"pg-data:/var/lib/postgresql/data\"]`"]
       - ["**sieć**", "wspólna sieć zestawu: usługi widzą się po nazwach (np. Adminer łączy się z serwerem `postgres`)", "tworzona automatycznie"]
       - ["**healthcheck**", "test gotowości usługi; `--wait` czeka, aż wszystkie będą zdrowe (`healthy`)", "`healthcheck:`"]
@@ -33,7 +33,7 @@ zadania:
     kod: |
       docker compose up -d
       docker compose ps
-    podpowiedz: "W kolumnie `STATUS` zobaczysz `health: starting`, a po chwili `healthy`. Polecenie `docker compose up -d --wait` czeka, aż wszystkie usługi będą gotowe — przy Oracle to kilka minut. Nazwy kontenerów mają postać `projekt-usługa-1`, np. `lab02-wiele-silnikow-postgres-1`."
+    podpowiedz: "W kolumnie `STATUS` zobaczysz `health: starting`, a po chwili `healthy`. Polecenie `docker compose up -d --wait` czeka, aż wszystkie usługi będą gotowe — przy Oracle to kilka minut. Nazwy kontenerów mają postać `projekt-usługa-1`, np. `lab02-wiele-baz-postgres-1`."
   - tresc: "Wskaż w pliku `compose.yaml`, gdzie podano obrazy, porty, zmienne środowiskowe i wolumeny. Które opcje polecenia `docker run` z instrukcji 1 (zadanie 8) im odpowiadają?"
     pole: opis
     podpowiedz:
@@ -48,18 +48,18 @@ zadania:
   - tresc: "Otwórz `http://localhost:8080` (Adminer) i zaloguj się do PostgreSQL (System: PostgreSQL, serwer `postgres`) oraz do MySQL (System: MySQL, serwer `mysql`); użytkownik, hasło i baza: `student`. Z Oracle połącz się w SQL Developer — jak w instrukcji 1 (Adminer w tym zestawie nie obsługuje Oracle)."
     pole: brak
     podpowiedz: "Adminer działa **w kontenerze** w tej samej sieci co bazy, dlatego jako serwer podajesz **nazwę usługi** (`postgres`, `mysql`), a nie `localhost` — dla Adminera `localhost` to jego własny kontener. Wybranie w Adminerze systemu *Oracle* kończy się błędem `None of the supported PHP extensions (OCI8, PDO_OCI) are available` — obraz `adminer` nie zawiera sterownika Oracle, dlatego do Oracle służy SQL Developer. DBeaver i SQL Developer działają poza Dockerem, więc łączą się z `localhost` i portem udostępnionym przez `ports:`. Połączenia z instrukcji 1 mogły zniknąć (po przywróceniu migawki `Czysta`) — utwórz je ponownie: Oracle `localhost:1521`, **Service name** `FREEPDB1`, `student`/`student`."
-  - tresc: "W każdym z trzech silników utwórz poleceniem `CREATE TABLE` (w Adminerze: **SQL command**, nie formularz *Create table*; w Oracle: SQL Developer) tabelę `osoba` (`id` — klucz główny nadawany automatycznie, `imie`, `nazwisko`, `data_urodzenia`) i dodaj do niej **swoje dane** oraz co najmniej dwie inne osoby, nie podając `id`. Porównaj składnię klucza automatycznego."
+  - tresc: "W każdym z trzech systemów bazodanowych utwórz poleceniem `CREATE TABLE` (w Adminerze: **SQL command**, nie formularz *Create table*; w Oracle: SQL Developer) tabelę `osoba` (`id` — klucz główny nadawany automatycznie, `imie`, `nazwisko`, `data_urodzenia`) i dodaj do niej **swoje dane** oraz co najmniej dwie inne osoby, nie podając `id`. Porównaj składnię klucza automatycznego."
     podpowiedz:
       - opis: "Kolumna `id` ma się wypełniać sama — w `INSERT` wymieniasz tylko pozostałe kolumny. Składnia klucza automatycznego:"
         tabela:
           - ["PostgreSQL", "MySQL", "Oracle"]
           - ["`id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY` (starszy skrót: `id SERIAL PRIMARY KEY`)", "`id INT AUTO_INCREMENT PRIMARY KEY`", "`id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY`"]
-      - opis: "Typy pozostałych kolumn dobierz jak w instrukcji 1 (`varchar` / `VARCHAR` / `VARCHAR2`), a datę zapisz typem `date` / `DATE`. Datę w `INSERT` najbezpieczniej podać jako `DATE '2001-05-12'` — działa we wszystkich trzech silnikach."
-  - tresc: "W każdym silniku napisz zapytanie, które zwraca imię i nazwisko połączone w jedną kolumnę (ze spacją) dla osób urodzonych po 1 stycznia 2000. Zapisz, gdzie składnia się różni."
+      - opis: "Typy pozostałych kolumn dobierz jak w instrukcji 1 (`varchar` / `VARCHAR` / `VARCHAR2`), a datę zapisz typem `date` / `DATE`. Datę w `INSERT` najbezpieczniej podać jako `DATE '2001-05-12'` — działa we wszystkich trzech systemach."
+  - tresc: "W każdym systemie bazodanowym napisz zapytanie, które zwraca imię i nazwisko połączone w jedną kolumnę (ze spacją) dla osób urodzonych po 1 stycznia 2000. Zapisz, gdzie składnia się różni."
     podpowiedz: "Łączenie tekstu: `||` w PostgreSQL i Oracle, `CONCAT(a, ' ', b)` w MySQL — tam `||` oznacza OR i zwróci 0. Jeśli wynik jest pusty, dodaj w zadaniu 4 osobę urodzoną po 2000 roku. Zestawienie różnic znajdziesz w sekcji „Różnice dialektów” na stronie z instrukcjami."
   - tresc: "Zatrzymaj zestaw poleceniem `docker compose down`, wyświetl wolumeny (`docker volume ls`), uruchom zestaw ponownie (`docker compose up -d --wait`) i sprawdź, czy tabele `osoba` nadal istnieją. Dlaczego dane przetrwały, choć w instrukcji 1 po `docker rm` znikały?"
     pole: opis
-    podpowiedz: "`docker compose down` usuwa kontenery, ale nie wolumeny nazwane — na liście zobaczysz np. `lab02-wiele-silnikow_pg-data`. Bazy zapisują dane właśnie w wolumenach, więc nowe kontenery widzą stare dane. W instrukcji 1 kontenery nie miały wolumenów, więc dane były w samym kontenerze."
+    podpowiedz: "`docker compose down` usuwa kontenery, ale nie wolumeny nazwane — na liście zobaczysz np. `lab02-wiele-baz_pg-data`. Bazy zapisują dane właśnie w wolumenach, więc nowe kontenery widzą stare dane. W instrukcji 1 kontenery nie miały wolumenów, więc dane były w samym kontenerze."
   - tresc: "Usuń zestaw razem z danymi: `docker compose down -v`, sprawdź `docker volume ls` i uruchom zestaw ponownie. Co się stało z tabelami? Kiedy w praktyce używa się opcji `-v`?"
     pole: opis
     podpowiedz: "`-v` usuwa wolumeny zestawu, więc bazy startują od zera — tak samo działa `./lab reset N` w kolejnych laboratoriach (powrót do stanu początkowego bazy)."
